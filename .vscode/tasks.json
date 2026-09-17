@@ -1,0 +1,40 @@
+{
+  // Tareas que corren todo dentro de Docker: no necesitan Python en la máquina.
+  // Paleta de comandos (Ctrl+Shift+P) -> "Tasks: Run Task", o
+  // "Tasks: Run Test Task" para la tarea de tests por defecto.
+  // Los argumentos van separados para que funcionen igual en PowerShell y bash.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Tests (Docker)",
+      "type": "process",
+      "command": "docker",
+      "args": ["compose", "run", "--rm", "app", "pytest", "-m", "not llm"],
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Tests del archivo abierto (Docker)",
+      // Filtra por nombre de módulo (-k): con el archivo chunking_test.py o
+      // chunking.py abierto, corre los tests de chunking_test.py.
+      "type": "process",
+      "command": "docker",
+      "args": [
+        "compose", "run", "--rm", "app",
+        "pytest", "-m", "not llm", "-k", "${fileBasenameNoExtension}"
+      ],
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Formato y lint (Docker)",
+      "type": "process",
+      "command": "docker",
+      "args": ["compose", "run", "--rm", "app", "sh", "-c", "ruff check --fix . && ruff format ."],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    }
+  ]
+}

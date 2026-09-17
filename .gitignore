@@ -19,10 +19,12 @@ htmlcov/
 dist/
 build/
 
-# Editores y SO: la configuración personal no se sube, las extensiones
-# recomendadas del proyecto sí
+# Editores y SO: la configuración personal no se sube; la del proyecto
+# (extensiones recomendadas, settings compartidos, tareas) sí
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 .DS_Store
 
