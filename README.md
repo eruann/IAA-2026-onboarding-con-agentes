@@ -72,6 +72,11 @@ El corazón es una **knowledge layer**: todo lo que la organización sabe, lo
 escrito y lo no escrito (quién es quién más allá del organigrama). El sistema la
 construye y, por ahora, la usa para el onboarding.
 
+**Deploy**: la demo corre en [Render](https://render.com) (aplicación) +
+[Neon](https://neon.tech) (Postgres con pgvector). Cada merge a `main` con CI en
+verde se despliega solo. En desarrollo cada uno usa su base local de Docker, no
+Neon. Detalle en [DEVELOPMENT.md](DEVELOPMENT.md#entornos-dónde-corre-cada-cosa).
+
 ```
 src/onboarding/
 ├── config.py     variables de entorno, un solo lugar
