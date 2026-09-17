@@ -39,8 +39,15 @@ editor te autocomplete (`uv sync`). No hace falta para trabajar.
 git clone <url-del-repo>
 cd IAA-2026-onboarding-con-agentes
 cp .env.example .env          # Windows: copy .env.example .env
+git config core.hooksPath .githooks
 docker compose up --build
 ```
+
+`git config core.hooksPath .githooks` activa el **hook de pre-commit** (una sola
+vez por clon): antes de cada commit, Ruff formatea y corrige los `.py` que vas a
+commitear, igual que Prettier. Corre dentro de Docker, así que tiene que estar
+levantado; si no lo está, el hook avisa y deja pasar el commit (CI lo chequea
+igual). Detalles en [CONTRIBUTING.md](../CONTRIBUTING.md#estilo).
 
 Verificar: <http://localhost:8000/health> dice `ok` y
 <http://localhost:8000/health/db> devuelve la versión de pgvector.
@@ -125,4 +132,8 @@ en la configuración de la app de Slack.
 | `/health/db` da 503 | La base todavía está arrancando, o falta `alembic upgrade head` |
 | Los cambios en el código no se ven | Estás mirando un contenedor viejo: `docker compose up -d --build app` |
 | Tests `db` salteados | No hay Postgres levantado. Corré los tests con `docker compose run --rm app pytest` |
+| Commiteo y el código no se formatea (el hook no corre) | Los hooks no están activados en tu clon. Revisá con `git config --get core.hooksPath`: tiene que decir `.githooks`. Si no dice nada, activalos con `git config core.hooksPath .githooks` y volvé a commitear |
+| El hook dice `Docker no está corriendo` pero Docker está levantado | Pasa con clientes gráficos de git (GitHub Desktop, Fork) que no encuentran `docker`. Commiteá desde la terminal o desde VS Code, o formateá a mano con `docker compose run --rm app ruff format .` |
+| El commit se frena con errores de Ruff | Ruff corrigió lo que pudo; lo que queda (por ejemplo un nombre indefinido) hay que arreglarlo a mano y volver a commitear |
+| `pre-commit: estos archivos tienen cambios sin stagear` | El archivo tiene una parte en el commit y otra no. Hacé `git add` del archivo entero y volvé a commitear |
 | Slack responde `dispatch_failed` | Tardaste más de 3 segundos: hay que hacer `ack()` primero y el trabajo pesado después |

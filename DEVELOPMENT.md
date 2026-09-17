@@ -69,19 +69,20 @@ infraestructura está versionada en `render.yaml`.
 1. **Rama desde `main` actualizado**, con el formato `feat/area-tarea`,
    `fix/...`, `docs/...` o `chore/...` (ejemplo: `feat/rag-ingesta`).
 2. **Código y test juntos**: cada `modulo.py` tiene su `modulo_test.py` al lado.
-3. **Antes de abrir el PR**, correr lo mismo que corre CI:
+3. **Commit**: el hook de pre-commit formatea y corrige con Ruff los `.py` que
+   commiteás. Se activa una vez por clon con
+   `git config core.hooksPath .githooks` ([docs/setup.md](docs/setup.md)).
+4. **Antes de abrir el PR**, correr los tests (el formato ya lo resolvió el hook):
 
    ```bash
-   docker compose run --rm app ruff format .
-   docker compose run --rm app ruff check .
    docker compose run --rm app pytest
    ```
 
-4. **Pull Request** completando la plantilla. CI corre lint, tests,
+5. **Pull Request** completando la plantilla. CI corre lint, tests,
    reversibilidad de migraciones y build.
-5. **Review y merge**: el dueño del repo revisa y mergea con squash. Nadie
+6. **Review y merge**: el dueño del repo revisa y mergea con squash. Nadie
    pushea directo a `main`.
-6. **Deploy**: automático. Render despliega `main` cuando CI está en verde, con
+7. **Deploy**: automático. Render despliega `main` cuando CI está en verde, con
    la base en Neon (ver [Entornos](#entornos-dónde-corre-cada-cosa)).
 
 Detalle de ramas, tests, migraciones y secretos: [CONTRIBUTING.md](CONTRIBUTING.md).

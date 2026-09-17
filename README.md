@@ -32,6 +32,16 @@ Windows (PowerShell):
 copy .env.example .env
 ```
 
+Activar los hooks de git (una sola vez por clon, igual en Linux, Mac y Windows):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Con eso, cada commit formatea y corrige los `.py` con Ruff. **Si al commitear no
+se formatea nada, casi siempre es porque este paso quedó sin hacer**: ver
+[docs/setup.md](docs/setup.md#problemas-frecuentes).
+
 Levantar todo:
 
 ```bash

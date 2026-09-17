@@ -15,6 +15,10 @@ docker compose run --rm app ruff format .      # formato
 docker compose run --rm app alembic upgrade head
 ```
 
+El repo tiene un hook de pre-commit (`.githooks/pre-commit`) que corre Ruff sobre
+los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
+`--no-verify` salvo pedido explícito.
+
 ## Reglas
 
 1. **No commitees ni pushees** salvo pedido explícito.

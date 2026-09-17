@@ -30,8 +30,19 @@ donde se generan los conflictos de merge: avisá en el chat antes de tocarlos.
 
 - Código, nombres de tablas y variables en **inglés**; comentarios, documentos,
   prompts y textos de la UI en **español**.
-- `ruff` decide el formato; no se discute. Antes de abrir el PR:
-  `docker compose run --rm app ruff format . && docker compose run --rm app ruff check .`
+- `ruff` decide el formato; no se discute. Lo aplica solo el **hook de
+  pre-commit** (`.githooks/pre-commit`), que se activa una vez por clon con
+  `git config core.hooksPath .githooks`. En cada commit:
+  - los `.py` staged se corrigen (`ruff check --fix`), se formatean
+    (`ruff format`) y se vuelven a agregar al commit;
+  - si queda un error que Ruff no corrige solo, el commit se frena;
+  - si un archivo tiene cambios staged y sin stagear a la vez, no se toca: el
+    commit se frena si no está formateado, para no mezclar cambios;
+  - si Docker no está corriendo, avisa y deja pasar. CI lo chequea igual.
+
+  Saltearlo en un caso puntual: `git commit --no-verify`. A mano, sobre todo el
+  repo: `docker compose run --rm app ruff format .` y
+  `docker compose run --rm app ruff check --fix .`
 - Comentarios: explican *por qué*, no *qué*. Los TODO van con el rol responsable:
   `# TODO(rag): ...`
 

@@ -1,0 +1,81 @@
+#!/bin/sh
+# Hook pre-commit: formatea y corrige con Ruff los .py que se van a commitear.
+#
+# Se activa una sola vez por clon:
+#   git config core.hooksPath .githooks
+#
+# Corre Ruff dentro de Docker, así que no hace falta Python en la máquina.
+# Funciona en Linux, Mac y Windows (Git for Windows ejecuta los hooks con sh).
+#
+# - Archivo staged sin otros cambios: se formatea, se corrige y se vuelve a
+#   agregar al commit.
+# - Archivo con cambios staged y sin stagear a la vez: no se toca (se mezclarían
+#   los cambios); si no está formateado, el commit se frena y lo tenés que
+#   corregir vos.
+# - Errores que Ruff no puede corregir solo: el commit se frena.
+#
+# Saltearlo en un caso puntual: git commit --no-verify (CI igual lo va a chequear).
+
+set -u
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root" || exit 1
+
+# Archivos .py agregados, copiados, modificados o renombrados en este commit
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.py')
+[ -z "$staged" ] && exit 0
+
+if ! docker info >/dev/null 2>&1; then
+    echo "pre-commit: Docker no está corriendo; salteo Ruff. CI lo va a chequear." >&2
+    exit 0
+fi
+
+# Separar los archivos que se pueden corregir y re-agregar sin riesgo
+fixable=""
+partial=""
+for file in $staged; do
+    if git diff --quiet -- "$file"; then
+        fixable="$fixable $file"
+    else
+        partial="$partial $file"
+    fi
+done
+
+# MSYS_NO_PATHCONV evita que Git Bash en Windows reescriba /repo como ruta de Windows.
+# Se monta el repo entero para que Ruff use el pyproject.toml actual, y sin caché
+# para no dejar archivos de root en el repo.
+ruff() {
+    MSYS_NO_PATHCONV=1 docker compose --progress quiet run --rm --no-deps -T \
+        -v "$repo_root:/repo" -w /repo -e RUFF_NO_CACHE=true \
+        app ruff "$@"
+}
+
+status=0
+
+if [ -n "$fixable" ]; then
+    # Primero check --fix (puede borrar imports) y después format, para que el
+    # formato final quede limpio.
+    # shellcheck disable=SC2086 # la lista de archivos se separa por espacios a propósito
+    if ! ruff check --fix --quiet $fixable; then
+        echo "" >&2
+        echo "pre-commit: Ruff encontró problemas que no puede corregir solo. Commit frenado." >&2
+        status=1
+    fi
+    # shellcheck disable=SC2086
+    ruff format --quiet $fixable || status=1
+    # shellcheck disable=SC2086
+    git add -- $fixable
+fi
+
+if [ -n "$partial" ]; then
+    # shellcheck disable=SC2086
+    if ! ruff format --check --quiet $partial || ! ruff check --quiet $partial; then
+        echo "" >&2
+        echo "pre-commit: estos archivos tienen cambios sin stagear y no pasan Ruff:" >&2
+        echo "  ${partial# }" >&2
+        echo "Stageá todo el archivo (git add) o corregilo a mano antes de commitear." >&2
+        status=1
+    fi
+fi
+
+exit "$status"
