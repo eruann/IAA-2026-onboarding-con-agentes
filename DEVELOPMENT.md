@@ -78,6 +78,9 @@ infraestructura está versionada en `render.yaml`.
    docker compose run --rm app pytest
    ```
 
+   O desde VS Code: panel **Testing** o tarea **Tests (Docker)**
+   ([docs/setup.md](docs/setup.md#tests-desde-vs-code)).
+
 5. **Pull Request** completando la plantilla. CI corre lint, tests,
    reversibilidad de migraciones y build.
 6. **Review y merge**: el dueño del repo revisa y mergea con squash. Nadie

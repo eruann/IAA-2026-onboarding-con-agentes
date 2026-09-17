@@ -1,0 +1,22 @@
+{
+  // Configuración compartida del proyecto. Lo personal (tema, fuente, atajos)
+  // va en tu configuración de usuario, no acá.
+
+  // Panel Testing con pytest. Toma testpaths y *_test.py de pyproject.toml.
+  // Usa el intérprete de .venv (creado con `uv sync`); los tests que gastan
+  // plata (@pytest.mark.llm) quedan afuera, igual que en CI.
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["-m", "not llm"],
+
+  // Ruff formatea y ordena imports al guardar: el mismo resultado que el hook
+  // de pre-commit, pero antes de commitear.
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  }
+}

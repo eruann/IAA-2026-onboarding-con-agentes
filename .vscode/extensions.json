@@ -2,6 +2,10 @@
   // VS Code ofrece instalar estas extensiones al abrir el proyecto.
   "recommendations": [
     // Dibuja los diagramas Mermaid en la vista previa de Markdown (docs/diagramas.md)
-    "bierner.markdown-mermaid"
+    "bierner.markdown-mermaid",
+    // Python: autocompletado y panel Testing (necesita `uv sync`, ver docs/setup.md)
+    "ms-python.python",
+    // Ruff: marca errores mientras escribís y formatea al guardar
+    "charliermarsh.ruff"
   ]
 }

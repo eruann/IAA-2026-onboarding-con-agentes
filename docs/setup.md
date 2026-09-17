@@ -30,8 +30,9 @@ Para ver un `.md` con sus diagramas: abrir el archivo y `Ctrl+Shift+V`
 
 En GitHub no hace falta nada: los diagramas se dibujan solos.
 
-Opcional: [uv](https://docs.astral.sh/uv/) en el host, solo si querés que el
-editor te autocomplete (`uv sync`). No hace falta para trabajar.
+Opcional: [uv](https://docs.astral.sh/uv/) en el host, para correr los tests desde
+el panel de VS Code y tener autocompletado. Ver [Tests desde VS Code](#tests-desde-vs-code).
+No hace falta para trabajar.
 
 ## Arranque
 
@@ -57,6 +58,64 @@ Cargar la empresa ficticia:
 ```bash
 docker compose run --rm app python -m onboarding.seed
 ```
+
+## Tests desde VS Code
+
+Al abrir el proyecto, VS Code ofrece instalar las extensiones recomendadas:
+**Python** (`ms-python.python`) y **Ruff** (`charliermarsh.ruff`), además de la
+de diagramas. El repo ya trae la configuración compartida en `.vscode/`.
+
+Hay dos formas de correr los tests desde el editor. Se pueden usar las dos.
+
+### Opción A: panel Testing (como Jest/Vitest)
+
+El ícono del matraz en la barra lateral lista todos los `*_test.py`, los corre
+con un clic, muestra ✓/✗ al lado de cada test y permite debuggear con
+breakpoints. Necesita un Python local **solo para el editor**; la app sigue
+corriendo en Docker.
+
+1. Instalar uv (una vez por máquina).
+
+   Linux / Mac:
+
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
+   Windows (PowerShell):
+
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+2. En la carpeta del proyecto, crear el entorno (`.venv/`, ignorado por git).
+   uv descarga Python 3.12 solo si no lo tenés:
+
+   ```bash
+   uv sync
+   ```
+
+3. En VS Code: `Ctrl+Shift+P` → **Python: Select Interpreter** → el de `.venv`.
+   Suele elegirlo solo.
+4. Abrir el panel **Testing**. Si no aparecen los tests, botón **Refresh Tests**.
+
+Los tests con base (`@pytest.mark.db`) usan el Postgres del contenedor por el
+puerto 5433: levantalo con `docker compose up -d db`. Si no está levantado, esos
+tests aparecen salteados, no fallados.
+
+Repetí `uv sync` cuando alguien agregue dependencias (cambia `uv.lock`).
+
+### Opción B: tareas con Docker (sin instalar nada)
+
+`Ctrl+Shift+P` → **Tasks: Run Task** y elegir:
+
+| Tarea | Qué corre |
+|---|---|
+| **Tests (Docker)** | toda la suite, igual que CI. También con **Tasks: Run Test Task** |
+| **Tests del archivo abierto (Docker)** | los tests del módulo que tenés abierto (filtra por nombre con `-k`) |
+| **Formato y lint (Docker)** | `ruff check --fix` y `ruff format` sobre todo el repo |
+
+La salida se ve en la terminal: no hay ✓/✗ por test ni debug con clic.
 
 ## Windows
 
