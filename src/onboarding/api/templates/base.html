@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Onboarding{% endblock %}</title>
+    <!-- HTMX: interacción sin build de JavaScript ni servicio aparte -->
+    <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0 auto; padding: 2rem 1.5rem; max-width: 60rem;
+        font: 16px/1.5 system-ui, sans-serif;
+      }
+      h1 { font-size: 1.5rem; }
+      .empty { opacity: .7; font-style: italic; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #8884; }
+    </style>
+  </head>
+  <body>
+    <header><h1>{% block heading %}Onboarding{% endblock %}</h1></header>
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>

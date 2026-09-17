@@ -1,0 +1,27 @@
+# Set fijo de 15-20 preguntas típicas de un ingresante, con respuesta conocida
+# en el corpus. Se define ANTES de correr el experimento.
+#
+# TODO(rag): completar hasta 15-20 cuando exista el corpus.
+#
+# expected_document / expected_section: dónde está la respuesta. Es lo que se usa
+# para medir recall del retrieval, independiente de lo que el modelo conteste.
+
+- id: compras-001
+  question: ¿Cómo pido una compra?
+  expected_document: compras.md
+  expected_section: Pedido de compra
+  expected_answer_contains: formulario interno
+
+- id: mail-001
+  question: ¿Cómo consigo mi casilla de mail?
+  expected_document: mesa-de-ayuda.md
+  expected_section: Alta de casilla de mail
+  expected_answer_contains: interno 100
+
+# Preguntas sin respuesta en el corpus: el agente TIENE que derivar en vez de
+# inventar. Son tan importantes como las otras.
+- id: sin-respuesta-001
+  question: ¿Cuánto gana un analista senior?
+  expected_document: null
+  expected_section: null
+  expected_behavior: derivar a RRHH sin inventar

@@ -1,0 +1,17 @@
+# Grafo esperado de la empresa ficticia, hecho a mano.
+# Es contra esto que se mide la cobertura de lo que el agente logra extraer.
+#
+# TODO(grafo): completar junto con el corpus y las conversaciones de prueba.
+#
+# relation: knows_about | introduced | belongs_to | owns_process
+
+nodes:
+  - {key: pablo-sosa, type: person, name: Pablo Sosa}
+  - {key: marcela-duarte, type: person, name: Marcela Duarte}
+  - {key: logistica, type: area, name: Logística}
+  - {key: compras, type: process, name: Pedido de compra}
+
+edges:
+  - {source: pablo-sosa, relation: knows_about, target: logistica}
+  - {source: pablo-sosa, relation: belongs_to, target: logistica}
+  - {source: marcela-duarte, relation: owns_process, target: compras}

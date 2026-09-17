@@ -1,0 +1,18 @@
+.git
+.github
+.venv
+.env
+.env.*
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+documentos
+docs
+eval/runs
+
+# Los tests están en el repo pero no entran en ninguna imagen.
+# En desarrollo llegan igual: compose monta ./src como volumen.
+**/*_test.py
+**/conftest.py

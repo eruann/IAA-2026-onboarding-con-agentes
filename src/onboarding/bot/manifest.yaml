@@ -1,0 +1,52 @@
+# Manifiesto de la app de Slack.
+#
+# Cada dev que trabaje en el bot crea SU PROPIA app de prueba:
+#   1. https://api.slack.com/apps -> Create New App -> From an app manifest
+#   2. Pegar este archivo
+#   3. Levantar el túnel:  docker compose --profile tunnel up
+#   4. Reemplazar TU-URL-PUBLICA por la URL que imprime cloudflared, en los
+#      tres lugares de abajo, y guardar
+#   5. Instalar la app en el workspace y copiar a .env:
+#      SLACK_BOT_TOKEN (xoxb-...) y SLACK_SIGNING_SECRET
+#
+# Con túnel gratuito la URL cambia cada vez que se reinicia: hay que
+# actualizarla en la app de Slack.
+
+display_information:
+  name: Onboarding (dev)
+  description: Misiones de onboarding y respuestas sobre la empresa
+  background_color: "#2b303b"
+
+features:
+  bot_user:
+    display_name: onboarding-dev
+    always_online: false
+  slash_commands:
+    - command: /misiones
+      url: https://TU-URL-PUBLICA/slack/events
+      description: Ver tus misiones de onboarding
+      should_escape: false
+
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - commands
+      - im:history
+      - im:read
+      - im:write
+      - users:read
+
+settings:
+  event_subscriptions:
+    request_url: https://TU-URL-PUBLICA/slack/events
+    bot_events:
+      - app_mention
+      - message.im
+  interactivity:
+    is_enabled: true
+    request_url: https://TU-URL-PUBLICA/slack/events
+  socket_mode_enabled: false
+  org_deploy_enabled: false
+  token_rotation_enabled: false

@@ -1,0 +1,8 @@
+# El dueño del repo revisa y mergea todos los PRs.
+# Reemplazar USUARIO-GITHUB por el usuario real antes de invitar al equipo:
+# si el usuario no existe, GitHub ignora el archivo y no pide review de nadie.
+
+* @USUARIO-GITHUB
+
+# Nota: GitHub no deja aprobar el PR propio. Cuando el PR lo abre el dueño, lo
+# aprueba otra persona del equipo.

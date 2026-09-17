@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Panel del jefe{% endblock %}
+{% block heading %}Panel del jefe{% endblock %}
+
+{% block content %}
+  <section>
+    <h2>Misiones esperando aprobación</h2>
+    {% if pending %}
+      <table>
+        <thead>
+          <tr><th>Persona</th><th>Misión</th><th>Evidencia</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for item in pending %}
+            <tr>
+              <td>{{ item.person }}</td>
+              <td>{{ item.quest }}</td>
+              <td>{{ item.evidence }}</td>
+              <td>
+                <button hx-post="/panel/approve/{{ item.id }}" hx-swap="outerHTML">
+                  Aprobar
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty">Nada pendiente.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Ingresantes</h2>
+    {% if people %}
+      <ul>
+        {% for person in people %}
+          <li>{{ person.name }} — {{ person.points }} puntos ({{ person.level }})</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Todavía no hay datos. Cargalos con el seed.</p>
+    {% endif %}
+  </section>
+{% endblock %}

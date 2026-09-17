@@ -1,0 +1,21 @@
+# Personas de la empresa ficticia.
+# TODO(pm): reemplazar por el elenco real de la empresa que se elija.
+# Los nombres tienen que coincidir con los que aparecen en corpus/.
+
+- key: ana-ingresante
+  name: Ana Ruiz
+  area: Operaciones
+  role: Analista de operaciones
+  is_newcomer: true
+
+- key: jefe-operaciones
+  name: Marcela Duarte
+  area: Operaciones
+  role: Jefa de Operaciones
+  is_newcomer: false
+
+- key: referente-logistica
+  name: Pablo Sosa
+  area: Logística
+  role: Referente de Logística
+  is_newcomer: false

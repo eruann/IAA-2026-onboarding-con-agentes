@@ -1,0 +1,120 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # CI nunca llama a un modelo real: no gasta tokens y no depende de la red.
+  LLM_PROVIDER: fake
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: onboarding
+          POSTGRES_PASSWORD: onboarding
+          POSTGRES_DB: onboarding
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U onboarding -d onboarding"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://onboarding:onboarding@localhost:5432/onboarding
+      # Sin esto los tests marcados `db` se saltearían y CI quedaría verde en falso.
+      REQUIRE_DB: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run alembic upgrade head
+      - name: Tests (sin los que gastan plata)
+        run: uv run pytest -m "not llm" --cov=src/onboarding --cov-report=term-missing
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: onboarding
+          POSTGRES_PASSWORD: onboarding
+          POSTGRES_DB: onboarding
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U onboarding -d onboarding"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://onboarding:onboarding@localhost:5432/onboarding
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+
+      - name: Una sola cabeza de migraciones
+        run: |
+          heads=$(uv run alembic heads | grep -c . || true)
+          if [ "$heads" != "1" ]; then
+            echo "Hay $heads cabezas de Alembic. Rebasá sobre main y regenerá tu migración."
+            uv run alembic heads
+            exit 1
+          fi
+
+      - name: Ida y vuelta (toda migración se tiene que poder revertir)
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          push: false
+          load: true
+          tags: onboarding-prod
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: La imagen de producción no tiene tests
+        run: |
+          found=$(docker run --rm --entrypoint find onboarding-prod /app/src -name "*_test.py" -o -name conftest.py)
+          if [ -n "$found" ]; then
+            echo "Tests dentro de la imagen de producción:"
+            echo "$found"
+            exit 1
+          fi
+
+  # El deploy lo hace Render: escucha main y despliega cuando estos checks pasan
+  # (Settings -> Build & Deploy -> "After CI checks pass"). No hacen falta
+  # credenciales de Render acá.

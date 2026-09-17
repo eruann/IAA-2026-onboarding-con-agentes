@@ -1,0 +1,33 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Documentos de la cátedra: se manejan en la carpeta compartida del equipo,
+# no en el repo (que es público y no sirve para revisar .docx en un diff).
+documentos/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Editores y SO: la configuración personal no se sube, las extensiones
+# recomendadas del proyecto sí
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+
+# Resultados de corridas de evaluación (se versionan solo los resúmenes)
+eval/runs/
+
+# Temporales de Word
+~$*.docx

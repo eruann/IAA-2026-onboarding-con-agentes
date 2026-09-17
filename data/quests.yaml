@@ -1,0 +1,27 @@
+# Misiones de onboarding. Alcance del TP: 6 a 8.
+# TODO(experiencia + pm): completar hasta 6-8 y ajustar puntos.
+#
+# approver: manager | helpdesk | agent
+# Criterio: se dan puntos por aprender y por recorrer la organización, nunca por
+# rendimiento. Cada misión tiene que poder verificarse con evidencia concreta.
+
+- key: casilla-de-mail
+  title: Conseguí tu casilla de mail
+  description: Llamá al interno 100 de Mesa de Ayuda y pedí el alta de tu casilla.
+  points: 20
+  approver: helpdesk
+  evidence_required: Captura del primer mail enviado desde tu casilla.
+
+- key: almuerzo-logistica
+  title: Almorzá con alguien de Logística
+  description: Coordiná un almuerzo con el referente de Logística y preguntale cómo llega un pedido a destino.
+  points: 40
+  approver: manager
+  evidence_required: Con quién almorzaste y una cosa que aprendiste.
+
+- key: primer-pedido-de-compra
+  title: Hacé tu primer pedido de compra
+  description: Seguí el proceso de compras de punta a punta con algo que necesites de verdad.
+  points: 30
+  approver: agent
+  evidence_required: Número de pedido generado.

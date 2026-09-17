@@ -1,0 +1,19 @@
+# Catálogo ficticio de canje.
+# En el TP no se integra con ninguna plataforma real de beneficios: se simula.
+# TODO(experiencia + pm): ajustar a la empresa elegida.
+
+- key: cafe
+  title: Café de la esquina
+  cost: 50
+
+- key: equipo-de-mate
+  title: Equipo de mate
+  cost: 200
+
+- key: curso
+  title: Curso a elección
+  cost: 400
+
+- key: dia-libre
+  title: Día libre
+  cost: 600

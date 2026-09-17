@@ -1,0 +1,9 @@
+# Finales de línea LF adentro del repo: con CRLF (Windows) se rompen los
+# contenedores y los scripts que corren en Linux.
+* text=auto eol=lf
+
+# Binarios: sin conversión
+*.png binary
+*.jpg binary
+*.pdf binary
+*.docx binary

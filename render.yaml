@@ -1,0 +1,32 @@
+# Infraestructura de la demo, versionada. Nada se configura a mano en la web.
+# La base es un proyecto de Neon (Postgres con pgvector, persistente): su URL
+# se carga como secreto en Render, no acá.
+
+services:
+  - type: web
+    name: onboarding
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerTarget: prod
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    # Las migraciones corren antes de que entre tráfico a la versión nueva.
+    preDeployCommand: alembic upgrade head
+    envVars:
+      - key: ENV
+        value: prod
+      - key: LLM_PROVIDER
+        value: openrouter
+      - key: LLM_MODEL
+        value: anthropic/claude-haiku-4.5
+      # sync: false = se carga a mano en el panel de Render y nunca toca el repo
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false
