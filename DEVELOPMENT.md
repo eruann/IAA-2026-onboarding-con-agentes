@@ -33,6 +33,35 @@ El detalle de cada rol, con su primer PR, está en [docs/roles.md](docs/roles.md
 `docker-compose.yml` y `pyproject.toml` los tocan varios roles. Avisá en el chat
 antes de cambiarlos: ahí es donde aparecen los conflictos de merge.
 
+## Entornos: dónde corre cada cosa
+
+La demo se despliega en **Render** (la aplicación) + **Neon** (la base de datos
+Postgres con pgvector). Decisión y motivos: [ADR 0004](docs/adr/0004-deploy-render-neon.md).
+
+| Entorno | Aplicación | Base de datos | Modelo (`LLM_PROVIDER`) |
+|---|---|---|---|
+| **Local** (tu máquina) | contenedor `app` de Docker Compose | contenedor `db`, puerto 5433 | `fake` por defecto; `openrouter` si cargás tu key |
+| **CI** (cada PR) | GitHub Actions | Postgres creado vacío en cada corrida | siempre `fake` |
+| **Producción** (demo) | Render, desde el `Dockerfile` | Neon | `openrouter` |
+
+Lo que conviene saber aunque no seas Tech Lead:
+
+- **Nadie desarrolla contra Neon.** Cada uno trabaja con su base local, que es
+  descartable: si se ensucia, `docker compose down -v` y el seed la vuelve a
+  cargar. A Neon solo llega lo que pasa por `main`.
+- **El deploy es automático**: cuando un PR se mergea y CI queda en verde, Render
+  despliega `main` y antes corre las migraciones (`alembic upgrade head`). Si una
+  migración falla, la versión nueva no se publica y sigue andando la anterior.
+- Por eso **toda migración tiene que funcionar contra una base con datos**, no
+  solo contra la tuya vacía, y tener un `downgrade()` que funcione.
+- **Los secretos de producción** (URL de Neon, key de OpenRouter, tokens de Slack)
+  viven solo en Render. Nunca en el repo ni en el chat.
+- El plan gratuito de Render **se duerme** tras ~15 minutos sin uso: el primer
+  request después tarda. Es normal, no es un bug.
+
+Configurarlo es tarea del Tech Lead ([docs/roles.md](docs/roles.md)); la
+infraestructura está versionada en `render.yaml`.
+
 ## Cómo se trabaja
 
 ### El ciclo de una tarea
@@ -52,7 +81,8 @@ antes de cambiarlos: ahí es donde aparecen los conflictos de merge.
    reversibilidad de migraciones y build.
 5. **Review y merge**: el dueño del repo revisa y mergea con squash. Nadie
    pushea directo a `main`.
-6. **Deploy**: automático. Render despliega `main` cuando CI está en verde.
+6. **Deploy**: automático. Render despliega `main` cuando CI está en verde, con
+   la base en Neon (ver [Entornos](#entornos-dónde-corre-cada-cosa)).
 
 Detalle de ramas, tests, migraciones y secretos: [CONTRIBUTING.md](CONTRIBUTING.md).
 
