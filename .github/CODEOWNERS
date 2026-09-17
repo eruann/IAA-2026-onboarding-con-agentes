@@ -1,8 +1,12 @@
-# El dueño del repo revisa y mergea todos los PRs.
-# Reemplazar USUARIO-GITHUB por el usuario real antes de invitar al equipo:
-# si el usuario no existe, GitHub ignora el archivo y no pide review de nadie.
+# El dueño del repo revisa y aprueba todos los PRs: la protección de main exige
+# la aprobación de un code owner.
+#
+# Para sumar a un titular como revisor de su área, agregar una línea por
+# carpeta (la última regla que coincide gana, así que el dueño tiene que
+# repetirse):
+#   /src/onboarding/knowledge/rag/ @eruann @usuario-rag
 
-* @USUARIO-GITHUB
+* @eruann
 
-# Nota: GitHub no deja aprobar el PR propio. Cuando el PR lo abre el dueño, lo
-# aprueba otra persona del equipo.
+# Nota: GitHub no deja aprobar el PR propio. Los PRs que abre el dueño los
+# aprueba otra persona del equipo, o el dueño los mergea como admin.
