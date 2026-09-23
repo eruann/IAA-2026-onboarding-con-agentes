@@ -200,7 +200,15 @@ responde después. En desarrollo hace falta una URL pública: perfil `tunnel`.
 
 Render (Web Service desde el Dockerfile, `render.yaml` versionado) + Neon
 (Postgres con pgvector, persistente). Render despliega `main` cuando los checks
-de CI pasan, corriendo antes `alembic upgrade head`.
+de CI pasan (`autoDeployTrigger: checksPass`).
+
+Las migraciones corren **al arrancar el contenedor**
+(`alembic upgrade head && uvicorn ...`), no como pre-deploy: `preDeployCommand`
+existe solo en los planes pagos de Render. Si una migración falla, el contenedor
+nuevo no levanta y sigue andando el anterior. Con una sola instancia, que es el
+caso del plan gratuito, no hay dos procesos migrando a la vez.
+
+Pasos para configurarlo: [runbooks/deploy.md](runbooks/deploy.md).
 
 ## Fuera de alcance
 

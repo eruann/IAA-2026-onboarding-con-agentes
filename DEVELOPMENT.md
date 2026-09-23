@@ -54,13 +54,19 @@ Lo que conviene saber aunque no seas Tech Lead:
   migración falla, la versión nueva no se publica y sigue andando la anterior.
 - Por eso **toda migración tiene que funcionar contra una base con datos**, no
   solo contra la tuya vacía, y tener un `downgrade()` que funcione.
-- **Los secretos de producción** (URL de Neon, key de OpenRouter, tokens de Slack)
+- **Los secretos de producción** (URL de Neon, key del modelo, tokens de Slack)
   viven solo en Render. Nunca en el repo ni en el chat.
+- **La key del modelo es de cada uno.** No hay una key compartida: la de la demo
+  la paga quien administra Render y no se usa para desarrollar. En local se
+  trabaja con `fake` (el default, gratis), con modelos `:free` de tu propia
+  cuenta o con Ollama ([docs/setup.md](docs/setup.md#modelos)). CI siempre usa
+  `fake`: no puede gastar plata.
 - El plan gratuito de Render **se duerme** tras ~15 minutos sin uso: el primer
   request después tarda. Es normal, no es un bug.
 
 Configurarlo es tarea del Tech Lead ([docs/roles.md](docs/roles.md)); la
-infraestructura está versionada en `render.yaml`.
+infraestructura está versionada en `render.yaml` y los pasos están en
+[docs/runbooks/deploy.md](docs/runbooks/deploy.md).
 
 ## Cómo se trabaja
 
