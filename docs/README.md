@@ -7,6 +7,7 @@
 | [setup.md](setup.md) | Instalar y levantar el proyecto (Linux, Mac, Windows) |
 | [roles.md](roles.md) | Quién hace qué y cuál es el primer PR de cada uno |
 | [adr/](adr/) | Decisiones de arquitectura, con fecha y motivo |
+| [runbooks/deploy.md](runbooks/deploy.md) | Poner la demo online: Neon, OpenRouter, Render y Slack |
 | [runbooks/](runbooks/) | Qué hacer cuando algo se rompe |
 | [minutas/](minutas/) | Minuta de 5 líneas por reunión |
 

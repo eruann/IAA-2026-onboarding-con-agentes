@@ -141,10 +141,24 @@ LLM_MODEL=anthropic/claude-haiku-4.5
 ```
 
 Con una sola key se puede apuntar a cualquier modelo cambiando `LLM_MODEL`
-(`openai/gpt-4o-mini`, `qwen/qwen-2.5-72b-instruct`, etc.). Hay modelos `:free`
-para desarrollo. Quién paga la key y con qué presupuesto lo define el equipo.
+(`openai/gpt-4o-mini`, `qwen/qwen-2.5-72b-instruct`, etc.).
 
-Modelo abierto local, sin gastar nada:
+### La key es de cada uno
+
+**No hay una key compartida del equipo.** Cada uno usa la suya en su `.env`, que
+está en `.gitignore` y nunca se sube. La key de la demo vive solo en las
+variables de entorno de Render y la paga quien administra ese servicio: no se
+comparte ni se usa para desarrollar.
+
+Tres formas de trabajar sin gastar nada:
+
+| Cómo | Para qué sirve |
+|---|---|
+| `LLM_PROVIDER=fake` (el default) | Levantar el proyecto, correr tests y trabajar en todo lo que no sea la respuesta del modelo |
+| Modelos `:free` de OpenRouter | Probar el circuito real con tu propia cuenta, sin saldo (`meta-llama/...:free`, por ejemplo). Tienen límite de uso por día |
+| Ollama local | Modelo abierto en tu máquina, sin cuenta ni internet. Pide RAM y anda más lento |
+
+Ollama:
 
 ```bash
 docker compose --profile local-llm up ollama
@@ -152,6 +166,22 @@ docker compose exec ollama ollama pull qwen2.5:7b
 ```
 
 y en `.env`: `LLM_PROVIDER=openai_compat`, `LLM_MODEL=qwen2.5:7b`.
+
+### Si el equipo cambia de proveedor
+
+No estamos atados a OpenRouter ([ADR 0006](adr/0006-llm-via-openrouter.md)).
+`openai_compat` sirve para **cualquier** proveedor con API compatible con OpenAI
+(Groq, Together, DeepSeek, vLLM, Ollama): se cambian dos variables y listo.
+
+```
+LLM_PROVIDER=openai_compat
+OPENAI_COMPAT_BASE_URL=https://api.del-proveedor.com/v1
+OPENAI_COMPAT_API_KEY=...
+LLM_MODEL=el-modelo-del-proveedor
+```
+
+Si el proveedor elegido no fuera compatible con OpenAI, el único archivo a tocar
+es `src/onboarding/llm/factory.py`, y habría que escribir un ADR nuevo.
 
 ## Slack (solo si trabajás en el bot)
 

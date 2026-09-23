@@ -35,8 +35,9 @@ hecho a mano, con horas registradas), calendario y documentos de la cátedra.
 **Primer PR:** que `docker compose up` funcione en Linux **y** en Windows, con
 alguien de cada sistema confirmándolo.
 
-Después: repo en GitHub con `main` protegida y CODEOWNERS, proyecto en Neon,
-servicio en Render, persistir `llm_calls` (costo por corrida), secretos.
+Después: repo en GitHub con `main` protegida y CODEOWNERS, la demo online
+siguiendo [runbooks/deploy.md](runbooks/deploy.md) (Neon, OpenRouter, Render,
+Slack), persistir `llm_calls` (costo por corrida), secretos.
 
 ## 3. Agentes y orquestación
 
