@@ -69,6 +69,22 @@ services:
     depends_on:
       - app
 
+  # Alternativa al túnel de Cloudflare, con dominio FIJO: la URL no cambia al
+  # reiniciar y no hay que actualizarla en la app de Slack. Necesita cuenta
+  # gratuita de ngrok y NGROK_AUTHTOKEN + NGROK_DOMAIN en .env (docs/setup.md).
+  # docker compose --profile ngrok up
+  ngrok:
+    image: ngrok/ngrok:latest
+    profiles: [ngrok]
+    # Opcionales a propósito (${VAR:-}): compose interpola el archivo entero
+    # aunque no se use este perfil, y una variable obligatoria rompería
+    # `docker compose up` para quien no usa ngrok. Si faltan, falla ngrok solo.
+    command: http app:8000 --url=${NGROK_DOMAIN:-}
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    depends_on:
+      - app
+
   # Modelo abierto local para comparar costo y calidad contra OpenRouter:
   # docker compose --profile local-llm up ollama
   ollama:

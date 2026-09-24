@@ -185,33 +185,87 @@ es `src/onboarding/llm/factory.py`, y habría que escribir un ADR nuevo.
 
 ## Slack (solo si trabajás en el bot)
 
-Cada persona usa **su propia app de Slack de prueba**: si dos comparten una, los
-eventos van a una sola.
+Cada persona usa **su propia app de Slack de prueba**, en el workspace del
+equipo: cada app manda los eventos a una sola URL, así que si dos comparten una,
+los mensajes le llegan a uno solo. Pedí primero la invitación al workspace.
 
-1. Levantar el túnel, que da una URL pública para tu entorno local:
+Se hace en dos tandas porque Slack **verifica la URL de eventos al activarla**,
+y tu app local solo responde en `/slack/events` cuando ya tiene los tokens en el
+`.env`.
 
-   ```bash
-   docker compose --profile tunnel up
-   ```
+1. Levantar la app con un **túnel**: Slack está en internet y tiene que poder
+   mandarle eventos a tu máquina. El túnel te da una URL pública que redirige a
+   tu `localhost:8000`. Hay dos opciones; las dos corren en Docker:
 
-   La URL aparece en los logs del contenedor `tunnel`
+   | | Cloudflare Tunnel | ngrok |
+   |---|---|---|
+   | Cuenta | no hace falta | gratuita, una por persona |
+   | URL | **cambia cada vez que reiniciás** | **fija**: se configura una vez en Slack |
+   | Comando | `docker compose --profile tunnel up` | `docker compose --profile ngrok up` |
+
+   Si vas a trabajar en el bot varios días, conviene **ngrok**: no tenés que
+   actualizar la URL en la app de Slack cada vez que reiniciás.
+
+   **Con Cloudflare:** la URL aparece en los logs del contenedor `tunnel`
    (`https://algo-random.trycloudflare.com`).
 
-2. Crear la app en <https://api.slack.com/apps> con **From an app manifest**,
-   pegando `src/onboarding/bot/manifest.yaml` y reemplazando `TU-URL-PUBLICA`
-   por la del paso 1 (aparece tres veces).
+   **Con ngrok**, la primera vez:
+   1. Crear cuenta en <https://dashboard.ngrok.com/signup>.
+   2. Copiar tu **authtoken** en *Getting Started* → *Your Authtoken*.
+   3. En *Domains*, tomar el dominio gratuito que te asigna (algo como
+      `nombre-random.ngrok-free.app`).
+   4. Cargar los dos en tu `.env` (son tuyos, no se comparten):
 
-3. Instalar la app en el workspace y copiar a `.env`:
+      ```
+      NGROK_AUTHTOKEN=...
+      NGROK_DOMAIN=nombre-random.ngrok-free.app
+      ```
+
+   Tu URL pública es `https://<NGROK_DOMAIN>`, siempre la misma.
+
+2. Crear la app en <https://api.slack.com/apps> → **Create New App** → **From a
+   manifest** → elegir el workspace del equipo. Pegar
+   `src/onboarding/bot/manifest.yaml` con tres cambios:
+   - reemplazar `TU-URL-PUBLICA` por la URL del túnel (aparece tres veces);
+   - reemplazar `tu-nombre` por el tuyo (aparece dos veces), para no
+     confundirla con las de los demás: `local-onboarding-matias`;
+   - **borrar el bloque `event_subscriptions`** entero: se activa en el paso 5.
+
+3. **Install App** → **Install to Workspace**, y copiar a tu `.env`:
 
    ```
-   SLACK_BOT_TOKEN=xoxb-...
-   SLACK_SIGNING_SECRET=...
+   SLACK_BOT_TOKEN=xoxb-...          # Install App u OAuth & Permissions
+   SLACK_SIGNING_SECRET=...          # Basic Information → App Credentials
    ```
 
-4. Reiniciar: `docker compose up -d --force-recreate app`
+4. Reiniciar la app para que lea el `.env`:
 
-La URL del túnel gratuito cambia cada vez que se reinicia: hay que actualizarla
-en la configuración de la app de Slack.
+   ```bash
+   docker compose up -d --force-recreate app
+   ```
+
+5. Activar los eventos: en la app de Slack → **Event Subscriptions** → **Enable
+   Events** → Request URL `https://<tu-túnel>/slack/events` → tiene que decir
+   **Verified**. En **Subscribe to bot events** agregar `app_mention` y
+   `message.im` → **Save Changes** → reinstalar la app cuando lo pida.
+
+6. Probar por **mensaje directo** con tu bot: en Slack, **Apps** (barra
+   lateral) → `local-onboarding-tu-nombre` → pestaña **Messages** → escribile
+   algo. Tiene que responder *"Te leo. Todavía no sé responder."*
+
+   **Se prueba por DM, no en canales.** En el workspace del equipo hay una app
+   de prueba por persona: un DM le llega solo a tu bot y a tu máquina, sin
+   molestar a nadie ni mezclarse con las pruebas de los demás. En un canal
+   compartido, además, el comando `/misiones` lo tienen registrado todas las
+   apps, y Slack te hace elegir a cuál mandarlo.
+
+   Si en la pestaña Messages dice que los mensajes están desactivados, en la
+   app de Slack: **App Home** → *Show Tabs* → activar **Messages Tab** y
+   **Allow users to send Slash commands and messages from the messages tab**.
+
+Con Cloudflare, la URL del túnel **cambia cada vez que se reinicia**: hay que
+actualizarla en tres lugares de la app de Slack (*Slash Commands*,
+*Interactivity* y *Event Subscriptions*). Con ngrok no hace falta.
 
 ## Problemas frecuentes
 
@@ -223,6 +277,7 @@ en la configuración de la app de Slack.
 | Tests `db` salteados | No hay Postgres levantado. Corré los tests con `docker compose run --rm app pytest` |
 | Commiteo y el código no se formatea (el hook no corre) | Los hooks no están activados en tu clon. Revisá con `git config --get core.hooksPath`: tiene que decir `.githooks`. Si no dice nada, activalos con `git config core.hooksPath .githooks` y volvé a commitear |
 | El hook dice `Docker no está corriendo` pero Docker está levantado | Pasa con clientes gráficos de git (GitHub Desktop, Fork) que no encuentran `docker`. Commiteá desde la terminal o desde VS Code, o formateá a mano con `docker compose run --rm app ruff format .` |
+| ngrok: `authentication failed: This ngrok session is not authenticated` | Falta `NGROK_AUTHTOKEN` en tu `.env`, o está mal copiado. Ver la sección Slack |
 | El commit se frena con errores de Ruff | Ruff corrigió lo que pudo; lo que queda (por ejemplo un nombre indefinido) hay que arreglarlo a mano y volver a commitear |
 | `pre-commit: estos archivos tienen cambios sin stagear` | El archivo tiene una parte en el commit y otra no. Hacé `git add` del archivo entero y volvé a commitear |
 | Slack responde `dispatch_failed` | Tardaste más de 3 segundos: hay que hacer `ack()` primero y el trabajo pesado después |

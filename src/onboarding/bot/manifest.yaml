@@ -2,24 +2,29 @@
 #
 # Cada dev que trabaje en el bot crea SU PROPIA app de prueba:
 #   1. https://api.slack.com/apps -> Create New App -> From an app manifest
-#   2. Pegar este archivo
-#   3. Levantar el túnel:  docker compose --profile tunnel up
-#   4. Reemplazar TU-URL-PUBLICA por la URL que imprime cloudflared, en los
-#      tres lugares de abajo, y guardar
-#   5. Instalar la app en el workspace y copiar a .env:
-#      SLACK_BOT_TOKEN (xoxb-...) y SLACK_SIGNING_SECRET
+#   2. Pegar este archivo, reemplazando tu-nombre por el tuyo y TU-URL-PUBLICA
+#      por la URL del túnel, y borrando el bloque event_subscriptions
+#   3. Seguir los pasos de docs/setup.md, sección Slack
+#
+# Para la app de producción (Render), ver docs/runbooks/deploy.md.
 #
 # Con túnel gratuito la URL cambia cada vez que se reinicia: hay que
 # actualizarla en la app de Slack.
 
 display_information:
-  name: Onboarding (dev)
+  name: local-onboarding-tu-nombre
   description: Misiones de onboarding y respuestas sobre la empresa
   background_color: "#2b303b"
 
 features:
+  # Habilita los mensajes directos (DM) al bot. Sin esto Slack le muestra al
+  # usuario "Sending messages to this app has been turned off".
+  app_home:
+    home_tab_enabled: false
+    messages_tab_enabled: true
+    messages_tab_read_only_enabled: false
   bot_user:
-    display_name: onboarding-dev
+    display_name: local-onboarding-tu-nombre
     always_online: false
   slash_commands:
     - command: /misiones

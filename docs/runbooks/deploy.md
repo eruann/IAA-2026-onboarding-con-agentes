@@ -111,32 +111,44 @@ python -m onboarding.seed
 Esta es la app **de producción**. Cada integrante que trabaje en el bot tiene
 además su propia app de prueba, con un túnel local ([setup.md](../setup.md)).
 
-1. **Create New App** → **From an app manifest** → elegir el workspace.
-2. Pegar el contenido de [`src/onboarding/bot/manifest.yaml`](../../src/onboarding/bot/manifest.yaml),
-   reemplazando `TU-URL-PUBLICA` por el dominio de Render (aparece tres veces) y
-   cambiando el nombre a algo sin `dev`:
+Se hace en dos tandas: Slack **verifica la URL de eventos al activarla**, y la
+app en Render solo monta `/slack/events` cuando ya tiene los dos tokens. Si se
+activan los eventos antes, la verificación falla con un 404.
 
-   ```yaml
-   display_information:
-     name: Onboarding
-   features:
-     bot_user:
-       display_name: onboarding
-   ```
+Si todavía no hay workspace, crearlo en <https://slack.com/get-started#/createnew>
+(plan gratuito; conviene que sea el mismo que usa el equipo).
 
-   Las tres URLs quedan así: `https://<tu-url>.onrender.com/slack/events`
-3. **Install to Workspace** y aceptar los permisos.
+1. **Create New App** → **From a manifest** → elegir el workspace.
+2. Pegar el contenido de [`src/onboarding/bot/manifest.yaml`](../../src/onboarding/bot/manifest.yaml)
+   con tres cambios:
+   - reemplazar `TU-URL-PUBLICA` por el dominio de Render (aparece tres veces):
+     `https://<tu-url>.onrender.com/slack/events`;
+   - nombre de producción: `name: Onboarding` y `display_name: onboarding` (el
+     manifest trae `local-onboarding-tu-nombre`, que es para las apps de prueba);
+   - **borrar el bloque `event_subscriptions`** entero: se activa en el paso 6.
+3. **Install App** → **Install to Workspace** → **Allow**.
 4. Copiar dos valores:
-   - **Bot User OAuth Token** (`xoxb-...`), en *OAuth & Permissions*
-   - **Signing Secret**, en *Basic Information*
+   - **Bot User OAuth Token** (`xoxb-...`), en *Install App* u *OAuth & Permissions*
+   - **Signing Secret**, en *Basic Information* → *App Credentials*
 5. Cargarlos en Render: servicio → **Environment** → editar `SLACK_BOT_TOKEN` y
-   `SLACK_SIGNING_SECRET` → **Save**. Render redeploya solo.
-6. Volver a Slack y verificar la Request URL: en *Event Subscriptions* tiene que
-   decir **Verified**. Si dice que falló, esperar a que termine el deploy y
-   tocar **Retry**.
+   `SLACK_SIGNING_SECRET` → **Save**. Render redeploya solo. Para confirmar que
+   quedó montado: un `POST` sin firma a `/slack/events` tiene que dar **401**
+   (antes daba 404).
+6. En la app de Slack → **Event Subscriptions** → **Enable Events** → Request
+   URL `https://<tu-url>.onrender.com/slack/events` → tiene que decir
+   **Verified**. Si falla, el servicio estaba dormido: **Retry**. En **Subscribe
+   to bot events** agregar `app_mention` y `message.im` → **Save Changes** →
+   reinstalar la app cuando lo pida.
 
-**Verificar:** invitar al bot a un canal (`/invite @onboarding`) y escribir
-`/misiones`. Tiene que responder el texto de ejemplo.
+**Verificar:**
+
+- **Mensaje directo**: **Apps** (barra lateral de Slack) → `onboarding` →
+  pestaña **Messages** → escribirle algo. Responde *"Te leo. Todavía no sé
+  responder."* Si los mensajes aparecen desactivados: en la app de Slack, **App
+  Home** → activar **Messages Tab** y **Allow users to send Slash commands and
+  messages from the messages tab** (el manifest ya lo trae; hace falta a mano
+  solo en apps creadas antes de ese cambio).
+- **En un canal**: `/invite @onboarding` y después `/misiones`.
 
 > **Cuidado con el plan gratuito de Render:** el servicio se duerme tras ~15
 > minutos sin tráfico y tarda ~1 minuto en despertar. Slack corta a los 3
