@@ -166,7 +166,8 @@ esa es la métrica de horas-persona del TP.
 | `db` | `pgvector/pgvector:pg16` | sí (puerto 5433 en el host) | Neon |
 | `migrate` | misma imagen, `alembic upgrade head` | sí | pre-deploy de Render |
 | `app` | API + panel + `/slack/events` | sí, puerto 8000 con hot reload | único servicio web |
-| `tunnel` | `cloudflared`, URL pública para Slack | perfil `tunnel` | no |
+| `tunnel` | `cloudflared`, URL pública para Slack (cambia al reiniciar) | perfil `tunnel` | no |
+| `ngrok` | alternativa con dominio fijo; cuenta gratuita por persona | perfil `ngrok` | no |
 | `ollama` | modelo abierto para comparar | perfil `local-llm` | no |
 
 Una sola imagen Docker con etapas `dev` y `prod`. Seed, ingesta y evaluación son

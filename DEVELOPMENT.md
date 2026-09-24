@@ -3,12 +3,33 @@
 Punto de partida para trabajar en el proyecto. Si es tu primera vez, seguí este
 orden:
 
+0. **Pedí los accesos** (ver [Primer día](#primer-día-qué-pedir-y-qué-no)).
 1. **Levantá el proyecto**: [docs/setup.md](docs/setup.md).
 2. **Entendé cómo está armado**: [docs/diagramas.md](docs/diagramas.md). Empezá
    por el diagrama 2 (módulos y dependencias) y el 3 (el grafo de LangGraph, el
    orquestador). Con esos dos se entiende dónde encaja tu parte.
 3. **Buscá tu rol** en la tabla de abajo y mirá sus carpetas.
 4. **Leé cómo se trabaja** (más abajo) antes de abrir tu primer PR.
+
+## Primer día: qué pedir y qué no
+
+Cada uno trabaja con **todo local**: su app, su base de datos, su modelo y, si
+toca el bot, su propia app de Slack. Producción (Render + Neon) no la toca nadie
+a mano: le llega lo que se mergea a `main`.
+
+Por eso **no se comparte ninguna key**. Lo único que se pide son accesos:
+
+| Qué necesitás | De dónde sale | ¿Hay que pedirlo? |
+|---|---|---|
+| El código | GitHub | **Sí**: invitación al repo, con permiso *Write* |
+| Base de datos | Postgres local en Docker (`docker compose up`) | No |
+| Modelo | `fake` por defecto; si querés uno real, **tu propia** key de OpenRouter u Ollama ([setup](docs/setup.md#la-key-es-de-cada-uno)) | No |
+| Slack | Solo si trabajás en el bot: **tu propia** app de prueba en el workspace del equipo ([setup](docs/setup.md#slack-solo-si-trabajás-en-el-bot)) | **Sí**: invitación al workspace |
+| Neon, Render, la key de OpenRouter de la demo | Solo producción | **No, nunca**: si algo de producción hace falta, lo hace el Tech Lead |
+
+Si alguien te pide una key de producción "para probar algo", la respuesta es no:
+todo se puede probar en local. Y si una key aparece en un chat, un commit o un
+archivo, hay que rotarla.
 
 ## Roles y carpetas
 
