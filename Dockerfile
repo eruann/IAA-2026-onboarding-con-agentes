@@ -32,4 +32,8 @@ FROM base AS prod
 RUN useradd --create-home app && chown -R app /app
 USER app
 EXPOSE 8000
-CMD ["sh", "-c", "uvicorn onboarding.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Migraciones al arrancar y después la app. En Render no hay preDeployCommand en
+# el plan gratuito, y el comando va acá (formato lista) y no en render.yaml: ahí
+# Render pasaba las comillas literales y sh no encontraba el comando.
+# exec: uvicorn queda como proceso principal y recibe las señales de apagado.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn onboarding.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

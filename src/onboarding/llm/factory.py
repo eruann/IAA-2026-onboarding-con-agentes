@@ -10,6 +10,7 @@ Modelos vía OpenRouter: "anthropic/claude-haiku-4.5", "openai/gpt-4o-mini",
 
 from langchain_core.language_models import BaseChatModel, FakeListChatModel
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 from onboarding.config import Settings, get_settings
 from onboarding.llm.callbacks import UsageLogger
@@ -35,8 +36,10 @@ def get_chat_model(
             raise RuntimeError("Falta OPENROUTER_API_KEY (o usá LLM_PROVIDER=fake)")
         api_key = settings.openrouter_api_key
         base_url = settings.openrouter_base_url
-    else:  # openai_compat: Ollama u otro self-host
-        api_key = settings.openai_compat_api_key
+    else:  # openai_compat: Ollama u otro proveedor compatible con OpenAI
+        # Los servidores locales como Ollama ignoran la key, pero el cliente
+        # exige una: sin key configurada se manda un valor de relleno.
+        api_key = settings.openai_compat_api_key or SecretStr("sin-key")
         base_url = settings.openai_compat_base_url
 
     return ChatOpenAI(
