@@ -16,12 +16,12 @@ services:
     # Deploy solo si los checks de CI pasan (lint, tests, migraciones, build)
     autoDeployTrigger: checksPass
     healthCheckPath: /health
-    # Las migraciones corren al arrancar, no como pre-deploy: preDeployCommand
-    # existe solo en los planes pagos. Si una migración falla, el contenedor no
-    # levanta y Render mantiene la versión anterior.
-    # El plan free corre una sola instancia, así que no hay dos procesos
-    # migrando a la vez. Si algún día se escala, esto pasa a preDeployCommand.
-    dockerCommand: sh -c "alembic upgrade head && uvicorn onboarding.api.main:app --host 0.0.0.0 --port $PORT"
+    # El comando de arranque está en el CMD del Dockerfile (etapa prod): corre
+    # las migraciones y después la app. No va acá como dockerCommand: Render
+    # pasa las comillas literales y el comando no se encuentra.
+    # preDeployCommand existe solo en los planes pagos. Si una migración falla,
+    # el contenedor no levanta y Render mantiene la versión anterior. El plan
+    # free corre una sola instancia: no hay dos procesos migrando a la vez.
     envVars:
       - key: ENV
         value: prod

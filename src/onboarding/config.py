@@ -23,11 +23,27 @@ class Settings(BaseSettings):
     openrouter_api_key: SecretStr | None = None
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     openai_compat_base_url: str = "http://ollama:11434/v1"
-    openai_compat_api_key: SecretStr = SecretStr("ollama")
+    openai_compat_api_key: SecretStr | None = SecretStr("ollama")
 
     # Slack por Events API (HTTP). No se usa Socket Mode: no hay worker aparte.
     slack_bot_token: SecretStr | None = None
     slack_signing_secret: SecretStr | None = None
+
+    @field_validator(
+        "openrouter_api_key",
+        "openai_compat_api_key",
+        "slack_bot_token",
+        "slack_signing_secret",
+        mode="before",
+    )
+    @classmethod
+    def empty_secret_means_unset(cls, value: object) -> object:
+        # Render, Docker y .env dejan las variables "vacías" como "" en vez de no
+        # definirlas. Un secreto vacío tiene que valer como no configurado: si no,
+        # Slack se monta con tokens vacíos y el control de "falta la key" no salta.
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     @field_validator("database_url")
     @classmethod
