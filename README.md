@@ -68,7 +68,8 @@ Los mismos en PowerShell y en bash.
 | Cargar la empresa ficticia | `docker compose run --rm app python -m onboarding.seed` |
 | Ingesta del corpus | `docker compose run --rm app python -m onboarding.knowledge.rag corpus` |
 | Consola SQL | `docker compose exec db psql -U onboarding -d onboarding` |
-| Slack con URL pública | `docker compose --profile tunnel up` |
+| Slack con URL pública (Cloudflare, URL cambia) | `docker compose --profile tunnel up` |
+| Slack con URL pública (ngrok, URL fija) | `docker compose --profile ngrok up` |
 | Borrar la base local | `docker compose down -v` |
 
 Detalles de instalación, Windows/WSL2 y app de Slack: [docs/setup.md](docs/setup.md).
