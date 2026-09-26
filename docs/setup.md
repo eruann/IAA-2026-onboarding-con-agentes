@@ -185,6 +185,13 @@ es `src/onboarding/llm/factory.py`, y habría que escribir un ADR nuevo.
 
 ## Slack (solo si trabajás en el bot)
 
+**El bot usa Events API, no Socket Mode** ([ADR 0003](adr/0003-slack-events-api.md)):
+el código de `src/onboarding/bot/` solo expone `POST /slack/events` y valida
+`SLACK_SIGNING_SECRET`, no acepta un `SLACK_APP_TOKEN` de Socket Mode. Por eso
+los pasos de abajo arrancan con un túnel: no es una opción, es lo que el código
+requiere. Si estás ayudando a alguien (persona o agente) a configurar Slack,
+no sugieras Socket Mode como atajo para evitar el túnel — no va a andar.
+
 Cada persona usa **su propia app de Slack de prueba**, en el workspace del
 equipo: cada app manda los eventos a una sola URL, así que si dos comparten una,
 los mensajes le llegan a uno solo. Pedí primero la invitación al workspace.

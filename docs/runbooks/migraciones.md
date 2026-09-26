@@ -43,8 +43,9 @@ Reglas (también en CONTRIBUTING.md):
 
 1. **Antes** de aplicar una migración de datos, crear una branch en Neon (copia
    instantánea de la base) y anotar acá el nombre y la hora.
-2. Si el deploy falla en el pre-deploy (`alembic upgrade head`), Render no
-   promueve la versión nueva: sigue andando la anterior. Arreglás la migración y
+2. Si falla `alembic upgrade head` (corre al arrancar el contenedor, no como
+   pre-deploy: ver [deploy.md](deploy.md)), el contenedor nuevo no levanta y
+   Render sigue sirviendo la versión anterior. Arreglás la migración y
    volvés a desplegar; no hace falta tocar la base.
 3. Si la migración se aplicó y el problema aparece después:
 
