@@ -80,6 +80,26 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     [docs/setup.md](docs/setup.md#slack-solo-si-trabajás-en-el-bot) (local) y
     [docs/runbooks/deploy.md](docs/runbooks/deploy.md) (producción).
 
+## Recorridos guiados (`.tours/`)
+
+El equipo aprende el código con recorridos de CodeTour (`.tours/*.tour`). Las
+preguntas que salen de ahí empiezan con `Recorrido <nombre>:`. Cuando veas una:
+
+- Abrí `.tours/<nombre>.tour` y buscá el paso que contiene la pregunta: ahí
+  están el archivo y el `pattern` de la línea de la que se habla. Leé ese código
+  antes de responder.
+- Quien pregunta no es dev. Respondé corto (un párrafo o una lista breve), sin
+  jerga, y si usás un término técnico explicalo en media línea.
+- Solo explicás: no modifiques archivos ni corras comandos que cambien algo,
+  aunque la pregunta sea "¿cómo encararías...?".
+
+Los comentarios `# recorrido: <nombre>` del código marcan dónde para cada paso.
+**No los borres**: si movés esa parte del código, el marcador va con ella. Si
+cambiás algo que un recorrido explica, fijate que el texto del paso siga siendo
+cierto (con `grep -r "<nombre>" .tours/`). Es una guía para empezar, no
+documentación completa: alcanza con que no mienta. Para crear o editar un
+recorrido, seguí [.tours/README.md](.tours/README.md).
+
 ## Estado
 
 Esqueleto: la mayoría de los módulos son stubs con `TODO(<rol>)`. Si te toca uno,

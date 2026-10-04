@@ -20,6 +20,7 @@ from onboarding.llm.callbacks import UsageLogger
 FAKE_RESPONSES = ["[fake] respuesta de prueba"]
 
 
+# recorrido: modelo-llm
 def get_chat_model(
     settings: Settings | None = None,
     *,

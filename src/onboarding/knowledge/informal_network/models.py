@@ -1,3 +1,4 @@
+# recorrido: tablas-grafo
 """Tablas de la red informal. Titular: rol Grafo cultural y datos.
 
 El grafo entra en dos tablas (decisión del docx: nada de Neo4j en este alcance):

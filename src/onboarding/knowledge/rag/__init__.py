@@ -8,4 +8,5 @@ from onboarding.knowledge.rag.citations import quote_is_supported
 from onboarding.knowledge.rag.ingest import ingest_directory
 from onboarding.knowledge.rag.retriever import retrieve
 
+# recorrido: rag-interfaz
 __all__ = ["chunk_text", "ingest_directory", "quote_is_supported", "retrieve"]

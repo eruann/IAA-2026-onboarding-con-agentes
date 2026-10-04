@@ -9,6 +9,7 @@ def test_documento_corto_queda_en_un_solo_fragmento(sample_corpus: dict[str, str
     assert len(chunks) == 1
 
 
+# recorrido: tests-rag
 def test_documento_largo_se_parte_respetando_el_maximo() -> None:
     text = "\n\n".join(f"Párrafo número {i}. " * 10 for i in range(20))
 

@@ -6,6 +6,8 @@
     // Python: autocompletado y panel Testing (necesita `uv sync`, ver docs/setup.md)
     "ms-python.python",
     // Ruff: marca errores mientras escribís y formatea al guardar
-    "charliermarsh.ruff"
+    "charliermarsh.ruff",
+    // Recorridos guiados por el código, uno por rol (.tours/)
+    "vsls-contrib.codetour"
   ]
 }

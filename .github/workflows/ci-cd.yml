@@ -16,6 +16,7 @@ env:
   # CI nunca llama a un modelo real: no gasta tokens y no depende de la red.
   LLM_PROVIDER: fake
 
+# recorrido: ci-jobs
 jobs:
   lint:
     runs-on: ubuntu-latest

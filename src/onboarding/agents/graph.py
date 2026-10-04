@@ -22,6 +22,7 @@ def _route(state: OnboardingState) -> str:
     return state.get("intent", "answer_question")
 
 
+# recorrido: armado-grafo
 def build_graph(model: BaseChatModel | None = None):
     """Compila el grafo. Los tests pasan un modelo fake; producción usa el default."""
     model = model or get_chat_model()

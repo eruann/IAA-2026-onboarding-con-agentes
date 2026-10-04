@@ -25,6 +25,7 @@ class UsageLogger(BaseCallbackHandler):
     def on_llm_start(self, serialized: dict, prompts: list[str], *, run_id: UUID, **kw: Any):
         self._started_at[run_id] = time.perf_counter()
 
+    # recorrido: registro-uso-llm
     def on_llm_end(self, response: LLMResult, *, run_id: UUID, **kw: Any) -> None:
         elapsed_ms = int((time.perf_counter() - self._started_at.pop(run_id, 0)) * 1000)
         usage = (response.llm_output or {}).get("token_usage", {})

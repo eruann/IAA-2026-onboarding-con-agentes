@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 LLMProvider = Literal["fake", "openrouter", "openai_compat"]
 
 
+# recorrido: configuracion
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
