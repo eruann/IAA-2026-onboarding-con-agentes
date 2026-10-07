@@ -11,6 +11,7 @@ from onboarding.agents import build_graph
 from onboarding.agents.prompts import load_prompt
 
 
+# recorrido: tests-grafo
 def test_grafo_responde_pregunta_con_modelo_fake(fake_llm: FakeListChatModel) -> None:
     graph = build_graph(fake_llm)
 

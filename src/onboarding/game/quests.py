@@ -8,6 +8,7 @@ Approver = Literal["manager", "helpdesk", "agent"]
 
 
 @dataclass(frozen=True)
+# recorrido: mision
 class Quest:
     key: str
     title: str

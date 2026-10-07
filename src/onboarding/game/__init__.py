@@ -3,4 +3,5 @@
 from onboarding.game.quests import Quest, QuestStatus
 from onboarding.game.tone import Tone
 
+# recorrido: juego-interfaz
 __all__ = ["Quest", "QuestStatus", "Tone"]

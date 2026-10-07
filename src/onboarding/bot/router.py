@@ -12,6 +12,7 @@ from onboarding.bot.app import get_slack_app
 router = APIRouter(tags=["slack"])
 
 
+# recorrido: slack-endpoint
 @router.post("/slack/events")
 async def slack_events(request: Request):
     return await SlackRequestHandler(get_slack_app()).handle(request)

@@ -15,5 +15,6 @@ eval/rag_questions.yaml, no elegir por gusto.
 from collections.abc import Sequence
 
 
+# recorrido: embeddings
 def embed_texts(texts: Sequence[str]) -> list[list[float]]:
     raise NotImplementedError("TODO(rag): ver ADR 0005 antes de implementar")

@@ -7,6 +7,7 @@ Relation = Literal["knows_about", "introduced", "belongs_to", "owns_process"]
 
 
 @dataclass(frozen=True)
+# recorrido: relacion
 class KnowledgeTriple:
     subject: str
     relation: Relation
@@ -14,6 +15,7 @@ class KnowledgeTriple:
     evidence: str  # frase textual que respalda la relación
 
 
+# recorrido: extraccion
 def extract_triples(text: str) -> list[KnowledgeTriple]:
     # TODO(grafo): salida estructurada del modelo (with_structured_output de
     # LangChain sobre el prompt agents/prompts/extract_knowledge.md).

@@ -1,3 +1,4 @@
+# recorrido: tablas-juego
 """Tablas del juego. Titular: rol Experiencia.
 
 TODO(experiencia): definir y migrar

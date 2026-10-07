@@ -13,6 +13,7 @@ class RetrievedChunk:
     score: float
 
 
+# recorrido: busqueda
 def retrieve(query: str, k: int = 5) -> list[RetrievedChunk]:
     # TODO(rag): búsqueda por similitud en pgvector.
     # Se mide precisión/recall aparte de la calidad de la respuesta, para poder

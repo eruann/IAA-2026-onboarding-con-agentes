@@ -11,6 +11,7 @@ DEFAULT_MAX_CHARS = 1200
 DEFAULT_OVERLAP = 150
 
 
+# recorrido: fragmentado
 def chunk_text(
     text: str,
     max_chars: int = DEFAULT_MAX_CHARS,

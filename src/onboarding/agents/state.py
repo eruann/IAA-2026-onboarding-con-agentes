@@ -10,6 +10,7 @@ Intent = Literal[
 ]
 
 
+# recorrido: estado-grafo
 class OnboardingState(TypedDict, total=False):
     intent: Intent
     # Quién habla (id de Slack) y en qué empresa/rol está

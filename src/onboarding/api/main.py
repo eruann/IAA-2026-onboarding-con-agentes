@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(panel.router)
 
+    # recorrido: slack-opcional
     if settings.slack_enabled:
         from onboarding.bot.router import router as slack_router
 

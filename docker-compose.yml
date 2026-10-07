@@ -26,6 +26,7 @@ x-app: &app
     db:
       condition: service_healthy
 
+# recorrido: servicios-docker
 services:
   db:
     image: pgvector/pgvector:pg16
@@ -43,6 +44,7 @@ services:
       timeout: 3s
       retries: 20
 
+  # recorrido: servicio-migrate
   migrate:
     <<: *app
     command: alembic upgrade head

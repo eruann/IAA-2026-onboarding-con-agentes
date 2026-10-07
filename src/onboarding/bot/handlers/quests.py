@@ -4,6 +4,7 @@ from slack_bolt import App
 
 
 def register(app: App) -> None:
+    # recorrido: comando-misiones
     @app.command("/misiones")
     def list_quests(ack, respond, command):
         # ack() primero y siempre: Slack corta a los 3 segundos.

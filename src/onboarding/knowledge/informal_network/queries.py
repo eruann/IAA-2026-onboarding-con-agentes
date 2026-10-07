@@ -1,6 +1,7 @@
 """Consultas al grafo. Es lo que alimenta las misiones y las derivaciones."""
 
 
+# recorrido: quien-sabe
 def who_knows_about(topic: str, limit: int = 3) -> list[str]:
     """Personas que saben de un tema, de más a menos respaldo.
 
