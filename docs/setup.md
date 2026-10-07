@@ -28,6 +28,22 @@ VS Code ofrece instalarla la primera vez que abrís el proyecto.
 Para ver un `.md` con sus diagramas: abrir el archivo y `Ctrl+Shift+V`
 (`Cmd+Shift+V` en Mac), o `Ctrl+K V` para tenerlo al lado del texto.
 
+### Extensión de VS Code para los recorridos guiados
+
+Los recorridos por el código, uno por rol, se abren con esta extensión:
+
+**CodeTour** (`vsls-contrib.codetour`), de Jonathan Carter
+
+![La extensión CodeTour en VS Code](img/codetour-extension.png)
+
+```bash
+code --install-extension vsls-contrib.codetour
+```
+
+También aparece sola: está en `.vscode/extensions.json`, así que VS Code ofrece
+instalarla al abrir el proyecto. Una vez instalada, en el Explorador aparece el
+panel **CodeTour**: empezá por **"0. Bienvenida"**.
+
 En GitHub no hace falta nada: los diagramas se dibujan solos.
 
 Opcional: [uv](https://docs.astral.sh/uv/) en el host, para correr los tests desde
@@ -63,7 +79,7 @@ docker compose run --rm app python -m onboarding.seed
 
 Al abrir el proyecto, VS Code ofrece instalar las extensiones recomendadas:
 **Python** (`ms-python.python`) y **Ruff** (`charliermarsh.ruff`), además de la
-de diagramas. El repo ya trae la configuración compartida en `.vscode/`.
+de diagramas y la de recorridos. El repo ya trae la configuración compartida en `.vscode/`.
 
 Hay dos formas de correr los tests desde el editor. Se pueden usar las dos.
 

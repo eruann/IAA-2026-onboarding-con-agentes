@@ -5,10 +5,11 @@ orden:
 
 0. **Pedí los accesos** (ver [Primer día](#primer-día-qué-pedir-y-qué-no)).
 1. **Levantá el proyecto**: [docs/setup.md](docs/setup.md).
-2. **Hacé el recorrido guiado** en VS Code: instalá la extensión CodeTour (VS
-   Code la sugiere al abrir el proyecto) y empezá por **"0. Bienvenida"**, en el
-   panel CodeTour del Explorador. Te lleva por el código de tu rol paso a paso, y
-   en cada paso tenés preguntas listas para Claude Code o Codex.
+2. **Hacé el recorrido guiado** en VS Code: instalá la extensión CodeTour
+   ([cómo](docs/setup.md#extensión-de-vs-code-para-los-recorridos-guiados)) y
+   empezá por **"0. Bienvenida"**, en el panel CodeTour del Explorador. Te lleva
+   por el código de tu rol paso a paso, y en cada paso tenés preguntas listas
+   para Claude Code o Codex.
 3. **Entendé cómo está armado**: [docs/diagramas.md](docs/diagramas.md). Empezá
    por el diagrama 2 (módulos y dependencias) y el 3 (el grafo de LangGraph, el
    orquestador). Con esos dos se entiende dónde encaja tu parte.
