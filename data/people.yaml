@@ -1,6 +1,5 @@
-# Personas de la empresa ficticia.
-# TODO(pm): reemplazar por el elenco real de la empresa que se elija.
-# Los nombres tienen que coincidir con los que aparecen en corpus/.
+# Personas de la empresa ficticia: Rumbo Sur Logística.
+# Los nombres coinciden con los que aparecen en corpus/.
 
 - key: ana-ingresante
   name: Ana Ruiz
@@ -18,4 +17,28 @@
   name: Pablo Sosa
   area: Logística
   role: Referente de Logística
+  is_newcomer: false
+
+- key: jefe-compras
+  name: Diego Fernández
+  area: Compras
+  role: Jefe de Compras
+  is_newcomer: false
+
+- key: referente-sistemas
+  name: Lucía Paredes
+  area: Sistemas
+  role: Referente de Mesa de Ayuda y Sistemas
+  is_newcomer: false
+
+- key: jefa-rrhh
+  name: Romina Castro
+  area: Recursos Humanos
+  role: Jefa de Recursos Humanos
+  is_newcomer: false
+
+- key: gerente-general
+  name: Martín Ibarra
+  area: Gerencia General
+  role: Gerente General
   is_newcomer: false
