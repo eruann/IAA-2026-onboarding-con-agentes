@@ -24,4 +24,11 @@
   description: Seguí el proceso de compras de punta a punta con algo que necesites de verdad.
   points: 30
   approver: agent
-  evidence_required: Número de pedido generado.
+  evidence_required: Número de pedido generado. 
+
+- key: cuidado-de-la-informacion
+  title: Aprendé a cuidar la información
+  description: Leé la guía interna de seguridad y averiguá cómo reportar un mensaje sospechoso.
+  points: 50
+  approver: agent
+  evidence_required: Mencioná dos prácticas de cuidado y el canal para reportar un mensaje sospechoso.
