@@ -20,6 +20,7 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", without_accents).strip().lower()
 
 
+# recorrido: citas
 def quote_is_supported(quote: str, source_text: str, min_length: int = 15) -> bool:
     """True si `quote` aparece textualmente en `source_text`.
 

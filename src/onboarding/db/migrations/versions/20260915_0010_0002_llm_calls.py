@@ -16,6 +16,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
+# recorrido: migracion-ejemplo
 def upgrade() -> None:
     op.create_table(
         "llm_calls",

@@ -29,6 +29,7 @@ def make_generate_quest(model: BaseChatModel) -> Node:
     return generate_quest
 
 
+# recorrido: nodo-respuesta
 def make_answer_question(model: BaseChatModel) -> Node:
     def answer_question(state: OnboardingState) -> dict:
         # TODO(agentes): 1) knowledge.retrieve  2) responder citando fuente

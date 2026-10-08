@@ -1,3 +1,4 @@
+# recorrido: tablas-rag
 """Tablas del corpus. Titular: rol RAG.
 
 TODO(rag): definir `documents` y `chunks`. La columna del vector depende del

@@ -164,7 +164,7 @@ esa es la métrica de horas-persona del TP.
 | Contenedor | Qué es | Local | Producción |
 |---|---|---|---|
 | `db` | `pgvector/pgvector:pg16` | sí (puerto 5433 en el host) | Neon |
-| `migrate` | misma imagen, `alembic upgrade head` | sí | pre-deploy de Render |
+| `migrate` | misma imagen, `alembic upgrade head` | sí | no existe: el `CMD` de la etapa `prod` migra al arrancar |
 | `app` | API + panel + `/slack/events` | sí, puerto 8000 con hot reload | único servicio web |
 | `tunnel` | `cloudflared`, URL pública para Slack (cambia al reiniciar) | perfil `tunnel` | no |
 | `ngrok` | alternativa con dominio fijo; cuenta gratuita por persona | perfil `ngrok` | no |
@@ -195,7 +195,9 @@ de ahí sale el costo por ingresante que promete la propuesta.
 Events API (HTTP), no Socket Mode: entra todo por `POST /slack/events` dentro de
 la misma app, así producción es un solo contenedor. Slack corta a los 3 segundos,
 así que los handlers hacen `ack()` inmediato y el trabajo pesado (RAG + modelo)
-responde después. En desarrollo hace falta una URL pública: perfil `tunnel`.
+responde después. En desarrollo hace falta una URL pública: perfil `tunnel`
+(Cloudflare) o `ngrok`. Socket Mode no está implementado: no hay
+`SLACK_APP_TOKEN` ni worker ([ADR 0003](adr/0003-slack-events-api.md)).
 
 ## Deploy
 
@@ -207,7 +209,8 @@ Las migraciones corren **al arrancar el contenedor**
 (`alembic upgrade head && uvicorn ...`), no como pre-deploy: `preDeployCommand`
 existe solo en los planes pagos de Render. Si una migración falla, el contenedor
 nuevo no levanta y sigue andando el anterior. Con una sola instancia, que es el
-caso del plan gratuito, no hay dos procesos migrando a la vez.
+caso del plan gratuito, no hay dos procesos migrando a la vez
+([ADR 0008](adr/0008-migraciones-al-arrancar.md)).
 
 Pasos para configurarlo: [runbooks/deploy.md](runbooks/deploy.md).
 

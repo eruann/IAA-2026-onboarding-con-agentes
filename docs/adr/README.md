@@ -14,9 +14,10 @@ Estados: `propuesta` → `aceptada` → `reemplazada por 000X`.
 | [0001](0001-stack.md) | Stack: Python, LangGraph, Postgres + pgvector, Slack | aceptada |
 | [0002](0002-estructura-monorepo.md) | Monorepo, un paquete por área, una imagen Docker | aceptada |
 | [0003](0003-slack-events-api.md) | Slack por Events API en vez de Socket Mode | aceptada |
-| [0004](0004-deploy-render-neon.md) | Deploy en Render + Neon | aceptada |
+| [0004](0004-deploy-render-neon.md) | Deploy en Render + Neon | aceptada; la parte de migraciones, reemplazada por 0008 |
 | [0005](0005-embeddings.md) | Modelo de embeddings | **abierta** |
 | [0006](0006-llm-via-openrouter.md) | Acceso a modelos vía OpenRouter | aceptada |
 | [0007](0007-knowledge-layer.md) | Knowledge layer: documentos y red informal detrás de una sola puerta | aceptada |
+| [0008](0008-migraciones-al-arrancar.md) | Migraciones al arrancar el contenedor, no como pre-deploy | aceptada |
 
 Plantilla: [_plantilla.md](_plantilla.md)

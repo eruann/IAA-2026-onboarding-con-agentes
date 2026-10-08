@@ -9,6 +9,7 @@ ayudar.
 LEVELS = [(0, "Recién llegado"), (100, "En marcha"), (250, "Con calle"), (500, "Referente")]
 
 
+# recorrido: puntos-niveles
 def level_for(points: int) -> str:
     if points < 0:
         raise ValueError("los puntos no pueden ser negativos")

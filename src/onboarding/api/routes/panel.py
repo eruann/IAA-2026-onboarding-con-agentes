@@ -13,6 +13,7 @@ router = APIRouter(tags=["panel"])
 
 
 @router.get("/panel", response_class=HTMLResponse)
+# recorrido: panel-jefe
 def panel_home(request: Request) -> HTMLResponse:
     # TODO(experiencia): listar ingresantes, su progreso y las misiones
     # pendientes de aprobación, con botón de aprobar (HTMX, sin recargar).

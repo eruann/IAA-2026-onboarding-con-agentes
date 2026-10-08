@@ -6,6 +6,7 @@
 # expected_document / expected_section: dónde está la respuesta. Es lo que se usa
 # para medir recall del retrieval, independiente de lo que el modelo conteste.
 
+# recorrido: preguntas-eval
 - id: compras-001
   question: ¿Cómo pido una compra?
   expected_document: compras.md
@@ -18,6 +19,7 @@
   expected_section: Alta de casilla de mail
   expected_answer_contains: interno 100
 
+# recorrido: preguntas-sin-respuesta
 # Preguntas sin respuesta en el corpus: el agente TIENE que derivar en vez de
 # inventar. Son tan importantes como las otras.
 - id: sin-respuesta-001

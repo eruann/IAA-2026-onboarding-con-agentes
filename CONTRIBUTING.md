@@ -22,8 +22,9 @@ from onboarding.knowledge.rag import retrieve  # no, desde fuera de la capa
 from onboarding.knowledge.rag.retriever import _score  # nunca
 ```
 
-Cuatro archivos son de todos: `src/onboarding/config.py`,
-`src/onboarding/db/models.py`, `docker-compose.yml` y `pyproject.toml`. Ahí es
+Cinco archivos son de todos: `src/onboarding/config.py`,
+`src/onboarding/db/models.py`, `src/onboarding/knowledge/__init__.py`,
+`docker-compose.yml` y `pyproject.toml`. Ahí es
 donde se generan los conflictos de merge: avisá en el chat antes de tocarlos.
 
 ## Estilo

@@ -15,6 +15,7 @@ from onboarding.knowledge.rag.chunking import chunk_text
 logger = logging.getLogger(__name__)
 
 
+# recorrido: ingesta
 def ingest_directory(path: Path) -> int:
     # README.md documenta la carpeta para el equipo; no es parte del corpus.
     documents = [doc for doc in sorted(path.glob("**/*.md")) if doc.name != "README.md"]

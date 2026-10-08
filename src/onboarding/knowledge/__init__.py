@@ -24,6 +24,7 @@ from onboarding.knowledge.rag import (
     retrieve,
 )
 
+# recorrido: knowledge-interfaz
 __all__ = [
     # Lo escrito
     "chunk_text",

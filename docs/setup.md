@@ -28,6 +28,22 @@ VS Code ofrece instalarla la primera vez que abrís el proyecto.
 Para ver un `.md` con sus diagramas: abrir el archivo y `Ctrl+Shift+V`
 (`Cmd+Shift+V` en Mac), o `Ctrl+K V` para tenerlo al lado del texto.
 
+### Extensión de VS Code para los recorridos guiados
+
+Los recorridos por el código, uno por rol, se abren con esta extensión:
+
+**CodeTour** (`vsls-contrib.codetour`), de Jonathan Carter
+
+![La extensión CodeTour en VS Code](img/codetour-extension.png)
+
+```bash
+code --install-extension vsls-contrib.codetour
+```
+
+También aparece sola: está en `.vscode/extensions.json`, así que VS Code ofrece
+instalarla al abrir el proyecto. Una vez instalada, en el Explorador aparece el
+panel **CodeTour**: empezá por **"0. Bienvenida"**.
+
 En GitHub no hace falta nada: los diagramas se dibujan solos.
 
 Opcional: [uv](https://docs.astral.sh/uv/) en el host, para correr los tests desde
@@ -63,7 +79,7 @@ docker compose run --rm app python -m onboarding.seed
 
 Al abrir el proyecto, VS Code ofrece instalar las extensiones recomendadas:
 **Python** (`ms-python.python`) y **Ruff** (`charliermarsh.ruff`), además de la
-de diagramas. El repo ya trae la configuración compartida en `.vscode/`.
+de diagramas y la de recorridos. El repo ya trae la configuración compartida en `.vscode/`.
 
 Hay dos formas de correr los tests desde el editor. Se pueden usar las dos.
 
@@ -184,6 +200,13 @@ Si el proveedor elegido no fuera compatible con OpenAI, el único archivo a toca
 es `src/onboarding/llm/factory.py`, y habría que escribir un ADR nuevo.
 
 ## Slack (solo si trabajás en el bot)
+
+**El bot usa Events API, no Socket Mode** ([ADR 0003](adr/0003-slack-events-api.md)):
+el código de `src/onboarding/bot/` solo expone `POST /slack/events` y valida
+`SLACK_SIGNING_SECRET`, no acepta un `SLACK_APP_TOKEN` de Socket Mode. Por eso
+los pasos de abajo arrancan con un túnel: no es una opción, es lo que el código
+requiere. Si estás ayudando a alguien (persona o agente) a configurar Slack,
+no sugieras Socket Mode como atajo para evitar el túnel — no va a andar.
 
 Cada persona usa **su propia app de Slack de prueba**, en el workspace del
 equipo: cada app manda los eventos a una sola URL, así que si dos comparten una,

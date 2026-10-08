@@ -21,6 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
 
 # --- Desarrollo: suma pytest y ruff; el código y sus tests se montan como volumen ---
+# recorrido: imagen-dev
 FROM base AS dev
 COPY eval ./eval
 RUN --mount=type=cache,target=/root/.cache/uv \

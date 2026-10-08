@@ -5,6 +5,7 @@
 #
 # relation: knows_about | introduced | belongs_to | owns_process
 
+# recorrido: grafo-esperado
 nodes:
   - {key: pablo-sosa, type: person, name: Pablo Sosa}
   - {key: marcela-duarte, type: person, name: Marcela Duarte}

@@ -5,6 +5,7 @@ Si tu área agrega tablas, importá acá su módulo `models` para que
 archivos compartidos: avisá en el chat antes de tocarlo.
 """
 
+# recorrido: registro-tablas
 from onboarding.db.base import Base
 from onboarding.game import models as game_models  # noqa: F401
 from onboarding.knowledge.informal_network import models as informal_network_models  # noqa: F401

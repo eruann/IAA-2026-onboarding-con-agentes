@@ -21,6 +21,7 @@ def test_slack_deshabilitado_si_faltan_credenciales() -> None:
 
 
 @pytest.mark.parametrize("vacio", ["", "   "])
+# recorrido: tests-config
 def test_secretos_vacios_cuentan_como_no_configurados(vacio: str) -> None:
     # Render, Docker y .env dejan las variables sin valor como "" o espacios.
     settings = Settings(
