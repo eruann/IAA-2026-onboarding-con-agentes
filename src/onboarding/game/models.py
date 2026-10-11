@@ -51,9 +51,7 @@ class Evidence(Base):
     __tablename__ = "evidence"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    assignment_id: Mapped[int] = mapped_column(
-        ForeignKey("quest_assignments.id"), nullable=False
-    )
+    assignment_id: Mapped[int] = mapped_column(ForeignKey("quest_assignments.id"), nullable=False)
     text: Mapped[str | None] = mapped_column(Text)
     url: Mapped[str | None] = mapped_column(String(2048))
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -63,9 +61,7 @@ class Approval(Base):
     __tablename__ = "approvals"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    assignment_id: Mapped[int] = mapped_column(
-        ForeignKey("quest_assignments.id"), nullable=False
-    )
+    assignment_id: Mapped[int] = mapped_column(ForeignKey("quest_assignments.id"), nullable=False)
     approved_by: Mapped[int] = mapped_column(ForeignKey("people.id"), nullable=False)
     decision: Mapped[str] = mapped_column(String(32), nullable=False)
     decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
