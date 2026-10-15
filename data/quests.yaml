@@ -25,7 +25,7 @@
   description: Seguí el proceso de compras de punta a punta con algo que necesites de verdad.
   points: 30
   approver: agent
-  evidence_required: Número de pedido generado. 
+  evidence_required: Número de pedido generado.
 
 - key: cuidado-de-la-informacion
   title: Aprendé a cuidar la información
