@@ -68,9 +68,19 @@ def upgrade() -> None:
             sa.ForeignKey("quest_assignments.id"),
             nullable=False,
         ),
-        sa.Column("approved_by", sa.Integer(), sa.ForeignKey("people.id"), nullable=False),
+        sa.Column("approved_by", sa.Integer(), sa.ForeignKey("people.id"), nullable=True),
+        sa.Column("approver_type", sa.String(length=32), nullable=False),
         sa.Column("decision", sa.String(length=32), nullable=False),
         sa.Column("decided_at", sa.DateTime(timezone=True), nullable=False),
+        sa.CheckConstraint(
+            "approver_type IN ('manager', 'helpdesk', 'agent')",
+            name="ck_approvals_approver_type",
+        ),
+        sa.CheckConstraint(
+            "(approver_type = 'agent' AND approved_by IS NULL) "
+            "OR (approver_type != 'agent' AND approved_by IS NOT NULL)",
+            name="ck_approvals_approver_person",
+        ),
     )
     op.create_table(
         "redemptions",

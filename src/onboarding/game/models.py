@@ -7,7 +7,7 @@ de la organización.
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from onboarding.db.base import Base
@@ -61,12 +61,24 @@ class Evidence(Base):
 
 class Approval(Base):
     __tablename__ = "approvals"
+    __table_args__ = (
+        CheckConstraint(
+            "approver_type IN ('manager', 'helpdesk', 'agent')",
+            name="ck_approvals_approver_type",
+        ),
+        CheckConstraint(
+            "(approver_type = 'agent' AND approved_by IS NULL) "
+            "OR (approver_type != 'agent' AND approved_by IS NOT NULL)",
+            name="ck_approvals_approver_person",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     assignment_id: Mapped[int] = mapped_column(
         ForeignKey("quest_assignments.id"), nullable=False
     )
-    approved_by: Mapped[int] = mapped_column(ForeignKey("people.id"), nullable=False)
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey("people.id"))
+    approver_type: Mapped[str] = mapped_column(String(32), nullable=False)
     decision: Mapped[str] = mapped_column(String(32), nullable=False)
     decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
