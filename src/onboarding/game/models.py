@@ -56,9 +56,7 @@ class QuestRow(Base):
 class QuestAssignment(Base):
     __tablename__ = "quest_assignments"
     __table_args__ = (
-        UniqueConstraint(
-            "quest_id", "person_id", name="uq_quest_assignments_quest_person"
-        ),
+        UniqueConstraint("quest_id", "person_id", name="uq_quest_assignments_quest_person"),
         CheckConstraint(
             "status IN ('pending', 'submitted', 'approved', 'rejected')",
             name="ck_quest_assignments_status",
@@ -90,9 +88,7 @@ class Evidence(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    assignment_id: Mapped[int] = mapped_column(
-        ForeignKey("quest_assignments.id"), nullable=False
-    )
+    assignment_id: Mapped[int] = mapped_column(ForeignKey("quest_assignments.id"), nullable=False)
     text: Mapped[str | None] = mapped_column(Text)
     url: Mapped[str | None] = mapped_column(String(2048))
     submitted_at: Mapped[datetime] = mapped_column(
@@ -123,9 +119,7 @@ class Approval(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    assignment_id: Mapped[int] = mapped_column(
-        ForeignKey("quest_assignments.id"), nullable=False
-    )
+    assignment_id: Mapped[int] = mapped_column(ForeignKey("quest_assignments.id"), nullable=False)
     approved_by: Mapped[int | None] = mapped_column(ForeignKey("people.id"))
     approver_type: Mapped[str] = mapped_column(String(32), nullable=False)
     decision: Mapped[str] = mapped_column(String(32), nullable=False)

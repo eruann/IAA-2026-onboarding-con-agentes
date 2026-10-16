@@ -54,9 +54,7 @@ def upgrade() -> None:
             server_default=sa.func.now(),
         ),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.UniqueConstraint(
-            "quest_id", "person_id", name="uq_quest_assignments_quest_person"
-        ),
+        sa.UniqueConstraint("quest_id", "person_id", name="uq_quest_assignments_quest_person"),
         sa.CheckConstraint(
             "status IN ('pending', 'submitted', 'approved', 'rejected')",
             name="ck_quest_assignments_status",
