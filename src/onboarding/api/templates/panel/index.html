@@ -5,23 +5,18 @@
 
 {% block content %}
   <section>
-    <h2>Misiones esperando aprobación</h2>
+    <h2>Misiones pendientes</h2>
     {% if pending %}
       <table>
         <thead>
-          <tr><th>Persona</th><th>Misión</th><th>Evidencia</th><th></th></tr>
+          <tr><th>Ingresante</th><th>Misión</th><th>Estado</th></tr>
         </thead>
         <tbody>
           {% for item in pending %}
             <tr>
               <td>{{ item.person }}</td>
               <td>{{ item.quest }}</td>
-              <td>{{ item.evidence }}</td>
-              <td>
-                <button hx-post="/panel/approve/{{ item.id }}" hx-swap="outerHTML">
-                  Aprobar
-                </button>
-              </td>
+              <td>Pendiente</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -36,7 +31,7 @@
     {% if people %}
       <ul>
         {% for person in people %}
-          <li>{{ person.name }} — {{ person.points }} puntos ({{ person.level }})</li>
+          <li>{{ person.name }} — {{ person.role }}, {{ person.area }}</li>
         {% endfor %}
       </ul>
     {% else %}
