@@ -11,10 +11,7 @@ def test_seed_carga_datos_de_juego_sin_duplicar(
     db_session: Session, tmp_path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     (tmp_path / "people.yaml").write_text(
-        "- name: Ingresante seed test\n"
-        "  role: Analista\n"
-        "  area: Pruebas\n"
-        "  is_newcomer: true\n",
+        "- name: Ingresante seed test\n  role: Analista\n  area: Pruebas\n  is_newcomer: true\n",
         encoding="utf-8",
     )
     (tmp_path / "quests.yaml").write_text(
@@ -32,9 +29,7 @@ def test_seed_carga_datos_de_juego_sin_duplicar(
     seed(with_corpus=False, session=db_session)
     seed(with_corpus=False, session=db_session)
 
-    person = db_session.scalar(
-        select(Person).where(Person.name == "Ingresante seed test")
-    )
+    person = db_session.scalar(select(Person).where(Person.name == "Ingresante seed test"))
     quest = db_session.scalar(select(QuestRow).where(QuestRow.key == "seed-test-quest"))
     assert person is not None
     assert quest is not None
