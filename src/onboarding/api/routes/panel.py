@@ -1,6 +1,7 @@
 """Panel del jefe: ver progreso y validar misiones. Titular: rol Experiencia."""
 
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
@@ -15,11 +16,12 @@ TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 router = APIRouter(tags=["panel"])
+DbSession = Annotated[Session, Depends(get_session)]
 
 
 @router.get("/panel", response_class=HTMLResponse)
 # recorrido: panel-jefe
-def panel_home(request: Request, session: Session = Depends(get_session)) -> HTMLResponse:
+def panel_home(request: Request, session: DbSession) -> HTMLResponse:
     # Las asignaciones en estado pending son misiones todavía no completadas.
     people = session.scalars(
         select(Person).where(Person.is_newcomer.is_(True)).order_by(Person.name)

@@ -39,5 +39,5 @@ def test_panel_muestra_ingresantes_y_misiones_pendientes(db_session: Session) ->
     assert "Ingresante de prueba" in response.text
     assert "Analista" in response.text
     assert "Conocer el equipo" in response.text
-    assert "pending" in response.text
+    assert "Pendiente" in response.text
     assert "Aprobar" not in response.text
