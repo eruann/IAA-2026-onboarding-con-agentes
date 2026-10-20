@@ -27,5 +27,10 @@ def embed_texts(texts: Sequence[str], settings: Settings | None = None) -> list[
         model=EMBEDDING_MODEL,
         base_url=settings.openai_compat_base_url,
         api_key=settings.openai_compat_api_key,
+        # Ollama espera texto plano, no tokens pre-convertidos. Desactivamos
+        # toda la lógica de tokenización/chunking por límite de contexto (sea
+        # con tiktoken o con transformers) — nuestros textos son chicos, no
+        # hace falta trocearlos, y evita agregar transformers como dependencia.
+        check_embedding_ctx_length=False,
     )
     return client.embed_documents(list(texts))
