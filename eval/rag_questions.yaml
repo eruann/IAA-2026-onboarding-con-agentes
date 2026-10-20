@@ -1,10 +1,24 @@
 # Set fijo de 15-20 preguntas típicas de un ingresante, con respuesta conocida
 # en el corpus. Se define ANTES de correr el experimento.
 #
-# TODO(rag): completar hasta 15-20 cuando exista el corpus.
-#
 # expected_document / expected_section: dónde está la respuesta. Es lo que se usa
 # para medir recall del retrieval, independiente de lo que el modelo conteste.
+# expected_document puede ser una lista cuando más de un documento del corpus
+# responde correctamente la misma pregunta (no es error del retriever si trae
+# cualquiera de los dos) — en ese caso expected_section queda en null, porque
+# no hay una única sección correcta a la que apuntar.
+#
+# expected_answer_contains puede ser un string o una lista de alternativas
+# válidas (cualquiera que matchee cuenta como correcto) — para no exigirle al
+# modelo la frase exacta del corpus cuando hay varias formas correctas de
+# decir lo mismo (números en letras, nombre de una persona vs. del equipo que
+# integra, etc).
+#
+# LIMITACIÓN CONOCIDA: expected_section no se puede medir todavía para ninguna
+# pregunta — chunk_text corta por tamaño (1200 caracteres), no por encabezado
+# `##`, y ningún documento del corpus llega a ese límite, así que cada uno
+# queda como un solo fragmento sin distinción de sección. Se arregla en un
+# PR aparte, mejorando el chunker para que corte respetando encabezados.
 
 # recorrido: preguntas-eval
 - id: compras-001
@@ -17,7 +31,91 @@
   question: ¿Cómo consigo mi casilla de mail?
   expected_document: mesa-de-ayuda.md
   expected_section: Alta de casilla de mail
-  expected_answer_contains: interno 100
+  expected_answer_contains: Lucía Paredes
+
+- id: organigrama-001
+  question: ¿Quién es el Jefe de Compras?
+  expected_document: [organigrama.md, compras.md]
+  expected_section: null
+  expected_answer_contains: Diego Fernández
+
+- id: logistica-001
+  question: ¿Qué pasa si cargo un pedido después de las 9?
+  expected_document: logistica.md
+  expected_section: Despacho a destino
+  expected_answer_contains: al día siguiente
+
+- id: vacaciones-001
+  question: ¿Con cuánta anticipación tengo que pedir vacaciones?
+  expected_document: vacaciones-y-licencias.md
+  expected_section: Pedido de vacaciones
+  expected_answer_contains: [15 días, quince días]
+
+- id: horarios-001
+  question: Si me olvido la tarjeta magnética, ¿cómo registro mi asistencia?
+  expected_document: horarios-y-asistencia.md
+  expected_section: Registro de asistencia
+  expected_answer_contains: registro manual
+
+- id: seguridad-001
+  question: ¿Cada cuánto tengo que cambiar mi contraseña?
+  expected_document: seguridad-informatica.md
+  expected_section: Contraseñas
+  expected_answer_contains: 90 días
+
+- id: viaticos-001
+  question: ¿En cuántos días tengo que rendir los gastos cuando vuelvo de un viaje?
+  expected_document: viaticos-y-gastos.md
+  expected_section: Rendición de gastos
+  expected_answer_contains: [5 días, cinco días]
+
+- id: conducta-001
+  question: ¿A quién le reporto si tengo un conflicto de interés con un proveedor?
+  expected_document: codigo-de-conducta.md
+  expected_section: Conflictos de interés
+  expected_answer_contains: Romina Castro
+
+- id: reuniones-001
+  question: ¿Con quién tengo la reunión de bienvenida el primer día?
+  expected_document: reuniones-y-comunicacion.md
+  expected_section: Reunión de ingreso
+  expected_answer_contains: jefe directo
+
+- id: proveedores-001
+  question: ¿A cuántos días se le paga a un proveedor?
+  expected_document: proveedores.md
+  expected_section: Pago a proveedores
+  expected_answer_contains: 30 días
+
+- id: teletrabajo-001
+  question: ¿Cuántos días de teletrabajo tengo si trabajo en Compras?
+  expected_document: teletrabajo.md
+  expected_section: Días de teletrabajo
+  expected_answer_contains: [2 días, dos días]
+
+- id: capacitacion-001
+  question: ¿Quién da la capacitación de ingreso?
+  expected_document: capacitacion.md
+  expected_section: Capacitación de ingreso
+  expected_answer_contains: [Mesa de Ayuda, Lucía Paredes]
+
+- id: incidentes-001
+  question: ¿A quién reporto un reclamo de un cliente por demora en un pedido?
+  expected_document: [incidentes-y-reclamos.md, logistica.md]
+  expected_section: null
+  expected_answer_contains: Pablo Sosa
+
+- id: rrhh-001
+  question: ¿Desde cuándo puedo descargar mi recibo de sueldo?
+  expected_document: rrhh-politicas.md
+  expected_section: Recibo de sueldo
+  expected_answer_contains: [1 de cada mes, día 1 de cada mes, primer día del mes]
+
+- id: faq-001
+  question: ¿Puedo cambiar de área dentro de la empresa?
+  expected_document: faq-general.md
+  expected_section: ¿Puedo cambiar de área?
+  expected_answer_contains: Romina Castro
 
 # recorrido: preguntas-sin-respuesta
 # Preguntas sin respuesta en el corpus: el agente TIENE que derivar en vez de
@@ -27,3 +125,15 @@
   expected_document: null
   expected_section: null
   expected_behavior: derivar a RRHH sin inventar
+
+- id: sin-respuesta-002
+  question: ¿Puedo traer a mi mascota a la oficina?
+  expected_document: null
+  expected_section: null
+  expected_behavior: derivar a RRHH (Romina Castro) sin inventar
+
+- id: sin-respuesta-003
+  question: ¿Cuál es el presupuesto anual de la empresa?
+  expected_document: null
+  expected_section: null
+  expected_behavior: derivar a Gerencia General (Martín Ibarra) sin inventar un número
