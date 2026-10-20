@@ -56,6 +56,29 @@ soporte parcial para otros idiomas.
 - Reindexar todo el corpus implica volver a embeber cada chunk — con 16
   documentos de este tamaño, es una operación de segundos, no un problema.
 
+## Resultado medido
+
+Con `ingest.py` y `retriever.py` ya implementados, se corrió `retrieve()`
+contra el set fijo de `eval/rag_questions.yaml` (19 preguntas).
+
+**Recall:** de las 16 preguntas con respuesta real en el corpus, `retrieve()`
+trajo el documento correcto en el top-5 las 16 veces (**100%** — 15 en
+rank 1, 1 en rank 2). Las 3 preguntas "sin respuesta" (diseñadas para que el
+agente derive en vez de inventar) no entran en esta cuenta: no hay documento
+correcto contra el cual medir.
+
+**Separación de score:** el score (similitud coseno, `1 - distancia`) del
+top-1 también separa limpio los dos grupos — entre 0.52 y 0.73 en las
+preguntas con respuesta real, entre 0.42 y 0.49 en las de "sin respuesta".
+Un umbral ~0.50 alcanzaría para distinguir "el corpus tiene algo relevante"
+de "no tiene nada", dato útil para la capa que decide si el agente responde
+o deriva (fuera del alcance de este ADR).
+
+**Conclusión:** `bge-m3` vía Ollama rinde bien para este corpus (16
+documentos, español, preguntas cortas). No hizo falta evaluar la alternativa
+de pago (Voyage/OpenAI) mencionada en "Consecuencias" — el recall local ya
+es 100%.
+
 ## Alternativas descartadas
 
 - **Librería de embeddings (ej. `sentence-transformers`) instalada dentro del
