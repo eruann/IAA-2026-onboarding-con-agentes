@@ -2,11 +2,11 @@
 
 ## Reclamo de un cliente
 
-Un reclamo de un cliente por un pedido se registra en el sistema de pedidos y se deriva a Pablo Sosa, de Logística, si es por demora o rotura.
+Un reclamo de un cliente por un pedido se registra en el sistema de pedidos. Si es por demora o rotura, se deriva al Referente de Logística; el detalle está en el documento de Logística.
 
 ## Incidente de seguridad
 
-Un incidente de seguridad (robo, accidente en el depósito) se reporta de inmediato al jefe de área y a Sistemas si involucra información o accesos.
+Un incidente de seguridad (robo, accidente en el depósito) se reporta de inmediato al jefe de área. Si involucra información o accesos, se reporta también a Sistemas.
 
 ## Seguimiento del incidente
 

@@ -14,4 +14,4 @@ Una vez enviado el formulario interno, el jefe de área tiene dos días hábiles
 
 ## Proveedores habituales
 
-Compras mantiene un listado de proveedores habituales por categoría (insumos de oficina, repuestos de flota, servicios de limpieza). Un pedido a un proveedor nuevo necesita aprobación de Diego Fernández, Jefe de Compras.
+Compras mantiene un listado de proveedores habituales por categoría (insumos de oficina, repuestos de flota, servicios de limpieza). Pedirle a un proveedor que no está en el listado necesita además la aprobación del Jefe de Compras. El alta de ese proveedor se explica en el documento de Proveedores.

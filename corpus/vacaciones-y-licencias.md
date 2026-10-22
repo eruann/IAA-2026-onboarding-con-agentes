@@ -6,7 +6,7 @@ Las vacaciones se piden con al menos 15 días de anticipación, a través del si
 
 ## Licencia por enfermedad
 
-La licencia por enfermedad se avisa el mismo día, antes de las 10 de la mañana, al jefe directo y a Romina Castro. Se presenta el certificado médico dentro de las 48 horas.
+La licencia por enfermedad se avisa el mismo día, antes de las 10 de la mañana. El aviso va a dos personas: el jefe directo y la Jefatura de Recursos Humanos. El certificado médico se presenta dentro de las 48 horas.
 
 ## Licencias especiales
 

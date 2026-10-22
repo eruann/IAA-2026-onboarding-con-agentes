@@ -2,7 +2,7 @@
 
 ## Alta de un proveedor nuevo
 
-Un proveedor nuevo se da de alta en el sistema de Compras, con los datos fiscales y al menos dos referencias de trabajos anteriores. Lo aprueba Diego Fernández.
+Un proveedor nuevo se da de alta en el sistema de Compras. Hay que cargar sus datos fiscales y al menos dos referencias de trabajos anteriores. El alta la aprueba el Jefe de Compras.
 
 ## Pago a proveedores
 
