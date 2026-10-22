@@ -6,7 +6,7 @@ Las contraseñas se cambian cada 90 días, lo pide el sistema automáticamente. 
 
 ## Uso de pendrives y dispositivos externos
 
-No se conectan pendrives ni dispositivos externos a las notebooks de la empresa sin autorización de Sistemas. Lucía Paredes gestiona las excepciones.
+No se conectan pendrives ni dispositivos externos a las notebooks de la empresa sin autorización de Sistemas. Las excepciones se piden a la Referente de Mesa de Ayuda y Sistemas.
 
 ## Reporte de un correo sospechoso
 

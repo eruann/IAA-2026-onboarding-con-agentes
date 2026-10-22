@@ -2,7 +2,7 @@
 
 ## Alta de casilla de mail
 
-Para pedir tu casilla de mail, llamá al interno 100 de Mesa de Ayuda. Lucía Paredes gestiona las altas y te la activa el mismo día.
+Para pedir tu casilla de mail, llamá al interno 100 de Mesa de Ayuda. El alta la gestiona la Referente de Mesa de Ayuda y Sistemas, y la casilla queda activa el mismo día.
 
 ## Alta de usuario en los sistemas internos
 
@@ -14,4 +14,4 @@ Si falla la notebook o no podés entrar a algún sistema, se abre un ticket llam
 
 ## Reseteo de contraseña
 
-El reseteo de contraseña se pide por el interno 100 o por mensaje directo a Lucía Paredes. No se resetean contraseñas por mail.
+El reseteo de contraseña se pide por el interno 100 o por mensaje directo a la Referente de Mesa de Ayuda y Sistemas. No se resetean contraseñas por mail.
