@@ -6,30 +6,97 @@
     <title>{% block title %}Onboarding{% endblock %}</title>
     <!-- HTMX: interacción sin build de JavaScript ni servicio aparte -->
     <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+    <script>
+      try {
+        if (localStorage.getItem("onboarding-theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (_) {}
+    </script>
     <style>
-      :root { color-scheme: light; }
+      :root {
+        color-scheme: light;
+        --page-bg: #F7F5FA;
+        --surface-bg: #FFFFFF;
+        --text: #1F3A5F;
+        --heading: #6B4A7D;
+        --muted: #4B5563;
+        --border: #d7c3df;
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --page-bg: #171923;
+        --surface-bg: #242735;
+        --text: #E5E7EB;
+        --heading: #D8B4FE;
+        --muted: #C4C9D4;
+        --border: #4B4560;
+      }
       body {
         margin: 0 auto; padding: 2rem 1.5rem; max-width: 60rem;
         font: 16px/1.5 system-ui, sans-serif;
-        background-color: #F7F5FA;
-        color: #1F3A5F;
+        background-color: var(--page-bg);
+        color: var(--text);
       }
       section {
-        background-color: #D3D3D3;
-        border: 1px solid #d7c3df;
+        background-color: var(--surface-bg);
+        border: 1px solid var(--border);
         border-radius: 12px;
         padding: 1.25rem;
         margin: 1.25rem 0;
       }
-      h2 { color: #6B4A7D; margin-top: 0; }
+      h2 { color: var(--heading); margin-top: 0; }
       h1 { font-size: 1.5rem; }
-      .empty { color: #000000; opacity: 1; font-style: italic; }
+      .empty { color: var(--muted); font-style: italic; }
       table { border-collapse: collapse; width: 100%; }
-      th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #8884; }
+      th, td { text-align: left; padding: .5rem; border-bottom: 1px solid var(--border); }
+      header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+      .theme-toggle {
+        display: grid; place-items: center; width: 2.75rem; height: 2.75rem;
+        border: 1px solid var(--border); border-radius: 999px;
+        background: var(--surface-bg); color: var(--text); font: inherit; cursor: pointer;
+      }
+      .theme-toggle svg { width: 1.25rem; height: 1.25rem; }
+      .theme-toggle .sun-icon, :root[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+      :root[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+      .theme-toggle:focus-visible { outline: 3px solid var(--heading); outline-offset: 3px; }
+      @media (max-width: 30rem) {
+        body { padding: 1.25rem .85rem; }
+        header { align-items: flex-start; }
+        .theme-toggle { flex: 0 0 auto; }
+      }
     </style>
   </head>
   <body>
-    <header><h1>{% block heading %}Onboarding{% endblock %}</h1></header>
+    <header>
+      <h1>{% block heading %}Onboarding{% endblock %}</h1>
+      <button class="theme-toggle" type="button" aria-label="Activar modo oscuro" aria-pressed="false">
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z" />
+        </svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+        </svg>
+      </button>
+    </header>
     <main>{% block content %}{% endblock %}</main>
+    <script>
+      const themeToggle = document.querySelector(".theme-toggle");
+      const syncThemeToggle = () => {
+        const isDark = document.documentElement.dataset.theme === "dark";
+        themeToggle.setAttribute("aria-pressed", String(isDark));
+        themeToggle.setAttribute("aria-label", isDark ? "Activar modo claro" : "Activar modo oscuro");
+      };
+      syncThemeToggle();
+      themeToggle.addEventListener("click", () => {
+        const isDark = document.documentElement.dataset.theme !== "dark";
+        document.documentElement.dataset.theme = isDark ? "dark" : "light";
+        try {
+          localStorage.setItem("onboarding-theme", isDark ? "dark" : "light");
+        } catch (_) {}
+        syncThemeToggle();
+      });
+    </script>
   </body>
 </html>
