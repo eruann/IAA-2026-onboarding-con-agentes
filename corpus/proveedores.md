@@ -20,6 +20,6 @@ Para estos proveedores, además del alta normal:
 
 - El proveedor tiene que estar en el registro de proveedores calificados que mantiene Calidad.
 - Un proveedor nuevo necesita la evaluación y aprobación de Aseguramiento de Calidad antes de la primera compra, no después.
-- Cambiar de proveedor calificado requiere control de cambios (POL-001 en el documento Operativo).
+- Cambiar de proveedor calificado requiere control de cambios.
 
 Comprar un insumo crítico a un proveedor no calificado es desvío mayor, aunque el insumo sea idéntico y más barato.

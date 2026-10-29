@@ -1,6 +1,6 @@
 # Procedimiento de Tesorería
 
-## 1. Objetivo, alcance y definiciones
+## Objetivo, alcance y definiciones
 
 Tesorería concentra todo el movimiento de fondos de la empresa: ningún pago se emite ni ningún cobro se registra fuera de este circuito. El procedimiento fija quién hace cada tarea, quién la aprueba y qué controles se aplican, con separación de funciones entre quien carga, quien aprueba y quien concilia.
 
@@ -18,7 +18,7 @@ Tesorería concentra todo el movimiento de fondos de la empresa: ningún pago se
 | Conciliación bancaria   | Comparación entre el extracto bancario y los registros contables, con explicación de cada diferencia.                                                 |
 | Esquema de firmas       | Combinación de personas habilitadas en el banco para autorizar operaciones según monto.                                                               |
 
-## 2. Roles y responsabilidades
+## Roles y responsabilidades
 
 El Jefe aprueba y decide, el Analista prepara y controla, y el Asistente ejecuta y registra. Nadie aprueba una operación que cargó él mismo, y ningún miembro de Tesorería firma pagos en el banco: los firman los gerentes apoderados por el Directorio.
 
@@ -67,7 +67,7 @@ Los poderes y la designación de firmantes los aprueba el Directorio; el Jefe ge
 
 En ausencia del Jefe, aprueba la propuesta de pagos el reemplazo que designe la Dirección. Quien carga un pago nunca lo firma.
 
-## 3. Cuentas bancarias, firmas y niveles de autorización
+## Cuentas bancarias, firmas y niveles de autorización
 
 Tesorería carga los pagos pero no los firma: los firman en el banco gerentes apoderados por el Directorio, dos o tres según el monto. El Jefe de Tesorería no tiene firma bancaria.
 
@@ -92,7 +92,7 @@ Los montos y la nómina de apoderados los aprueba el Directorio y se revisan al 
 - El Analista confirma el cambio por teléfono con un contacto ya registrado, nunca con el que figura en el mail que pide el cambio.
 - El Jefe aprueba el cambio antes del primer pago a la nueva cuenta.
 
-## 4. Pago a proveedores
+## Pago a proveedores
 
 Los pagos se hacen los días viernes salvo excepciones, solo con la documentación completa del paso 1 y si el pago está incluido en las previsiones de caja. Los medios preferidos son la transferencia y el eCheq; el cheque en papel queda como excepción autorizada por el Jefe.
 
@@ -144,7 +144,7 @@ El Analista prepara y carga, el Jefe aprueba, los gerentes apoderados firman y e
 
 **Anticipos a proveedores:** solo con orden de compra firmada y aprobación del Jefe y del Gerente Financiero; el Analista hace el seguimiento hasta recibir la factura que los cancele.
 
-## 5. Gestión de cobros
+## Gestión de cobros
 
 Todo cobro entra a una cuenta bancaria de la empresa y se imputa el mismo día hábil. No se reciben cobros en efectivo salvo autorización del Jefe, y nunca se usan para pagar gastos sin antes depositarlos.
 
@@ -180,7 +180,7 @@ Todo cobro entra a una cuenta bancaria de la empresa y se imputa el mismo día h
 
 El Analista emite cada semana el listado de deudores por antigüedad (aging) y lo envía al Jefe y a Comercial.
 
-## 6. Caja chica (fondo fijo)
+## Caja chica (fondo fijo)
 
 La caja chica es un fondo fijo de 1,000.000 Pesos a cargo del Asistente, para operaciones diarias: viáticos de cadetes y transportistas y gastos menores de la operatoria de la empresa. En todo momento, efectivo más comprobantes debe sumar el monto del fondo.
 
@@ -205,7 +205,7 @@ La caja chica es un fondo fijo de 1,000.000 Pesos a cargo del Asistente, para op
 - El acta de arqueo detalla billetes, vales y comprobantes, y la firman ambos.
 - Cualquier diferencia se informa al Jefe en el día; si no se explica, se registra como faltante y se analiza con la Dirección.
 
-## 7. Cash flow
+## Cash flow
 
 El cash flow se prepara en forma diaria y mensual, y es la base de las decisiones de pago, cobro, financiamiento e inversión. Lo prepara el Analista y lo aprueba el Jefe. Todo pago debe estar en las previsiones de caja; si no lo está, se informa al Gerente Financiero antes de programarlo.
 
@@ -239,7 +239,7 @@ El Analista incorpora estas previsiones al cash flow, junto con los cobros esper
 
 **Orden de prioridad cuando los fondos no alcanzan:** sueldos y cargas sociales, impuestos, servicios críticos, proveedores estratégicos y luego el resto por antigüedad.
 
-## 8. Conciliaciones bancarias y cierre mensual
+## Conciliaciones bancarias y cierre mensual
 
 Cada cuenta bancaria se concilia todos los días hábiles. La conciliación la realiza el Analista o el Asistente, según la carga de trabajo, y el Jefe la revisa. Todo débito o crédito que no se pueda explicar abre un reporte de incidente.
 
@@ -259,7 +259,7 @@ Cada cuenta bancaria se concilia todos los días hábiles. La conciliación la r
 
 **Cierre de Tesorería del mes:** conciliaciones mensuales firmadas, registro de incidentes abiertos, arqueo de caja chica, inventario de eCheqs en custodia y cheques en cartera, listado de pagos de excepción y cash flow real vs. proyectado.
 
-## 9. Controles internos, indicadores y registros
+## Controles internos, indicadores y registros
 
 **Controles clave**
 
