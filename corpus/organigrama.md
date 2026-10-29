@@ -6,7 +6,7 @@ Farmalog Sur tiene siete áreas: Operaciones, Logística, Compras, Sistemas, Rec
 
 ## Gerencia General
 
-Martín Ibarra es el Gerente General. Coordina a los jefes de cada área y aprueba las decisiones que superan el presupuesto mensual de cada sector.
+Martín Ibarra es el Gerente General y reporta a Verónica Salgado. Coordina a los jefes de cada área y aprueba las decisiones que superan el presupuesto mensual de cada sector.
 
 ## Dirección
 
@@ -16,37 +16,37 @@ Lorena Quiroga es la Directora Técnica, farmacéutica matriculada. Martín Belt
 
 ## Calidad
 
-Ignacio Pereyra es el Gerente de Aseguramiento de Calidad (QA) y reporta a Verónica Salgado. Reportan a Ignacio: Rocío Miranda, Jefa de Control de Calidad y Validaciones; Julián Rearte, Analista de QA Sr. y padrino de los ingresantes de Calidad; y Carla Bianchi, Responsable de Trazabilidad ANMAT.
+Ignacio Pereyra es el Gerente de Aseguramiento de Calidad (QA) y reporta a Martín Ibarra. Reportan a Ignacio: Rocío Miranda, Jefa de Control de Calidad y Validaciones; Julián Rearte, Analista de QA Sr. y padrino de los ingresantes de Calidad; y Carla Bianchi, Responsable de Trazabilidad ANMAT.
 
 ## Operaciones
 
-Marcela Duarte es la Jefa de Operaciones. Ana Ruiz es Analista de Operaciones y reporta directo a Marcela.
+Marcela Duarte es la Jefa de Operaciones y reporta a Pablo Domínguez. Ana Ruiz es Analista de Operaciones y reporta directo a Marcela.
 
-Pablo Domínguez es el Gerente de Operaciones y reporta a Verónica Salgado. Sergio Arriaga es el Jefe de Depósito Sarandí y reporta a Pablo Domínguez. Daniela Foglia es la Supervisora de Cámaras Frías y reporta a Sergio Arriaga. En los hechos es la única persona que conoce el comportamiento fino de las cámaras de Sarandí: qué alarma tiende a dar falsos positivos, qué estante de la cámara 3 corre medio grado más frío y cuánto tarda cada equipo en recuperar rango después de una apertura larga. Nada de eso está escrito en ningún POE. Gastón Ruiz es el Referente de Seguridad e Higiene y reporta a Pablo Domínguez.
+Pablo Domínguez es el Gerente de Operaciones y reporta a Martín Ibarra. Sergio Arriaga es el Jefe de Depósito Sarandí y reporta a Pablo Domínguez. Daniela Foglia es la Supervisora de Cámaras Frías y reporta a Sergio Arriaga. Gastón Ruiz es el Referente de Seguridad e Higiene y reporta a Pablo Domínguez.
 
 ## Logística
 
-Pablo Sosa es el Referente de Logística. Coordina los despachos y el seguimiento de pedidos hasta destino.
+Pablo Sosa es el Referente de Logística y reporta a Hernán Ledesma. Coordina los despachos y el seguimiento de pedidos hasta destino.
 
 Hernán Ledesma es el Jefe de Transporte y Distribución y reporta a Pablo Domínguez.
 
 ## Compras
 
-Diego Fernández es el Jefe de Compras. Autoriza los pedidos que superan el límite que puede aprobar un equipo por su cuenta.
+Diego Fernández es el Jefe de Compras y reporta a Silvina Ortega. Autoriza los pedidos que superan el límite que puede aprobar un equipo por su cuenta.
 
-Silvina Ortega lleva Compras y Administración y reporta a Verónica Salgado.
+Silvina Ortega lleva Compras y Administración y reporta a Martín Ibarra.
 
 ## Sistemas
 
-Lucía Paredes es la Referente de Mesa de Ayuda y Sistemas. Atiende altas de usuario, casillas de mail y accesos.
+Lucía Paredes es la Referente de Mesa de Ayuda y Sistemas y reporta a Nahuel Ferreyra. Atiende altas de usuario, casillas de mail y accesos.
 
-Nahuel Ferreyra es el Jefe de Sistemas y reporta a Verónica Salgado.
+Nahuel Ferreyra es el Jefe de Sistemas y reporta a Martín Ibarra.
 
 ## Recursos Humanos
 
-Romina Castro es la Jefa de Recursos Humanos. Gestiona licencias, vacaciones y consultas sobre legajo.
+Romina Castro es la Jefa de Recursos Humanos y reporta a Mariana Costas. Gestiona licencias, vacaciones y consultas sobre legajo.
 
-Mariana Costas es la Responsable de People y reporta a Verónica Salgado.
+Mariana Costas es la Responsable de People y reporta a Martín Ibarra.
 
 ## Finanzas
 

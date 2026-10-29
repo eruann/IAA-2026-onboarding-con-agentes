@@ -11,8 +11,13 @@ nodes:
   - {key: marcela-duarte, type: person, name: Marcela Duarte}
   - {key: logistica, type: area, name: Logística}
   - {key: compras, type: process, name: Pedido de compra}
+  - {key: daniela-foglia, type: person, name: Daniela Foglia}
+  - {key: camaras-frias-sarandi, type: area, name: Cámaras frías de Sarandí}
 
 edges:
   - {source: pablo-sosa, relation: knows_about, target: logistica}
   - {source: pablo-sosa, relation: belongs_to, target: logistica}
   - {source: marcela-duarte, relation: owns_process, target: compras}
+  # Lo que no está en ningún documento: qué alarma da falsos positivos, qué
+  # estante de la cámara 3 corre más frío, cuánto tarda cada equipo en recuperar.
+  - {source: daniela-foglia, relation: knows_about, target: camaras-frias-sarandi}
