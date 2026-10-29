@@ -1,9 +1,10 @@
-import streamlit as st
 import sys
 import tomllib
 from pathlib import Path
+
 import anthropic
 import ollama
+import streamlit as st
 from langchain_anthropic import ChatAnthropic
 from langchain_ollama import ChatOllama
 
@@ -83,7 +84,11 @@ if "nombre" not in st.session_state:
             # El bloque grande se cachea; el nombre va aparte para no romper el caché entre usuarios
             st.session_state.system = [
                 {"type": "text", "text": instrucciones, "cache_control": {"type": "ephemeral"}},
-                {"type": "text", "text": f"El usuario se llama {st.session_state.nombre}. Llamalo por su nombre."},
+                {
+                    "type": "text",
+                    "text": f"El usuario se llama {st.session_state.nombre}. "
+                    "Llamalo por su nombre.",
+                },
             ]
             st.session_state.messages = []
             st.rerun()
@@ -97,7 +102,10 @@ with st.sidebar:
         st.session_state.clear()
         st.rerun()
 
-st.write(f"Hola {st.session_state.nombre}, preguntame quién es quién en la empresa o cómo funciona Tesorería.")
+st.write(
+    f"Hola {st.session_state.nombre}, preguntame quién es quién en la empresa "
+    "o cómo funciona Tesorería."
+)
 
 # Prueba de extract_triples: texto libre -> relaciones para la red informal
 with st.expander("Probar extracción de relaciones"):
