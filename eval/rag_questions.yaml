@@ -19,6 +19,60 @@
   expected_section: Alta de casilla de mail
   expected_answer_contains: interno 100
 
+- id: bienvenida-001
+  question: ¿Puedo ofrecerle a un cliente almacenamiento congelado en Córdoba?
+  expected_document: bienvenida.md
+  expected_section: Sitios
+  expected_answer_contains: solamente en Sarandí
+
+- id: glosario-001
+  question: ¿Qué significa que un lote "está en cuarenta"?
+  expected_document: glosario.md
+  expected_section: Jerga que no vas a encontrar en ningún manual
+  expected_answer_contains: cuarentena
+
+- id: recepcion-001
+  question: ¿Cuánto tiempo puede quedar producto refrigerado en la zona de recepción?
+  expected_document: recepcion-de-mercaderia.md
+  expected_section: Descarga de producto refrigerado
+  expected_answer_contains: 30 minutos
+
+- id: temperatura-001
+  question: ¿Cada cuánto se calibran los sensores de TermoTrack?
+  expected_document: control-de-temperatura.md
+  expected_section: Calibración de sensores
+  expected_answer_contains: cada 12 meses
+
+- id: excursion-001
+  question: Saltó una alarma crítica en una cámara fría, ¿muevo el producto a otra cámara?
+  expected_document: excursiones-de-temperatura.md
+  expected_section: Los primeros 15 minutos
+  expected_answer_contains: Aislar, no mover
+
+- id: kit-001
+  question: ¿Cuánto tiempo puede pasar entre que cierro un kit térmico y sale el camión?
+  expected_document: kit-termico-y-despacho.md
+  expected_section: Ventana de despacho
+  expected_answer_contains: 2 horas
+
+- id: seguridad-001
+  question: ¿Cuánto tiempo seguido puedo trabajar dentro de la cámara de congelado?
+  expected_document: seguridad-e-higiene.md
+  expected_section: Trabajo en cámara de congelado
+  expected_answer_contains: 45 minutos
+
+- id: sigma-001
+  question: ¿Puedo entrar a Sigma WMS desde mi casa por VPN?
+  expected_document: sigma-wms.md
+  expected_section: Ingreso
+  expected_answer_contains: No hay acceso remoto
+
+- id: tesoreria-001
+  question: ¿Qué hago si un gasto supera el tope de la caja chica?
+  expected_document: tesoreria.md
+  expected_section: Caja chica (fondo fijo)
+  expected_answer_contains: pago a proveedores
+
 # recorrido: preguntas-sin-respuesta
 # Preguntas sin respuesta en el corpus: el agente TIENE que derivar en vez de
 # inventar. Son tan importantes como las otras.

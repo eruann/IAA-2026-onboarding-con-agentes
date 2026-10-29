@@ -2,11 +2,11 @@
 
 ## Trato entre compañeros
 
-El trato entre compañeros es respetuoso, sin diferencia de jerarquía. Cualquier situación incómoda se puede reportar a Romina Castro, de Recursos Humanos, en forma confidencial.
+El trato entre compañeros es respetuoso, sin diferencia de jerarquía. Cualquier situación incómoda se puede reportar a la Jefatura de Recursos Humanos, en forma confidencial. Quién ocupa ese puesto figura en el Organigrama.
 
 ## Conflictos de interés
 
-Un conflicto de interés (por ejemplo, un familiar que trabaja en un proveedor) se declara a Romina Castro antes de participar en una decisión de compra.
+Un conflicto de interés, por ejemplo un familiar que trabaja en un proveedor, se declara a la Jefatura de Recursos Humanos. La declaración se hace antes de participar en una decisión de compra, no después.
 
 ## Uso de los recursos de la empresa
 

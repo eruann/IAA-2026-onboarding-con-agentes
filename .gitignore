@@ -33,3 +33,6 @@ eval/runs/
 
 # Temporales de Word
 ~$*.docx
+
+# Carpeta personal, no se sube
+src/onboarding/mi_caperta/
