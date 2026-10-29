@@ -1,12 +1,12 @@
-# Rumbo Sur Logística S.A.
+# Farmalog Sur S.A.
 
-### GEN-001 — Bienvenida a Rumbo Sur Logística — qué hacemos y cómo ganamos plata
+### GEN-001 — Bienvenida a Farmalog Sur — qué hacemos y cómo ganamos plata
 
 *GEN-001 · version 3.0 · vigente desde 2026-02-10 · propietario: Dirección General · audiencia: todos*
 
 #### Qué hace la empresa
 
-Rumbo Sur Logística S.A. es un operador logístico farmacéutico. No fabricamos medicamentos: los guardamos y los movemos por cuenta de los laboratorios que nos contratan, garantizando que lleguen al destino en las mismas condiciones en que salieron de la planta del fabricante.
+Farmalog Sur S.A. es una empresa farmacéutica especializada en la conservación y distribución de medicamentos. No fabricamos medicamentos: los guardamos y los distribuimos por cuenta de los laboratorios que nos contratan, garantizando que lleguen al destino en las mismas condiciones en que salieron de la planta del fabricante.
 
 Concretamente prestamos cuatro servicios:
 
@@ -33,82 +33,14 @@ El congelado (−20 °C) existe **solamente en Sarandí**. Si un cliente pide co
 
 
 #### Habilitación y qué significa en la práctica
-
+ 
 Estamos habilitados por ANMAT como distribuidora de especialidades medicinales. Eso implica tres obligaciones permanentes que atraviesan todo lo que hacemos:
 
 - Tener una **Dirección Técnica** farmacéutica presente y responsable.
 - Operar bajo **procedimientos escritos y vigentes** (los POEs).
 - Mantener **trazabilidad** de los productos alcanzados por el sistema nacional.
 
-Una observación de ANMAT no es una multa y ya está: puede suspender la habilitación, y sin habilitación no hay empresa. Esto explica por qué el área de Calidad tiene poder de veto sobre operaciones, algo que no es habitual en logística general.
-
-#### Cómo está organizada la empresa
-
-Tres bloques: **Operaciones** (depósito y transporte), **Calidad** (aseguramiento, control y dirección técnica) y **Soporte** (sistemas, people, administración y compras). El detalle de quién es quién está en ORG-001.
-
-### ORG-001 — Organigrama y referentes por tema
-
-*ORG-001 · version 5.2 · vigente desde 2026-08-01 · propietario: People · audiencia: todos*
-
-#### Dirección
-
-| Persona          | Puesto                                       | Sitio   |
-|------------------|----------------------------------------------|---------|
-| Verónica Salgado | Directora General                            | Sarandí |
-| Lorena Quiroga   | Directora Técnica (farmacéutica matriculada) | Sarandí |
-| Martín Beltrán   | Director Técnico suplente                    | Sarandí |
-
-La Directora Técnica **no** reporta a Operaciones ni a Calidad: reporta directo a Dirección General. Esto es a propósito. La DT es la que firma frente a ANMAT y tiene que poder frenar un despacho aunque eso le cueste plata a la empresa.
-
-#### Calidad
-
-| Persona         | Puesto                                    | Reporta a        |
-|-----------------|-------------------------------------------|------------------|
-| Ignacio Pereyra | Gerente de Aseguramiento de Calidad (QA)  | Verónica Salgado |
-| Rocío Miranda   | Jefa de Control de Calidad y Validaciones | Ignacio Pereyra  |
-| Julián Rearte   | Analista de QA Sr.                        | Ignacio Pereyra  |
-| Carla Bianchi   | Responsable de Trazabilidad ANMAT         | Ignacio Pereyra  |
-
-#### Operaciones
-
-| Persona         | Puesto                            | Reporta a        |
-|-----------------|-----------------------------------|------------------|
-| Pablo Domínguez | Gerente de Operaciones            | Verónica Salgado |
-| Sergio Arriaga  | Jefe de Depósito Sarandí          | Pablo Domínguez  |
-| Daniela Foglia  | Supervisora de Cámaras Frías      | Sergio Arriaga   |
-| Hernán Ledesma  | Jefe de Transporte y Distribución | Pablo Domínguez  |
-
-#### Soporte
-
-| Persona         | Puesto                           | Reporta a        |
-|-----------------|----------------------------------|------------------|
-| Nahuel Ferreyra | Jefe de Sistemas                 | Verónica Salgado |
-| Mariana Costas  | Responsable de People            | Verónica Salgado |
-| Gastón Ruiz     | Referente de Seguridad e Higiene | Pablo Domínguez  |
-| Silvina Ortega  | Compras y Administración         | Verónica Salgado |
-
-#### A quién preguntarle qué
-
-Esta tabla es la que más se usa y la que más rápido queda vieja. Si algo no coincide con la realidad, avisale a People en \#gente-y-cultura.
-
-| Tema                                       | Referente       | Suplente       | Canal             |
-|--------------------------------------------|-----------------|----------------|-------------------|
-| Desvíos, CAPA, auditorías internas         | Ignacio Pereyra | Julián Rearte  | \#calidad-general |
-| Liberación de lotes y criterio regulatorio | Lorena Quiroga  | Martín Beltrán | \#calidad-general |
-| Cámaras frías, alarmas, mapeo térmico      | Daniela Foglia  | Sergio Arriaga | \#ops-sarandi     |
-| Validación y calificación de equipos       | Rocío Miranda   | —              | \#calidad-general |
-| Transporte, kits térmicos, devoluciones    | Hernán Ledesma  | Sergio Arriaga | \#ops-sarandi     |
-| Trazabilidad ANMAT                         | Carla Bianchi   | Lorena Quiroga | \#calidad-general |
-| Accesos, Sigma WMS, TermoTrack, VPN        | Nahuel Ferreyra | —              | \#ayuda-sistemas  |
-| Vacaciones, licencias, legajo, recibos     | Mariana Costas  | —              | \#gente-y-cultura |
-| Seguridad e higiene, EPP, accidentes       | Gastón Ruiz     | —              | \#ops-sarandi     |
-| Compras, reembolsos, viáticos              | Silvina Ortega  | —              | correo            |
-
-#### Cosas que no están en el organigrama pero conviene saber
-
-- **Daniela Foglia** es, en los hechos, la única persona que conoce el comportamiento fino de las cámaras de Sarandí: cuál alarma tiende a dar falsos positivos, qué estante de la cámara 3 corre medio grado más frío, cuánto tarda cada equipo en recuperar rango después de una apertura larga. Nada de eso está escrito en ningún POE.
-- **Julián Rearte** es el padrino asignado a los ingresantes de Calidad. Es la vía correcta para preguntas "de las que dan vergüenza preguntar".
-- **Martín Beltrán** está de guardia como DT suplente los fines de semana y feriados. Si hay una excursión de temperatura un domingo, es a él a quien se llama, no a Lorena.
+Una observación de ANMAT no es una multa y ya está: puede suspender la habilitación, y sin habilitación no hay empresa. Esto explica por qué el área de Calidad tiene poder de veto sobre operaciones, algo que no es habitual en otras industrias.
 
 ### GEN-002 — Glosario interno y siglas
 
@@ -173,7 +105,7 @@ Cuando alguien dice "frío" sin aclarar, se refiere a 2–8 °C. "Congelado" sie
 
 #### 1. Objeto y alcance
 
-Establecer cómo se recibe producto farmacéutico en cualquiera de los tres sitios de Rumbo Sur Logística, desde que el camión llega al portón hasta que el stock queda disponible en Sigma WMS.
+Establecer cómo se recibe producto farmacéutico en cualquiera de los tres sitios de Farmalog Sur, desde que el camión llega al portón hasta que el stock queda disponible en Sigma WMS.
 
 Aplica a producto de laboratorio cliente y a devoluciones de droguería. **No** aplica a insumos propios (cajas, refrigerantes, papelería), que se reciben por ADM-003.
 
@@ -379,7 +311,7 @@ Si el registrador de un envío en curso muestra excursión al llegar a destino:
 1. El destinatario **no recibe** el producto hasta que Calidad evalúe.
 2. El transportista deja el producto en el kit térmico cerrado.
 3. Se aplica el mismo flujo de evaluación de impacto de la sección 5.
-4. Si el producto vuelve a Rumbo Sur Logística, ingresa como devolución bajo POE-LOG-011, en cuarentena, y nunca reingresa a stock disponible sin decisión de la DT.
+4. Si el producto vuelve a Farmalog Sur, ingresa como devolución bajo POE-LOG-011, en cuarentena, y nunca reingresa a stock disponible sin decisión de la DT.
 
 #### 9. Error frecuente que conviene evitar
 
@@ -579,7 +511,7 @@ El plazo objetivo de bloqueo del stock propio es **inmediato**: en la práctica,
 
 #### 7. Incidentes durante el transporte
 
-| Situación                              | Qué hace el transportista                     | Qué hace Rumbo Sur Logística                                                               |
+| Situación                              | Qué hace el transportista                     | Qué hace Farmalog Sur                                                               |
 |----------------------------------------|-----------------------------------------------|-------------------------------------------------------------------------------------|
 | Demora que supera la autonomía del kit | Llama a guardia antes de continuar            | Transporte evalúa desvío a sitio intermedio o reacondicionamiento                   |
 | Accidente con daño de bultos           | No manipula el producto, fotografía y llama   | Se despacha personal, el producto vuelve como devolución en cuarentena              |
@@ -662,7 +594,7 @@ Los registros de trazabilidad se conservan **5 años** y tienen que poder recupe
 
 #### 1. Declaración
 
-Rumbo Sur Logística asume el compromiso de que todo producto farmacéutico bajo nuestra custodia conserve sus atributos de calidad desde la recepción hasta la entrega, y de poder demostrarlo documentalmente en cualquier momento.
+Farmalog Sur asume el compromiso de que todo producto farmacéutico bajo nuestra custodia conserve sus atributos de calidad desde la recepción hasta la entrega, y de poder demostrarlo documentalmente en cualquier momento.
 
 Esta política la firma la Dirección General y se revisa anualmente.
 
@@ -791,15 +723,16 @@ Se recertifica anualmente.
 
 #### 1. Cuentas que se crean al ingresar
 
-| Sistema                    | Quién la pide                             | Plazo de alta  |
-|----------------------------|-------------------------------------------|----------------|
-| Correo corporativo y Slack | People, automático con el alta del legajo | día 1          |
-| Sigma WMS                  | El jefe directo, formulario en Qualis     | 48 hs hábiles  |
-| TermoTrack                 | El jefe directo, formulario en Qualis     | 48 hs hábiles  |
-| Qualis                     | People, automático                        | día 1          |
-| VPN                        | El jefe directo, requiere justificación   | 5 días hábiles |
+Todas las altas de usuario se piden a Mesa de Ayuda, al interno 100, indicando el área a la que pertenecés. El detalle está en el documento de Mesa de Ayuda.
 
-El alta de Sigma WMS y TermoTrack **no es automática**: alguien tiene que pedirla. Es el olvido más común del primer día y la causa número uno de tickets en \#ayuda-sistemas.
+| Sistema    | Qué hay que indicar al pedirla                  | Plazo de alta  |
+|------------|-------------------------------------------------|----------------|
+| Sigma WMS  | Área                                            | 48 hs hábiles  |
+| TermoTrack | Área                                            | 48 hs hábiles  |
+| Qualis     | Área                                            | 48 hs hábiles  |
+| VPN        | Área y justificación aprobada por el jefe directo | 5 días hábiles |
+
+El alta de Sigma WMS y TermoTrack **no es automática**: hay que pedirla. Es el olvido más común del primer día y la causa número uno de tickets en Mesa de Ayuda.
 
 #### 2. Perfiles de Sigma WMS
 
@@ -813,164 +746,27 @@ El alta de Sigma WMS y TermoTrack **no es automática**: alguien tiene que pedir
 
 El perfil **Calidad** es el único que puede liberar un lote de cuarentena. Un analista de QA ingresa con perfil Consulta durante el período de calificación y recién pasa a perfil Calidad cuando completa la calificación en POE-CAL-001 y POE-CAL-003, registrada en Qualis.
 
-#### 3. Reglas de cuenta
-
-- **Las cuentas son personales e intransferibles.** Prestar usuario y contraseña es falta grave, sin importar la urgencia. En un sistema donde la firma electrónica equivale a firma, prestar la cuenta es firmar por otro.
-- Contraseña mínima de 12 caracteres, se renueva cada 180 días.
-- **Segundo factor obligatorio** en correo, Slack, Qualis y VPN. En Sigma WMS no, porque se opera con pistola en el piso, pero el acceso desde fuera de la red del depósito está bloqueado.
-- Bloqueo de pantalla obligatorio al alejarse del puesto.
-
-#### 4. Acceso remoto
+#### 3. Acceso remoto
 
 La VPN se otorga sólo a quienes necesitan operar fuera de sitio. Qualis es accesible por VPN —por eso el plazo de 24 horas para abrir un desvío corre también los fines de semana—, pero **Sigma WMS no es accesible remotamente en ningún caso**, ni siquiera para perfiles de Administrador. Es una decisión de diseño, no una limitación técnica.
 
-#### 5. Datos y confidencialidad
+#### 4. Datos y confidencialidad
 
 - La información de stock, lotes y clientes es confidencial por contrato con los laboratorios.
 - **Prohibido sacar fotos en zona operativa** sin autorización escrita de Calidad o Dirección. Esto incluye fotos "para acordarme del procedimiento".
 - Prohibido subir documentación interna a servicios externos (drive personal, herramientas de IA, traductores online).
 - Los pedidos de información de clientes o de terceros se derivan a Dirección Técnica.
 
-#### 6. Tarjeta de acceso físico
+#### 5. Tarjeta de acceso físico
 
 - Se entrega el día 1 y habilita sólo las zonas correspondientes al puesto.
 - El acceso a zona operativa se habilita **después** de la inducción de seguridad (POL-002).
 - El acceso a cámara de congelado requiere además la capacitación específica de trabajo en frío.
-- Tarjeta perdida: avisar el mismo día a Sistemas para bloquearla.
+- Tarjeta perdida: avisar el mismo día a Mesa de Ayuda (interno 100) para bloquearla.
 
-#### 7. Bajas
+#### 6. Bajas
 
 Al egreso de una persona, Sistemas revoca todos los accesos **el último día laborable, al cierre del turno**. People dispara el aviso. Los accesos de terceros y contratistas se revisan trimestralmente.
-
-#### 8. Dónde pedir ayuda
-
-Todo pasa por \#ayuda-sistemas. Nahuel Ferreyra es el Jefe de Sistemas. Para incidentes que frenan operación (Sigma WMS caído, TermoTrack sin registrar) hay teléfono de guardia publicado en la cartelera; Slack no es el canal para eso.
-
-### POL-004 — Jornada, vacaciones y licencias
-
-*POL-004 · version 6.1 · vigente desde 2026-07-01 · propietario: People · audiencia: todos*
-
-#### 1. Jornada
-
-| Sector                               | Horario                       |
-|--------------------------------------|-------------------------------|
-| Administración, Calidad, Sistemas    | 8:30 a 17:30, lunes a viernes |
-| Depósito, turno mañana               | 6:00 a 14:00                  |
-| Depósito, turno tarde                | 14:00 a 22:00                 |
-| Depósito, turno noche (sólo Sarandí) | 22:00 a 6:00                  |
-
-El almuerzo es de 45 minutos y no se computa como trabajado. En depósito la pausa es rotativa para no dejar el piso sin cobertura.
-
-#### 2. Trabajo remoto
-
-Los puestos administrativos y de Calidad pueden trabajar hasta **2 días por semana** desde casa, a acordar con el jefe directo. Restricciones:
-
-- Los martes son **presenciales obligatorios para todos** (es el día de la reunión de Calidad y de la revisión de desvíos).
-- Operaciones, transporte y depósito no tienen modalidad remota por la naturaleza de la tarea.
-- Un analista de QA en período de calificación **no toma días remotos** hasta completarla: la calificación requiere presencia en piso.
-
-#### 3. Registro de asistencia
-
-Se ficha con la tarjeta de acceso al ingreso y al egreso. El olvido de fichada se corrige con el jefe directo dentro de la misma semana; pasada la semana requiere nota a People.
-
-#### 4. Vacaciones
-
-- Se toman por año calendario y se piden con **30 días de anticipación mínima** en Qualis, módulo People.
-- Las aprueba el jefe directo. Si hay superposición dentro del mismo equipo, define el jefe por antigüedad en el puesto.
-- **Diciembre y enero**: como el volumen de despacho es máximo, Operaciones y Transporte tienen cupo limitado (máximo 20 % del equipo simultáneo). Calidad y administración no tienen cupo.
-- Se pueden fraccionar en hasta dos períodos, ninguno menor a 7 días corridos.
-
-El primer año de trabajo, los días de vacaciones se otorgan proporcionalmente al tiempo trabajado, siempre que se hayan cumplido al menos 6 meses en la empresa al 31 de diciembre.
-
-#### 5. Licencias especiales
-
-| Motivo                                                      | Días                               |
-|-------------------------------------------------------------|------------------------------------|
-| Matrimonio                                                  | 10 días corridos                   |
-| Nacimiento de hijo (progenitor no gestante)                 | 5 días corridos                    |
-| Fallecimiento de familiar directo                           | 3 días corridos                    |
-| Fallecimiento de hermano                                    | 1 día                              |
-| Examen (estudios de nivel medio, terciario o universitario) | 2 días por examen, hasta 10 al año |
-| Mudanza                                                     | 1 día por año                      |
-| Donación de sangre                                          | el día de la donación              |
-
-La licencia por examen requiere presentar el comprobante de rendición dentro de las 48 horas de reincorporado. Es la que más se pierde por no presentar el papel.
-
-#### 6. Licencia por enfermedad
-
-- Se avisa al jefe directo **antes del inicio del turno**, por el canal que el jefe indique.
-- A partir del **segundo día consecutivo** se presenta certificado médico.
-- El certificado se carga en Qualis, módulo People, dentro de las 72 horas.
-- Ausencias reiteradas de un día sin certificado se conversan con People; no hay sanción automática.
-
-#### 7. Feriados y guardias
-
-En feriados opera sólo una dotación mínima en Sarandí. La guardia de Dirección Técnica existe todos los días del año: los fines de semana y feriados la cubre Martín Beltrán como DT suplente. El listado de guardias del mes se publica en \#ops-sarandi el último día hábil del mes anterior.
-
-#### 8. Recibos de sueldo
-
-Se publican en Qualis, módulo People, el último día hábil del mes. La consulta sobre liquidación va a Mariana Costas, no al jefe directo.
-
-### POL-005 — Compras, viáticos y reembolsos
-
-*POL-005 · version 3.0 · vigente desde 2026-04-01 · propietario: Administración · audiencia: todos*
-
-#### 1. Principio
-
-Nadie compra por su cuenta y después pide que se lo devuelvan, salvo los casos de reembolso previstos en la sección 4. Toda compra se pide antes, por el circuito.
-
-#### 2. Circuito de compra
-
-1. Quien necesita algo carga una **solicitud de compra** en Qualis, módulo Compras, con descripción, cantidad y justificación.
-2. Aprueba el jefe directo.
-3. Según el monto, aprueba además:
-
-| Monto (ARS, sin IVA) | Aprobación adicional     | Cotizaciones requeridas |
-|----------------------|--------------------------|-------------------------|
-| hasta 150.000        | ninguna                  | 1                       |
-| 150.001 a 800.000    | Gerente del área         | 2                       |
-| 800.001 a 3.000.000  | Gerente + Administración | 3                       |
-| más de 3.000.000     | Dirección General        | 3 + evaluación formal   |
-
-4. Silvina Ortega (Compras) emite la orden de compra. **El proveedor no factura sin número de orden de compra**: una factura sin OC vuelve al proveedor y genera demora de pago.
-
-#### 3. Proveedores críticos
-
-Algunos insumos afectan directamente la calidad del producto y por eso tienen circuito reforzado: cajas isotérmicas, geles refrigerantes, registradores de temperatura, servicios de calibración y el operador de destrucción.
-
-Para estos, además del circuito normal:
-
-- El proveedor tiene que estar en el **registro de proveedores calificados** que mantiene Calidad.
-- Un proveedor nuevo requiere evaluación y aprobación de Aseguramiento de Calidad **antes** de la primera compra, no después.
-- Cambiar de proveedor calificado requiere control de cambios según POL-001.
-
-Comprar un insumo crítico a un proveedor no calificado es desvío mayor, aunque el insumo sea idéntico y más barato.
-
-#### 4. Reembolsos
-
-Se reembolsan gastos pagados de bolsillo sólo en estos casos:
-
-- Viáticos de viaje a los sitios de Córdoba o Mendoza.
-- Traslados por urgencia operativa fuera de horario.
-- Compras de urgencia menores a **50.000 ARS** autorizadas por escrito (mail o Slack sirve) por un gerente antes de hacerlas.
-
-Requisitos: comprobante fiscal a nombre de Rumbo Sur Logística S.A., carga en Qualis dentro de los **15 días corridos** del gasto, y aprobación del jefe. Pasados los 15 días, el reembolso requiere excepción de Administración.
-
-#### 5. Viáticos
-
-| Concepto                           | Tope                                                            |
-|------------------------------------|-----------------------------------------------------------------|
-| Comida, día completo fuera de sede | equivalente a 2 comidas, con comprobante                        |
-| Alojamiento                        | según tarifa acordada por Administración con hoteles convenidos |
-| Traslado                           | pasaje en clase económica o kilometraje según tabla vigente     |
-
-El viaje se autoriza antes en Qualis. Los hoteles convenidos se reservan a través de Administración, no por cuenta propia.
-
-#### 6. Pagos
-
-- Los pagos a proveedores se hacen los **martes y los jueves**.
-- Los reembolsos a empleados se liquidan con el sueldo del mes siguiente a la aprobación.
-- Las consultas de estado de pago van a Administración por correo, no por Slack.
 
 ### POL-006 — Capacitación y calificación del personal
 
@@ -998,8 +794,8 @@ Todo ingresante hace, en la primera semana:
 | Inducción general a la empresa                         | People                   | —                               |
 | Seguridad e higiene (POL-002)                          | Gastón Ruiz              | primer ingreso a zona operativa |
 | Buenas Prácticas de Distribución y Política de Calidad | Aseguramiento de Calidad | cualquier tarea sobre producto  |
-| Uso de Sigma WMS, nivel consulta                       | Sistemas                 | alta de usuario                 |
-| Confidencialidad y uso de sistemas (POL-003)           | Sistemas                 | alta de usuario                 |
+| Uso de Sigma WMS, nivel consulta                       | Mesa de Ayuda            | alta de usuario                 |
+| Confidencialidad y uso de sistemas (POL-003)           | Mesa de Ayuda            | alta de usuario                 |
 
 #### 4. Calificación por puesto
 
@@ -1058,7 +854,7 @@ El mismo día 1, en la inducción con People. Pero la tarjeta **no habilita el m
 
 #### Tengo usuario de correo y Slack pero no puedo entrar a Sigma WMS. ¿Es normal?
 
-Sí, y es el problema más común de la primera semana. Correo, Slack y Qualis se crean solos con el alta del legajo. **Sigma WMS y TermoTrack los tiene que pedir tu jefe directo** por formulario en Qualis, y tardan 48 horas hábiles. Si pasaron 48 horas hábiles desde que tu jefe lo pidió, escribí a \#ayuda-sistemas.
+Sí, y es el problema más común de la primera semana. **Sigma WMS y TermoTrack no son automáticos: hay que pedirlos** a Mesa de Ayuda (interno 100), indicando tu área, y tardan 48 horas hábiles. Si pasaron 48 horas hábiles desde el pedido, volvé a llamar al interno 100.
 
 #### ¿Cómo sé qué POEs tengo que leer?
 
@@ -1080,10 +876,6 @@ A las de 2–8 °C sí, acompañado, con campera térmica y una vez hecha la ind
 
 No. Está prohibido sacar fotos en zona operativa sin autorización escrita de Calidad o Dirección (POL-003). Tomá nota en papel o en tu notebook.
 
-#### ¿Puedo trabajar desde casa?
-
-Los puestos administrativos y de Calidad tienen hasta 2 días por semana, pero **no durante el período de calificación**: hasta que completes la matriz, es todo presencial. Y los martes son presenciales para todos, siempre.
-
 #### Me equivoqué en algo. ¿Lo reporto o lo arreglo y listo?
 
 Lo reportás. Abrir un desvío en Qualis no tiene ninguna consecuencia para vos, y ocultarlo sí. Cualquier persona puede abrir un desvío sobre cualquier cosa, sin pedir permiso. Está en POE-CAL-004.
@@ -1091,14 +883,6 @@ Lo reportás. Abrir un desvío en Qualis no tiene ninguna consecuencia para vos,
 #### Vi algo raro en una cámara pero no estoy seguro de que sea un problema.
 
 Avisá igual. En \#alertas-termotrack o directamente a Daniela Foglia. La cultura acá es que un falso positivo no cuesta nada y un falso negativo cuesta un lote.
-
-#### ¿Cuándo cobro y dónde veo el recibo?
-
-Los recibos se publican en Qualis, módulo People, el último día hábil del mes. Las consultas de liquidación van a Mariana Costas.
-
-#### ¿Cuándo puedo tomarme vacaciones?
-
-Se piden con 30 días de anticipación en Qualis. El primer año se otorgan proporcionales al tiempo trabajado, siempre que llegues con 6 meses cumplidos al 31 de diciembre. Detalle en POL-004.
 
 #### ¿Hay algo que definitivamente NO tengo que hacer en mi primera semana?
 
@@ -1176,9 +960,9 @@ Este manual cubre las operaciones más frecuentes. El manual completo del provee
 
 #### 1. Ingreso
 
-Sigma WMS se accede desde sigma.rumbosur.local, sólo desde la red de cada sitio. **No hay acceso remoto ni por VPN**, por decisión de política (POL-003). Si necesitás consultar algo desde afuera, pedile a alguien en sitio o esperá.
+Sigma WMS se accede desde sigma.farmalogsur.local, sólo desde la red de cada sitio. **No hay acceso remoto ni por VPN**, por decisión de política (POL-003). Si necesitás consultar algo desde afuera, pedile a alguien en sitio o esperá.
 
-El usuario es tu usuario de red. Si te bloqueaste, \#ayuda-sistemas.
+El usuario es tu usuario de red. Si te bloqueaste, llamá a Mesa de Ayuda (interno 100).
 
 #### 2. Estados de lote
 
