@@ -13,12 +13,25 @@ from onboarding.agents.prompts import load_prompt
 Relation = Literal["knows_about", "introduced", "belongs_to", "owns_process"]
 
 # corpus/ está en la raíz del repo, tanto local como en Docker (/app/corpus)
-ORGANIGRAMA = Path(__file__).resolve().parents[4] / "corpus" / "organigrama.md"
+CORPUS = Path(__file__).resolve().parents[4] / "corpus"
+ORGANIGRAMA = CORPUS / "organigrama.md"
 
 
 @lru_cache
 def _organigrama() -> str:
     return ORGANIGRAMA.read_text(encoding="utf-8")
+
+
+@lru_cache
+def _procedimientos() -> str:
+    # Todo el corpus menos el organigrama (va aparte) y el README (no es un
+    # documento de la empresa, explica cómo escribir el corpus).
+    excluidos = {"README.md", ORGANIGRAMA.name}
+    documentos = sorted(p for p in CORPUS.glob("*.md") if p.name not in excluidos)
+    return "\n".join(
+        f'<documento nombre="{p.name}">\n{p.read_text(encoding="utf-8")}\n</documento>'
+        for p in documentos
+    )
 
 
 # Lo que tiene que devolver el modelo, como JSON Schema: los mismos campos que
@@ -63,9 +76,13 @@ def extract_triples(text: str, model: BaseChatModel) -> list[KnowledgeTriple]:
     # json_schema: el proveedor restringe la salida al esquema. Con function_calling
     # los modelos chicos (qwen2.5 7B en Ollama) inventan sus propios argumentos.
     extractor = model.with_structured_output(_SCHEMA, method="json_schema")
-    # El organigrama va con el prompt: sin verlo, el modelo no puede saber qué
-    # relaciones ya están escritas ahí y tiene que descartar.
-    system = f"{load_prompt('extract_knowledge')}\n<organigrama>\n{_organigrama()}\n</organigrama>"
+    # El organigrama y los procedimientos van con el prompt: sin verlos, el modelo
+    # no puede saber qué relaciones ya están escritas y tiene que descartar.
+    system = (
+        f"{load_prompt('extract_knowledge')}\n"
+        f"<organigrama>\n{_organigrama()}\n</organigrama>\n"
+        f"<procedimientos>\n{_procedimientos()}\n</procedimientos>"
+    )
     salida = extractor.invoke([SystemMessage(system), HumanMessage(text)])
     # Nada de deducir: si la frase de respaldo no está en el texto, el modelo la
     # inventó o la parafraseó, y la relación no va al grafo.
