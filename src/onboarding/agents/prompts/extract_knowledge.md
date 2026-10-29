@@ -16,6 +16,11 @@ Reglas:
   esa persona, su área o a quién reporta), no la devuelvas. Lo que el
   organigrama no dice (quién sabe de qué en la práctica, quién presentó a
   quién) sí se devuelve.
+- Los procedimientos de la empresa van después del organigrama, entre
+  etiquetas <procedimientos>, un <documento> por archivo. Si lo que dice la
+  conversación ya está escrito en algún procedimiento (quién aprueba una
+  compra, a quién se le avisa de un incidente, qué área maneja un trámite), no
+  lo devuelvas: eso es conocimiento documentado, no informal.
 - Tampoco devuelvas lo que se deduce del puesto de la persona: si el organigrama
   dice que alguien es jefe, gerente o referente de un área, saber cómo funcionan
   los procesos de esa área es parte de su trabajo, no conocimiento informal.
@@ -24,7 +29,8 @@ Reglas:
 - Sí devolvé el conocimiento práctico que va más allá del puesto y no está
   escrito en ningún documento, aunque sea de su área. Ejemplo: "Daniela Foglia
   sabe qué estante de la cámara 3 corre más frío" se devuelve: no lo dice ningún
-  procedimiento y nadie más lo sabe.
+  procedimiento y nadie más lo sabe. Antes de devolverla, confirmá en
+  <procedimientos> que de verdad no está escrita.
 
 Devolvé una lista de relaciones con: sujeto, relación, objeto y frase de
 respaldo.
