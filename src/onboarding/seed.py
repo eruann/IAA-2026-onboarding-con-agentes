@@ -37,13 +37,14 @@ def load_yaml(name: str) -> list[dict]:
 
 
 def _load_game_data(session: Session, people: list[dict], quests: list[dict]) -> None:
-    people_by_name = {person.name: person for person in session.scalars(select(Person)).all()}
+    people_by_key = {person.key: person for person in session.scalars(select(Person)).all()}
     for data in people:
-        person = people_by_name.get(data["name"])
+        person = people_by_key.get(data["key"])
         if person is None:
-            person = Person(name=data["name"], role=data["role"], area=data["area"])
+            person = Person(key=data["key"])
             session.add(person)
-            people_by_name[person.name] = person
+            people_by_key[person.key] = person
+        person.name = data["name"]
         person.role = data["role"]
         person.area = data["area"]
         person.is_newcomer = data["is_newcomer"]

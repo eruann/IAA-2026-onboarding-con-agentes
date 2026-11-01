@@ -20,6 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "people",
         sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("key", sa.String(length=80), nullable=False, unique=True),
         sa.Column("slack_user_id", sa.String(length=64), nullable=True),
         sa.Column("name", sa.String(length=160), nullable=False),
         sa.Column("role", sa.String(length=160), nullable=False),

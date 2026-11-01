@@ -28,6 +28,9 @@ class Person(Base):
     __tablename__ = "people"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    # Clave natural de data/people.yaml: el seed actualiza por acá y el grafo
+    # usa la misma para referirse a la persona.
+    key: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     slack_user_id: Mapped[str | None] = mapped_column(String(64), unique=True)
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     role: Mapped[str] = mapped_column(String(160), nullable=False)
