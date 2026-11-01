@@ -540,7 +540,7 @@ flowchart LR
       QUESTS["<b>quests</b><br/>key · points · approver"]
       ASSIGN["<b>quest_assignments</b><br/>status · completed_at"]
       EVID["<b>evidence</b><br/>text · url"]
-      APPR["<b>approvals</b><br/>approved_by · decision<br/>decided_at"]
+      APPR["<b>approvals</b><br/>approved_by · approver_type<br/>decision · decided_at"]
       REDEEM["<b>redemptions</b><br/>reward_key · points_spent"]
     end
 
