@@ -1,4 +1,4 @@
-# Set fijo de 15-20 preguntas típicas de un ingresante, con respuesta conocida
+# Set fijo de preguntas típicas de un ingresante (hoy 28), con respuesta conocida
 # en el corpus. Se define ANTES de correr el experimento.
 #
 # expected_document / expected_section: dónde está la respuesta. Es lo que se usa
@@ -16,9 +16,10 @@
 #
 # LIMITACIÓN CONOCIDA: expected_section no se puede medir todavía para ninguna
 # pregunta — chunk_text corta por tamaño (1200 caracteres), no por encabezado
-# `##`, y ningún documento del corpus llega a ese límite, así que cada uno
-# queda como un solo fragmento sin distinción de sección. Se arregla en un
-# PR aparte, mejorando el chunker para que corte respetando encabezados.
+# `##`, y no guarda la sección de cada fragmento. Los documentos cortos quedan
+# en un solo fragmento con todas sus secciones, y los largos (tesoreria.md,
+# glosario.md, sigma-wms.md, ...) se parten mezclando secciones. Se arregla en
+# el issue #16: cortar respetando encabezados y guardar la sección.
 
 # recorrido: preguntas-eval
 - id: compras-001
