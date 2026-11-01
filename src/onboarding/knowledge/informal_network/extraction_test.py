@@ -5,6 +5,7 @@ evidencia y el contexto que recibe), no la calidad de la extracción. Eso se mid
 en eval/.
 """
 
+import pytest
 from langchain_core.messages import SystemMessage
 
 from onboarding.knowledge.informal_network.extraction import KnowledgeTriple, extract_triples
@@ -77,3 +78,12 @@ def test_el_prompt_lleva_organigrama_y_procedimientos() -> None:
     assert '<documento nombre="compras.md">' in system.content
     assert '<documento nombre="README.md">' not in system.content
     assert '<documento nombre="organigrama.md">' not in system.content
+
+
+def test_sin_modelo_usa_el_del_proyecto(monkeypatch: pytest.MonkeyPatch) -> None:
+    modelo = _ModeloFijo({"triples": [_triple("Para Excel avanzado, preguntale a Diego.")]})
+    monkeypatch.setattr(
+        "onboarding.knowledge.informal_network.extraction.get_chat_model", lambda: modelo
+    )
+
+    assert len(extract_triples(TEXTO)) == 1

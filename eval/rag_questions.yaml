@@ -153,7 +153,7 @@
   expected_section: Ventana de despacho
   expected_answer_contains: 2 horas
 
-- id: seguridad-001
+- id: seguridad-higiene-001
   question: ¿Cuánto tiempo seguido puedo trabajar dentro de la cámara de congelado?
   expected_document: seguridad-e-higiene.md
   expected_section: Trabajo en cámara de congelado

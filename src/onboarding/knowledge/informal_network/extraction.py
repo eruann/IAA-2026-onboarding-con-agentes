@@ -9,6 +9,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from onboarding.agents.prompts import load_prompt
+from onboarding.llm import get_chat_model
 
 Relation = Literal["knows_about", "introduced", "belongs_to", "owns_process"]
 
@@ -72,7 +73,10 @@ class KnowledgeTriple:
 
 
 # recorrido: extraccion
-def extract_triples(text: str, model: BaseChatModel) -> list[KnowledgeTriple]:
+def extract_triples(text: str, model: BaseChatModel | None = None) -> list[KnowledgeTriple]:
+    # Sin modelo explícito, el del proyecto (regla 5). Pasar uno sirve para probar
+    # con otro modelo o, en los tests, con uno de salida fija.
+    model = model or get_chat_model()
     # json_schema: el proveedor restringe la salida al esquema. Con function_calling
     # los modelos chicos (qwen2.5 7B en Ollama) inventan sus propios argumentos.
     extractor = model.with_structured_output(_SCHEMA, method="json_schema")
