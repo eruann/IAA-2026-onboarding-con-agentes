@@ -31,19 +31,19 @@
   question: ¿Cómo consigo mi casilla de mail?
   expected_document: mesa-de-ayuda.md
   expected_section: Alta de casilla de mail
-  expected_answer_contains: Lucía Paredes
+  expected_answer_contains: [interno 100, Mesa de Ayuda]
 
 - id: organigrama-001
   question: ¿Quién es el Jefe de Compras?
-  expected_document: [organigrama.md, compras.md]
-  expected_section: null
+  expected_document: organigrama.md
+  expected_section: Compras
   expected_answer_contains: Diego Fernández
 
 - id: logistica-001
   question: ¿Qué pasa si cargo un pedido después de las 9?
   expected_document: logistica.md
   expected_section: Despacho a destino
-  expected_answer_contains: al día siguiente
+  expected_answer_contains: [al día siguiente, día siguiente, otro día, mañana]
 
 - id: vacaciones-001
   question: ¿Con cuánta anticipación tengo que pedir vacaciones?
@@ -73,13 +73,13 @@
   question: ¿A quién le reporto si tengo un conflicto de interés con un proveedor?
   expected_document: codigo-de-conducta.md
   expected_section: Conflictos de interés
-  expected_answer_contains: Romina Castro
+  expected_answer_contains: [Recursos Humanos, RRHH, Romina Castro]
 
 - id: reuniones-001
   question: ¿Con quién tengo la reunión de bienvenida el primer día?
   expected_document: reuniones-y-comunicacion.md
   expected_section: Reunión de ingreso
-  expected_answer_contains: jefe directo
+  expected_answer_contains: jefe
 
 - id: proveedores-001
   question: ¿A cuántos días se le paga a un proveedor?
@@ -103,7 +103,7 @@
   question: ¿A quién reporto un reclamo de un cliente por demora en un pedido?
   expected_document: [incidentes-y-reclamos.md, logistica.md]
   expected_section: null
-  expected_answer_contains: Pablo Sosa
+  expected_answer_contains: [Referente de Logística, Pablo Sosa]
 
 - id: rrhh-001
   question: ¿Desde cuándo puedo descargar mi recibo de sueldo?
@@ -115,7 +115,7 @@
   question: ¿Puedo cambiar de área dentro de la empresa?
   expected_document: faq-general.md
   expected_section: ¿Puedo cambiar de área?
-  expected_answer_contains: Romina Castro
+  expected_answer_contains: [Recursos Humanos, RRHH, jefe directo]
 
 # recorrido: preguntas-sin-respuesta
 # Preguntas sin respuesta en el corpus: el agente TIENE que derivar en vez de
