@@ -13,7 +13,9 @@ orden:
 3. **Entendé cómo está armado**: [docs/diagramas.md](docs/diagramas.md). Empezá
    por el diagrama 2 (módulos y dependencias) y el 3 (el grafo de LangGraph, el
    orquestador). Con esos dos se entiende dónde encaja tu parte.
-4. **Buscá tu rol** en la tabla de abajo y mirá sus carpetas.
+4. **Buscá tu rol** en la tabla de abajo y mirá sus carpetas. Para probar lo
+   que construís, tu rol tiene un taller en `/ui`: cómo se arma en
+   [docs/talleres.md](docs/talleres.md).
 5. **Leé cómo se trabaja** (más abajo) antes de abrir tu primer PR.
 
 ## Primer día: qué pedir y qué no

@@ -89,8 +89,8 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     aprobado (no estás en modo plan y no hay un plan aceptado en la
     conversación), no edites todavía: contá en pocas líneas qué vas a hacer, qué
     archivos tocás y por qué, sugerile el modo plan (Claude Code: `Shift+Tab`;
-    Codex: `/plan`) y esperá su OK. El equipo está aprendiendo: tiene que
-    entender el cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
+    Codex: `/plan`) y esperá su OK. La idea es que quien pide entienda el
+    cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
 
 ## Talleres (interfaz `/ui`)
 
@@ -99,6 +99,13 @@ chat con su agente y pruebas directas de sus funciones, con selector de modelo
 ([ADR 0009](docs/adr/0009-interfaz-nicegui-y-talleres.md)). Cada taller se
 declara en un `workshop.py` de la carpeta del rol (hoy:
 `knowledge/informal_network/workshop.py`); su guía es el `LEEME.md` de al lado.
+
+**Guía completa para el equipo: [docs/talleres.md](docs/talleres.md)** (campos
+del `Workshop`, tipos de parámetro y cómo se dibujan, cómo se muestra el
+resultado, taller nuevo). Si alguien pregunta cómo armar o configurar su taller,
+partí de esa guía y confirmalo en el código (`onboarding/workshop.py` y
+`ui/tool_form.py`); si no coinciden, gana el código y corregí la guía en el
+mismo PR. Si cambiás cómo funcionan los talleres, actualizá la guía.
 
 Para sumar una prueba a un taller:
 
