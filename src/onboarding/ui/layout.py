@@ -126,6 +126,7 @@ def sidebar(
             label="Modelo",
             value=model_index,
             on_change=cambiar_modelo,
+            with_input=True,  # filtra mientras escribís
         ).classes("w-full")
         if catalog.notes:
             # Problemas del .env o de los proveedores (modelos que faltan, Ollama

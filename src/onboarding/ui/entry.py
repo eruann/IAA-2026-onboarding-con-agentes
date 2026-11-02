@@ -81,6 +81,7 @@ async def entry() -> None:
                 options,
                 label="¿Quién sos?",
                 value=prefs.get("person") if prefs.get("person") in by_key else None,
+                with_input=True,  # filtra mientras escribís
             ).classes("w-full")
             # Provisorio: hasta que se sepa quién es jefe de quién (ver game/people.py)
             as_manager = ui.checkbox("Entrar como jefe", value=bool(prefs.get("as_manager")))
