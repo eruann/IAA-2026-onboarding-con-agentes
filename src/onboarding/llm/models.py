@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Tabla de llamadas al modelo: base del costo por ingresante."""
 
 from datetime import UTC, datetime

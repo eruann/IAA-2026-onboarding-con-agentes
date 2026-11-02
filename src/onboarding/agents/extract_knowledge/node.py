@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Nodo de la red informal. Titular: rol Grafo cultural y datos.
 
 Lee un texto y saca relaciones "quién sabe qué" con `extract_triples`, la función

@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 # recorrido: tablas-grafo
 """Tablas de la red informal. Titular: rol Grafo cultural y datos.
 

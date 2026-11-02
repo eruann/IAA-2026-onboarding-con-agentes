@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Montaje de Slack dentro de FastAPI: un solo endpoint para todo.
 
 Ahí entran eventos, slash commands y clics en botones. La Request URL que se

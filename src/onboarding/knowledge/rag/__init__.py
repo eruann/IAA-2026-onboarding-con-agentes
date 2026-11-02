@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Lo escrito: ingesta, búsqueda y verificación de citas.
 
 Parte de la knowledge layer. Titular: rol RAG y evaluación.

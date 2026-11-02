@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Formulario automático para una prueba de un taller.
 
 Lee la firma de la función (`describe_params`) y arma un campo por parámetro.

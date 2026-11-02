@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Lineage del grafo: qué nodos hay, cómo se conectan y qué usa cada uno.
 
 Genera `agents/grafo.json` leyendo el código, sin ejecutar los nodos:

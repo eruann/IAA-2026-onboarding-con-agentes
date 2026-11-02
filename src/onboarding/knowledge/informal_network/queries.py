@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Consultas al grafo. Es lo que alimenta las misiones y las derivaciones."""
 
 

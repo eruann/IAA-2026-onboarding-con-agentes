@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Dial de tono: de checklist seria a mapa con avatares.
 
 Cada empresa elige dónde pararse. El tono cambia los textos, nunca las reglas

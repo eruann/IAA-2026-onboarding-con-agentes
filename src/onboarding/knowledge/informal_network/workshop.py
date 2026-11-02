@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Taller del rol Grafo cultural y datos.
 
 Lo mismo que tenía el primer prototipo de interfaz (PR #15): un chat con el

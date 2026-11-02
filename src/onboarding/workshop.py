@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Talleres: dónde cada rol prueba sus cosas desde la interfaz web.
 
 Cada rol declara su taller en un `workshop.py` de su carpeta: a qué agente le

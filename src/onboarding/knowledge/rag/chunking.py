@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Partido de documentos en fragmentos.
 
 Implementación inicial a propósito simple: corta por párrafos y junta hasta

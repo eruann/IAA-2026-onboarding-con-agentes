@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Registro de modelos para Alembic.
 
 Si tu área agrega tablas, importá acá su módulo `models` para que

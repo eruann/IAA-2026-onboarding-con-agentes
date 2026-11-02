@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Nodos del grafo que todavía no tienen carpeta propia.
 
 Cuando un rol empieza a trabajar su agente, lo pasa a `agents/<nodo>/` (como

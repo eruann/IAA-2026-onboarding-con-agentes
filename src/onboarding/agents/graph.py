@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Grafo de LangGraph: misión → responder → validar evidencia → extraer conocimiento.
 
 Por ahora el router manda cada intención a su nodo. Cuando los nodos se

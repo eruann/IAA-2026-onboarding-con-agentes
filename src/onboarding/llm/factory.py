@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Un único lugar donde se elige el modelo.
 
 Cambiar de modelo es cambiar `LLM_MODEL` en el entorno; cambiar de proveedor es

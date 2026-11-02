@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """App de Bolt en modo Events API.
 
 `process_before_response=True` es obligatorio en este modo: Bolt corre el

@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Documentos del corpus enteros, para meterlos en el prompt.
 
 Solución transitoria hasta que exista `retrieve`: así respondía el primer chat

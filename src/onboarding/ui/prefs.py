@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Preferencias de quien usa la interfaz, guardadas en su navegador (localStorage).
 
 Nombre, modelo elegido y modo oscuro. Viven en el navegador y no en el servidor:

@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Interfaz web (NiceGUI), montada en la misma app FastAPI bajo /ui.
 
 Un solo proceso y un solo servicio en Render: la API, el panel, Slack y esta

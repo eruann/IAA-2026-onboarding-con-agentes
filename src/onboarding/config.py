@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Configuración del sistema. Único lugar donde se leen variables de entorno."""
 
 from functools import lru_cache
