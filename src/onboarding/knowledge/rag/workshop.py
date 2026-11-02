@@ -54,6 +54,11 @@ def _expected(question: dict) -> list[str]:
     return [expected] if isinstance(expected, str) else list(expected)
 
 
+def _row(cells: tuple[str, ...]) -> str:
+    """Una fila de tabla Markdown. Un "|" dentro de una celda la partiría en dos."""
+    return "| " + " | ".join(str(cell).replace("|", "\\|") for cell in cells) + " |"
+
+
 def evaluate_retrieval(k: int = 5) -> str:
     """Corre las preguntas de eval/rag_questions.yaml contra `retrieve` y mide si
     trae el documento correcto. Solo el retrieval: no llama al modelo."""
@@ -78,10 +83,14 @@ def evaluate_retrieval(k: int = 5) -> str:
             hit = relevant > 0
             hits += hit
             result = "✅" if hit else "❌"
-        rows.append(
-            f"| {question['id']} | {question['question']} | {', '.join(expected) or '—'} "
-            f"| {', '.join(dict.fromkeys(found)) or '—'} | {result} |"
+        cells = (
+            question["id"],
+            question["question"],
+            ", ".join(expected) or "—",
+            ", ".join(dict.fromkeys(found)) or "—",
+            result,
         )
+        rows.append(_row(cells))
 
     answerable = len(precisions)
     recall = hits / answerable if answerable else 0.0

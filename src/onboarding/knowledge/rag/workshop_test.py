@@ -70,3 +70,17 @@ def test_avisa_si_no_esta_el_set_de_preguntas(tmp_path, monkeypatch) -> None:
 
     with pytest.raises(FileNotFoundError, match="imagen de desarrollo"):
         evaluate_retrieval()
+
+
+@pytest.mark.usefixtures("questions")
+def test_un_pipe_en_la_pregunta_no_rompe_la_tabla(monkeypatch) -> None:
+    path = workshop.QUESTIONS_FILE
+    path.write_text(
+        "- id: pipe-001\n  question: ¿Uso A | B?\n  expected_document: compras.md\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setitem(FOUND, "¿Uso A | B?", ["compras.md"])
+
+    row = next(line for line in evaluate_retrieval().splitlines() if "pipe-001" in line)
+
+    assert row == "| pipe-001 | ¿Uso A \\| B? | compras.md | compras.md | ✅ |"
