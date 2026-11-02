@@ -12,7 +12,7 @@ from langchain_core.language_models import BaseChatModel, FakeListChatModel
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
-from onboarding.config import Settings, get_settings
+from onboarding.config import LLMProvider, Settings, get_settings
 from onboarding.llm.callbacks import UsageLogger
 
 # Respuestas del proveedor `fake`: determinísticas, sin red ni costo.
@@ -24,10 +24,17 @@ FAKE_RESPONSES = ["[fake] respuesta de prueba"]
 def get_chat_model(
     settings: Settings | None = None,
     *,
+    provider: LLMProvider | None = None,
+    model: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 1024,
 ) -> BaseChatModel:
+    """`provider` y `model` pisan a LLM_PROVIDER y LLM_MODEL para esta llamada: así
+    la interfaz deja elegir o comparar modelos sin tocar el .env. Las keys y las
+    URLs siguen saliendo de la configuración."""
     settings = settings or get_settings()
+    if provider is not None:
+        settings = settings.model_copy(update={"llm_provider": provider})
 
     if settings.llm_provider == "fake":
         return FakeListChatModel(responses=FAKE_RESPONSES)
@@ -44,7 +51,7 @@ def get_chat_model(
         base_url = settings.openai_compat_base_url
 
     return ChatOpenAI(
-        model=settings.llm_model,
+        model=model or settings.llm_model,
         base_url=base_url,
         api_key=api_key,
         temperature=temperature,

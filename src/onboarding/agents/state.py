@@ -1,6 +1,9 @@
 """Estado que viaja por el grafo."""
 
-from typing import Literal, TypedDict
+from typing import Annotated, Literal, TypedDict
+
+from langchain_core.messages import AnyMessage
+from langgraph.graph.message import add_messages
 
 Intent = Literal[
     "generate_quest",  # armar una misión para un rol
@@ -13,9 +16,12 @@ Intent = Literal[
 # recorrido: estado-grafo
 class OnboardingState(TypedDict, total=False):
     intent: Intent
-    # Quién habla (id de Slack) y en qué empresa/rol está
+    # Quién habla (id de Slack), cómo se llama y en qué empresa/rol está
     actor_id: str
+    actor_name: str
     role: str
+    # Conversación previa. add_messages las acumula en vez de pisarlas.
+    messages: Annotated[list[AnyMessage], add_messages]
     # Texto de entrada (pregunta, evidencia, mensaje del jefe)
     input: str
     # Salida para el usuario y de dónde salió

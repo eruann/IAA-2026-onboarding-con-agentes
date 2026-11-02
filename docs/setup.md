@@ -174,14 +174,87 @@ Tres formas de trabajar sin gastar nada:
 | Modelos `:free` de OpenRouter | Probar el circuito real con tu propia cuenta, sin saldo (`meta-llama/...:free`, por ejemplo). Tienen límite de uso por día |
 | Ollama local | Modelo abierto en tu máquina, sin cuenta ni internet. Pide RAM y anda más lento |
 
-Ollama:
+### Ollama local
+
+Conviene instalarlo **en tu máquina**, no en Docker: así usa tu placa de video
+(NVIDIA en Linux y Windows, la de Apple en Mac). En Docker, en Mac nunca tiene
+GPU, y en Linux necesita instalar aparte `nvidia-container-toolkit`.
+
+La idea es que **no quede corriendo siempre**: se levanta cuando lo vas a usar y
+se apaga con Ctrl+C.
+
+**Linux**
 
 ```bash
-docker compose --profile local-llm up ollama
-docker compose exec ollama ollama pull qwen2.5:7b
+curl -fsSL https://ollama.com/install.sh | sh   # instala (pide sudo)
+sudo systemctl disable --now ollama             # que no arranque solo
 ```
 
-y en `.env`: `LLM_PROVIDER=openai_compat`, `LLM_MODEL=qwen2.5:7b`.
+Cada vez que lo quieras usar, en una terminal aparte:
+
+```bash
+OLLAMA_HOST=0.0.0.0 OLLAMA_CONTEXT_LENGTH=16384 ollama serve
+```
+
+- `OLLAMA_HOST=0.0.0.0` hace falta para que la app, que corre en Docker, lo vea.
+- `OLLAMA_CONTEXT_LENGTH=16384`: sin esto Ollama usa 4096 tokens y **recorta el
+  prompt** sin avisar (el chat manda documentos enteros y se pierden).
+
+Si tenés firewall (`ufw`), habilitá el puerto solo para las redes de Docker, así
+no queda abierto al resto de la red (una sola vez):
+
+```bash
+sudo ufw allow from 172.16.0.0/12 to any port 11434 proto tcp comment 'Ollama para Docker'
+```
+
+**Windows**
+
+1. Bajá el instalador de <https://ollama.com/download> y ejecutalo.
+2. Para que no arranque solo: Administrador de tareas → **Aplicaciones de
+   inicio** → Ollama → **Deshabilitar**. Si está corriendo, cerralo desde el
+   ícono de la bandeja (clic derecho → *Quit Ollama*).
+3. Cada vez que lo quieras usar, en PowerShell:
+
+```powershell
+$env:OLLAMA_CONTEXT_LENGTH="16384"; ollama serve
+```
+
+`OLLAMA_CONTEXT_LENGTH`: sin esto Ollama usa 4096 tokens y recorta el prompt sin
+avisar. Con Docker Desktop no hace falta `OLLAMA_HOST`: la app lo encuentra en
+`host.docker.internal`. Si no aparece en la interfaz, sumá
+`$env:OLLAMA_HOST="0.0.0.0";` antes de `ollama serve`.
+
+**Bajar un modelo (una vez, con `ollama serve` corriendo)**
+
+```bash
+ollama pull gemma3:4b
+```
+
+`gemma3:4b` pesa unos 3,3 GB y anda en una notebook, pero es un modelo chico:
+con documentos largos a veces confunde datos (los modelos `:free` grandes de
+OpenRouter responden mejor). `ollama list` muestra los que tenés.
+
+**Conectarlo con la app**, en tu `.env` (igual en Linux y Windows):
+
+```
+OPENAI_COMPAT_BASE_URL=http://host.docker.internal:11434/v1
+```
+
+y reiniciá la app (`docker compose up`). Con Ollama corriendo, sus modelos
+aparecen en el selector de modelo de la interfaz (`/ui`), al lado de los de
+OpenRouter. Qué modelos ofrece el selector se elige en el `.env` con dos listas
+JSON, `OPENROUTER_MODELS` y `OLLAMA_MODELS` (ver `.env.example`): se muestran los
+que estén disponibles, y OpenRouter se completa hasta 6 con gratis que razonan. Si además querés que sea el modelo por defecto:
+`LLM_PROVIDER=openai_compat` y `LLM_MODEL=gemma3:4b`.
+
+**Alternativa sin instalar nada** (sin GPU, más lento): el Ollama del compose.
+
+```bash
+docker compose --profile local-llm up -d ollama
+docker compose exec ollama ollama pull gemma3:4b
+```
+
+con `OPENAI_COMPAT_BASE_URL=http://ollama:11434/v1` en el `.env`.
 
 ### Si el equipo cambia de proveedor
 

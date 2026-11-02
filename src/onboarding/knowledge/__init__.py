@@ -16,22 +16,34 @@ Reglas:
     maneja). Se relacionan por clave, sin foreign keys entre sus tablas.
 """
 
-from onboarding.knowledge.informal_network import KnowledgeTriple, who_knows_about
+from onboarding.knowledge.informal_network import WORKSHOP as INFORMAL_NETWORK_WORKSHOP
+from onboarding.knowledge.informal_network import (
+    KnowledgeTriple,
+    extract_triples,
+    who_knows_about,
+)
 from onboarding.knowledge.rag import (
     chunk_text,
     ingest_directory,
     quote_is_supported,
+    read_documents,
     retrieve,
 )
 
+# Talleres de los roles de la capa, para la interfaz (ver onboarding/workshop.py)
+WORKSHOPS = (INFORMAL_NETWORK_WORKSHOP,)
+
 # recorrido: knowledge-interfaz
 __all__ = [
+    "WORKSHOPS",
     # Lo escrito
     "chunk_text",
     "ingest_directory",
     "quote_is_supported",
+    "read_documents",
     "retrieve",
     # Lo no escrito
     "KnowledgeTriple",
+    "extract_triples",
     "who_knows_about",
 ]

@@ -48,9 +48,15 @@ Levantar todo:
 docker compose up --build
 ```
 
-Listo: <http://localhost:8000/health> responde `ok` y el panel del jefe está en
-<http://localhost:8000/panel>. Sin tocar el `.env` el proyecto arranca con el
-proveedor de modelo `fake`: no hace falta ninguna API key para empezar.
+Listo: la interfaz está en <http://localhost:8000/ui>. Ahí cada rol tiene su
+**taller**: un chat con su agente y pruebas de sus funciones, con selector de
+modelo. El panel del jefe está en <http://localhost:8000/panel> y
+<http://localhost:8000/health> responde `ok`.
+
+Sin tocar el `.env` el proyecto arranca con el proveedor de modelo `fake`: no
+hace falta ninguna API key para empezar. Para probar con modelos de verdad sin
+gastar: los gratis de OpenRouter o un modelo local con Ollama (ver
+[docs/setup.md](docs/setup.md#ollama-local)).
 
 ## Comandos
 
@@ -76,7 +82,8 @@ Detalles de instalación, Windows/WSL2 y app de Slack: [docs/setup.md](docs/setu
 
 ## Cómo está hecho
 
-Un solo proceso sirve la API, el panel del jefe y el endpoint de Slack; al lado,
+Un solo proceso sirve la API, la interfaz web (`/ui`), el panel del jefe y el
+endpoint de Slack; al lado,
 Postgres con pgvector guarda documentos, estado del juego y red informal.
 
 El corazón es una **knowledge layer**: todo lo que la organización sabe, lo

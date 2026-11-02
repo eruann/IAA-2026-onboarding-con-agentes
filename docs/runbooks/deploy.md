@@ -65,8 +65,11 @@ cada uno tiene su Postgres local en Docker.
 **Esta key es solo para producción.** Para desarrollar, cada uno usa la suya (o
 `fake`, o un modelo local): ver [setup.md](../setup.md#la-key-es-de-cada-uno).
 
-Con esa key funciona cualquier modelo cambiando `LLM_MODEL`; el default es
-`anthropic/claude-haiku-4.5`. Ver [ADR 0006](../adr/0006-llm-via-openrouter.md).
+Con esa key funciona cualquier modelo cambiando `LLM_MODEL`. El default de
+`render.yaml` es uno gratis (`google/gemma-4-31b-it:free`), y `OPENROUTER_MODELS`
+elige los que ofrece el selector de la interfaz (`/ui`); así la demo anda con una
+key sin saldo. Para usar uno pago, cambiar `LLM_MODEL` y cargarle crédito a la
+key. Ver [ADR 0006](../adr/0006-llm-via-openrouter.md).
 
 ## 3. Render: la aplicación
 

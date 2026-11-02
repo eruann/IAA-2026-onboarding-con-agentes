@@ -40,3 +40,16 @@ def test_openrouter_usa_su_base_url_y_el_modelo_configurado() -> None:
 
     assert model.model_name == "qwen/qwen-2.5-72b-instruct"
     assert "openrouter.ai" in str(model.openai_api_base)
+
+
+def test_el_modelo_y_el_proveedor_se_pueden_elegir_por_llamada() -> None:
+    settings = Settings(
+        llm_provider="fake",
+        openrouter_api_key="sk-test",
+        llm_model="google/gemma-4-31b-it:free",
+    )
+
+    model = get_chat_model(settings, provider="openrouter", model="qwen/qwen3:free")
+
+    assert model.model_name == "qwen/qwen3:free"
+    assert "openrouter.ai" in str(model.openai_api_base)

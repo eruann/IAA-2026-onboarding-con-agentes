@@ -10,6 +10,7 @@ from fastapi import FastAPI
 
 from onboarding.api.routes import health, panel
 from onboarding.config import get_settings
+from onboarding.ui import mount as mount_ui
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,9 @@ def create_app() -> FastAPI:
         # Sin tokens la app arranca igual: quien no trabaja en el bot no
         # necesita una app de Slack para levantar el proyecto.
         logger.warning("Slack deshabilitado: faltan SLACK_BOT_TOKEN y SLACK_SIGNING_SECRET")
+
+    # Interfaz web en /ui (NiceGUI). Va al final: se monta sobre las rutas de arriba.
+    mount_ui(app)
 
     return app
 

@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     openai_compat_base_url: str = "http://ollama:11434/v1"
     openai_compat_api_key: SecretStr | None = SecretStr("ollama")
+    # Modelos que ofrece el selector de la interfaz, como lista JSON en el .env
+    # (ver llm/catalog.py). Vacías: OpenRouter completa con gratis; Ollama, todos.
+    openrouter_models: list[str] = []
+    ollama_models: list[str] = []
 
     # Slack por Events API (HTTP). No se usa Socket Mode: no hay worker aparte.
     slack_bot_token: SecretStr | None = None
@@ -44,6 +48,14 @@ class Settings(BaseSettings):
         # Slack se monta con tokens vacíos y el control de "falta la key" no salta.
         if isinstance(value, str) and not value.strip():
             return None
+        return value
+
+    @field_validator("openrouter_models", "ollama_models", mode="before")
+    @classmethod
+    def empty_list_means_none(cls, value: object) -> object:
+        # `OLLAMA_MODELS=` vacío en el .env no es JSON válido: vale como lista vacía
+        if isinstance(value, str) and not value.strip():
+            return []
         return value
 
     @field_validator("database_url")
