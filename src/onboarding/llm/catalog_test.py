@@ -59,7 +59,7 @@ def test_el_del_env_va_primero_y_no_se_repite(responden) -> None:
     options = catalog.model_catalog(_settings()).options
 
     assert options[0].model == "a/uno:free"
-    assert options[0].label.endswith("(del .env)")
+    assert options[0].label == "a/uno:free · OpenRouter"
     assert "a/uno:free" not in _models(options, "openrouter")
 
 
