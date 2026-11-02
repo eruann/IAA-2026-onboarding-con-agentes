@@ -8,7 +8,7 @@ import pytest
 from langchain_core.language_models import FakeListChatModel
 
 from onboarding.agents import build_graph
-from onboarding.agents.prompts import load_prompt
+from onboarding.llm import load_prompt
 
 
 # recorrido: tests-grafo

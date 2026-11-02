@@ -4,14 +4,16 @@
 
 """Carga de prompts.
 
-Los prompts viven en archivos .md al lado de este módulo para que los cambios se
-revisen en el PR igual que el código.
+Los prompts viven en `agents/prompts/*.md` para que los cambios se revisen en el
+PR igual que el código. La carga está acá, junto al modelo, y no en `agents`: así
+la knowledge layer también los usa (la extracción de relaciones) sin depender de
+`agents`, que a su vez depende de la capa.
 """
 
 from functools import lru_cache
 from pathlib import Path
 
-PROMPTS_DIR = Path(__file__).parent / "prompts"
+PROMPTS_DIR = Path(__file__).resolve().parents[1] / "agents" / "prompts"
 
 
 @lru_cache

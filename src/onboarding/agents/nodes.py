@@ -16,9 +16,9 @@ from collections.abc import Callable
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
-from onboarding.agents.prompts import load_prompt
 from onboarding.agents.state import OnboardingState
 from onboarding.knowledge import read_documents
+from onboarding.llm import load_prompt
 
 Node = Callable[[OnboardingState], dict]
 

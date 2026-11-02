@@ -6,5 +6,6 @@
 
 from onboarding.llm.catalog import ModelCatalog, ModelOption, model_catalog
 from onboarding.llm.factory import get_chat_model
+from onboarding.llm.prompts import load_prompt
 
-__all__ = ["ModelCatalog", "ModelOption", "get_chat_model", "model_catalog"]
+__all__ = ["ModelCatalog", "ModelOption", "get_chat_model", "load_prompt", "model_catalog"]

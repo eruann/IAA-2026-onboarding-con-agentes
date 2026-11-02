@@ -18,10 +18,13 @@ docker compose run --rm app alembic upgrade head
 docker compose run --rm app python -m onboarding.agents.lineage  # regenerar agents/grafo.json
 ```
 
-`agents/grafo.json` es el lineage del grafo (nodos, qué usa cada uno, TODOs y
-chequeos de reglas), generado desde el código. Si cambiás un nodo, lo que llama o
-la interfaz de la knowledge layer, regeneralo y commitealo: un test falla si está
-desactualizado, y su diff en el PR muestra qué cambió en la arquitectura.
+`agents/grafo.json` es la arquitectura del grafo (nodos, flechas, qué usa cada
+nodo de la knowledge layer y del modelo), generada desde el código. Si cambiás un
+nodo, lo que llama o la interfaz de la knowledge layer, regeneralo y commitealo:
+un test falla si está desactualizado, y su diff en el PR muestra qué cambió en la
+arquitectura. Lo que cambia con el trabajo de cada rol (TODOs, funciones
+pendientes, quién usa qué, chequeos de reglas) no va al JSON: la interfaz lo
+calcula al abrir el panel.
 
 El repo tiene un hook de pre-commit (`.githooks/pre-commit`) que corre Ruff sobre
 los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
@@ -60,7 +63,7 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
 5. El modelo se obtiene **siempre** de `onboarding.llm.get_chat_model()`. Ningún
    módulo nombra un proveedor ni instancia un cliente.
 6. Los prompts viven en `src/onboarding/agents/prompts/*.md`, no embebidos en el
-   código.
+   código, y se cargan con `onboarding.llm.load_prompt()`.
 7. Función pública nueva, test nuevo. El test va al lado del módulo como
    `<modulo>_test.py` (pytest no reconoce otro nombre). Las fixtures están en
    `src/onboarding/conftest.py`. Los tests no llaman a modelos reales: está el
