@@ -38,9 +38,11 @@ def _rows(value: list) -> list[dict]:
 
 
 def render_result(value: Any) -> None:
-    """Muestra el resultado según su forma: texto, tabla o JSON."""
+    """Muestra el resultado según su forma: texto, sí/no, tabla o JSON."""
     if value is None or value == []:
         ui.label("Sin resultados.").classes("texto-suave italic")
+    elif isinstance(value, bool):
+        ui.label("✅ Sí" if value else "❌ No")
     elif isinstance(value, str):
         ui.markdown(value)
     elif isinstance(value, list) and all(

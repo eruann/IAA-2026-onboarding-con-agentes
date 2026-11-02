@@ -22,6 +22,7 @@ from onboarding.knowledge.informal_network import (
     extract_triples,
     who_knows_about,
 )
+from onboarding.knowledge.rag import WORKSHOP as RAG_WORKSHOP
 from onboarding.knowledge.rag import (
     chunk_text,
     ingest_directory,
@@ -31,7 +32,7 @@ from onboarding.knowledge.rag import (
 )
 
 # Talleres de los roles de la capa, para la interfaz (ver onboarding/workshop.py)
-WORKSHOPS = (INFORMAL_NETWORK_WORKSHOP,)
+WORKSHOPS = (RAG_WORKSHOP, INFORMAL_NETWORK_WORKSHOP)
 
 # recorrido: knowledge-interfaz
 __all__ = [

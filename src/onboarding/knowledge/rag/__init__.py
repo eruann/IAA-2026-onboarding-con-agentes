@@ -8,6 +8,14 @@ from onboarding.knowledge.rag.citations import quote_is_supported
 from onboarding.knowledge.rag.corpus import read_documents
 from onboarding.knowledge.rag.ingest import ingest_directory
 from onboarding.knowledge.rag.retriever import retrieve
+from onboarding.knowledge.rag.workshop import WORKSHOP
 
 # recorrido: rag-interfaz
-__all__ = ["chunk_text", "ingest_directory", "quote_is_supported", "read_documents", "retrieve"]
+__all__ = [
+    "WORKSHOP",
+    "chunk_text",
+    "ingest_directory",
+    "quote_is_supported",
+    "read_documents",
+    "retrieve",
+]
