@@ -22,9 +22,17 @@
 - **¿Quién sabe de?**: aparece como pendiente hasta que lo implementes.
 - **Chat**: el agente de onboarding responde sobre el organigrama y Tesorería.
 
-## Pedidos listos para Claude Code o Codex
+## Cómo pedírselo a Claude Code o Codex: primero el plan
 
-- `Creá las tablas nodes y edges de knowledge/informal_network/models.py con su migración y downgrade.`
-- `Hacé que el nodo agents/extract_knowledge guarde las relaciones en nodes/edges, con test db.`
-- `Implementá who_knows_about() sobre nodes/edges, con test db.`
-- `Agregá a mi taller (knowledge/informal_network/workshop.py) una prueba que muestre la cobertura contra el ground truth.`
+No le pidas que lo haga de una: pedile un **plan** y entendelo antes de
+aprobarlo. Prendé el modo plan (Claude Code: `Shift+Tab` hasta *plan mode*;
+Codex: `/plan`; más detalle en `DEVELOPMENT.md`, "Primero el plan") y pedí, por
+ejemplo:
+
+- `Armame un plan para crear las tablas nodes y edges (informal_network/models.py) con su migración. Explicame cada columna y para qué sirve.`
+- `Armame un plan para que el nodo agents/extract_knowledge guarde las relaciones en nodes/edges. ¿Qué archivos toca y cómo lo pruebo?`
+- `Armame un plan para implementar who_knows_about() sobre nodes/edges. ¿Cómo ordena a las personas y por qué?`
+- `Armame un plan para sumar a mi taller una prueba que muestre la cobertura contra el ground truth.`
+
+Leé el plan, preguntá lo que no entiendas y recién ahí aprobalo. Si no podés
+explicar con tus palabras qué va a cambiar, todavía no lo apruebes.

@@ -85,6 +85,12 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     en producción, la URL de Render. Nunca Socket Mode. Pasos completos:
     [docs/setup.md](docs/setup.md#slack-solo-si-trabajás-en-el-bot) (local) y
     [docs/runbooks/deploy.md](docs/runbooks/deploy.md) (producción).
+13. **Primero el plan.** Si alguien te pide cambiar código y no viene de un plan
+    aprobado (no estás en modo plan y no hay un plan aceptado en la
+    conversación), no edites todavía: contá en pocas líneas qué vas a hacer, qué
+    archivos tocás y por qué, sugerile el modo plan (Claude Code: `Shift+Tab`;
+    Codex: `/plan`) y esperá su OK. El equipo está aprendiendo: tiene que
+    entender el cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
 
 ## Talleres (interfaz `/ui`)
 
@@ -106,6 +112,10 @@ Para sumar una prueba a un taller:
 No hace falta tocar `ui/`: el formulario y la forma de mostrar el resultado
 (texto, tabla o JSON) salen solos. Si la función todavía tira
 `NotImplementedError`, el taller la muestra como pendiente con su archivo.
+
+Los pedidos de ejemplo del `LEEME.md` de cada taller se escriben como pedidos de
+plan ("Armame un plan para…, explicame…"), nunca como órdenes para copiar y
+pegar ("Implementá…").
 
 Un taller nuevo (otro rol): crear su `workshop.py` + `LEEME.md`, exportar
 `WORKSHOP` por la interfaz pública del módulo y sumarlo en
