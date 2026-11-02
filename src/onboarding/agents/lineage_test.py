@@ -1,6 +1,6 @@
 import json
 
-from onboarding.agents.lineage import OUTPUT, _follow, _todos, build_lineage, current_state, render
+from onboarding.agents.lineage import OUTPUT, _todos, build_lineage, current_state, follow, render
 
 # Funciones de ejemplo: así los tests no dependen de lo que hoy tiene cada nodo, que
 # cambia cuando cada rol avanza.
@@ -42,7 +42,7 @@ def test_el_json_guarda_solo_la_arquitectura() -> None:
 
 
 def test_sigue_las_llamadas_hasta_la_capa_y_el_modelo() -> None:
-    found = _follow(node_example, {"knowledge_function": knowledge_function})
+    found = follow(node_example, {"knowledge_function": knowledge_function})
 
     assert found["knowledge"] == {"knowledge_function": ["node_example"]}
     # node_example no llama al modelo directo: lo hace _ask

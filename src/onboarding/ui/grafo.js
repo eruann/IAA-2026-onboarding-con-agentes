@@ -337,9 +337,9 @@ function habilitarZoom(svg) {
 // --- Recorrido de un mensaje ----------------------------------------------------
 
 // Los data-id por los que pasó el mensaje, en orden: nodos y líneas, pasando por
-// el rombo y el tronco cuando los hay.
-function pasosDelRecorrido(flujo, visitados) {
-  const camino = ["__start__", ...visitados, "__end__"];
+// el rombo y el tronco cuando los hay. `hasta` es Fin, o el nodo donde falló.
+function pasosDelRecorrido(flujo, visitados, hasta = "__end__") {
+  const camino = ["__start__", ...visitados, hasta];
   const pasos = [];
   for (let i = 0; i < camino.length - 1; i++) {
     const [a, b] = [camino[i], camino[i + 1]];
@@ -358,18 +358,33 @@ function pasosDelRecorrido(flujo, visitados) {
   return pasos;
 }
 
-// Pinta el recorrido paso a paso, sin redibujar. Si llega otro mensaje mientras
-// se anima, el anterior se corta.
-window.marcarRecorrido = async (destino, visitados) => {
+// Pinta el recorrido paso a paso, sin redibujar. Si el mensaje falló, llega hasta
+// el nodo donde falló y lo marca aparte. Si llega otro mensaje mientras se anima,
+// el anterior se corta.
+window.marcarRecorrido = async (destino, visitados, fallido = null) => {
   const dibujo = dibujos.get(destino);
   if (!dibujo) return;
   const vuelta = ++dibujo.vuelta;
-  for (const el of dibujo.svg.querySelectorAll(".resaltado")) el.classList.remove("resaltado");
-  if (!visitados.length) return;
-  for (const id of pasosDelRecorrido(dibujo.flujo, visitados)) {
+  for (const clase of ["resaltado", "fallido"]) {
+    for (const el of dibujo.svg.querySelectorAll(`.${clase}`)) el.classList.remove(clase);
+  }
+  if (!visitados.length && !fallido) return;
+  const pasos = pasosDelRecorrido(dibujo.flujo, visitados, fallido ?? "__end__");
+  for (const [i, id] of pasos.entries()) {
     if (vuelta !== dibujo.vuelta) return;
-    dibujo.svg.querySelector(`[data-id="${CSS.escape(id)}"]`)?.classList.add("resaltado");
+    const clase = fallido && i === pasos.length - 1 ? "fallido" : "resaltado";
+    dibujo.svg.querySelector(`[data-id="${CSS.escape(id)}"]`)?.classList.add(clase);
     await new Promise((listo) => setTimeout(listo, 220));
+  }
+};
+
+// Marca las funciones de la knowledge layer que usó la última prueba del taller.
+window.marcarUso = (destino, funciones) => {
+  const dibujo = dibujos.get(destino);
+  if (!dibujo) return;
+  for (const el of dibujo.svg.querySelectorAll(".en-uso")) el.classList.remove("en-uso");
+  for (const funcion of funciones) {
+    dibujo.svg.querySelector(`[data-id="${CSS.escape(`k_${funcion}`)}"]`)?.classList.add("en-uso");
   }
 };
 
@@ -383,7 +398,7 @@ async function esperar(id) {
   return null;
 }
 
-window.dibujarGrafo = async (destino, lineage, visitados = []) => {
+window.dibujarGrafo = async (destino, lineage, visitados = [], fallido = null, enUso = []) => {
   const [{ ELK, rough }, contenedor] = await Promise.all([cargar(), esperar(destino)]);
   if (!contenedor) return;
   await document.fonts.load(`17px ${FUENTE}`);
@@ -412,5 +427,6 @@ window.dibujarGrafo = async (destino, lineage, visitados = []) => {
   contenedor.replaceChildren(svg);
   habilitarZoom(svg);
   dibujos.set(destino, { svg, flujo, vuelta: 0 });
-  if (visitados.length) await window.marcarRecorrido(destino, visitados);
+  window.marcarUso(destino, enUso);
+  if (visitados.length || fallido) await window.marcarRecorrido(destino, visitados, fallido);
 };

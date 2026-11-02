@@ -1,6 +1,7 @@
+import pytest
 from langchain_core.language_models import FakeListChatModel
 
-from onboarding.agents import run_turn
+from onboarding.agents import TurnError, run_turn
 
 
 class _ModeloQueAnota(FakeListChatModel):
@@ -38,3 +39,17 @@ def test_conocimiento_recibe_los_documentos_el_nombre_y_la_conversacion() -> Non
         "Federico Medina",
         "¿y quién lo reemplaza?",
     ]
+
+
+class _ModeloQueFalla(FakeListChatModel):
+    def invoke(self, *args, **kwargs):
+        raise RuntimeError("el proveedor no responde")
+
+
+def test_si_falla_dice_en_que_nodo_y_guarda_el_error_original() -> None:
+    with pytest.raises(TurnError) as failure:
+        run_turn("¿Quién es el Jefe de Tesorería?", model=_ModeloQueFalla(responses=["x"]))
+
+    assert failure.value.path == []
+    assert failure.value.failed_node == "answer_question"
+    assert isinstance(failure.value.__cause__, RuntimeError)
