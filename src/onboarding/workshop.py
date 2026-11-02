@@ -33,8 +33,13 @@ from typing import Any, Literal
 
 from langchain_core.language_models import BaseChatModel
 
-# Cómo se dibuja cada parámetro en la interfaz
-ParamKind = Literal["text", "int", "float", "bool", "choice", "model"]
+# Cómo se dibuja cada parámetro en la interfaz. "history" no se dibuja: recibe la
+# conversación del chat del taller.
+ParamKind = Literal["text", "int", "float", "bool", "choice", "model", "history"]
+
+# Tipo para un parámetro que recibe la conversación del chat del taller: una tupla
+# de (quién, texto), con quién = "user" o "assistant".
+ChatHistory = typing.NewType("ChatHistory", tuple)
 
 
 @dataclass(frozen=True)
@@ -56,14 +61,12 @@ class Embed:
 @dataclass(frozen=True)
 class Workshop:
     role: str  # nombre del rol, como en docs/roles.md: es el nombre del taller
-    intent: str  # a qué nodo del grafo va el chat de este taller
+    # A qué nodo del grafo va el chat de este taller. None: decide el coordinador.
+    intent: str | None
     summary: str  # qué construye el rol, en una o dos líneas
     tools: tuple[Tool, ...] = ()
     guide: Path | None = None  # LEEME.md que muestra la interfaz
     embeds: tuple[Embed, ...] = ()  # páginas del rol que se ven dentro del taller
-    # Otros nodos con los que se puede chatear, además de `intent` (el chat muestra
-    # un selector). Para quien trabaja sobre varios nodos, como Agentes.
-    intents: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -84,6 +87,8 @@ def _kind_of(annotation: Any) -> tuple[ParamKind, tuple[Any, ...]]:
         args = [arg for arg in typing.get_args(annotation) if arg is not type(None)]
         if len(args) == 1:
             return _kind_of(args[0])
+    if annotation is ChatHistory:
+        return "history", ()
     if origin is Literal:
         return "choice", typing.get_args(annotation)
     if annotation is bool:
@@ -167,4 +172,4 @@ def all_workshops() -> list[Workshop]:
 
 
 # Roles que todavía no tienen taller: la interfaz los muestra como "próximamente"
-UPCOMING = ("Tech Lead",)
+UPCOMING: tuple[str, ...] = ()

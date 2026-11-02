@@ -18,7 +18,6 @@ sale solo de la firma de la función.
 | Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
 | Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
 | Diseñador de misiones | [`agents/generate_quest/workshop.py`](../src/onboarding/agents/generate_quest/workshop.py) | [`LEEME.md`](../src/onboarding/agents/generate_quest/LEEME.md) |
-| Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
 
 ## El archivo `workshop.py`
 
@@ -46,12 +45,11 @@ WORKSHOP = Workshop(
 | Campo | Qué es |
 |---|---|
 | `role` | Nombre del rol, igual que en [docs/roles.md](roles.md). Es el nombre del taller en el selector. |
-| `intent` | A qué nodo del grafo va el chat del taller. Uno de los valores de `Intent` en [`agents/state.py`](../src/onboarding/agents/state.py): `answer_question`, `generate_quest`, `validate_evidence` o `extract_knowledge`. |
+| `intent` | A qué nodo del grafo va el chat del taller. Uno de los valores de `Intent` en [`agents/state.py`](../src/onboarding/agents/state.py): `answer_question`, `generate_quest`, `validate_evidence` o `extract_knowledge`. `None`: decide el coordinador (el taller de Agentes). |
 | `summary` | Una o dos líneas: qué construye el rol. Se muestra debajo del título. |
 | `tools` | Las pruebas: una línea `Tool(función, "Título", "Ayuda corta")` por función. |
 | `guide` | El `LEEME.md` de al lado, que se muestra en la sección **Guía**. |
 | `embeds` | Opcional. Páginas de la app que construye el rol y se ven dentro del taller, cada una en su sección con botón **Recargar**: `Embed("Panel del jefe", "/panel", "Ayuda corta")`. Un test revisa que la ruta exista. |
-| `intents` | Opcional. Otros nodos con los que se puede chatear, además de `intent`: el chat muestra un selector **Nodo**. Para quien trabaja sobre varios nodos, como Agentes. |
 
 ## Sumar una prueba
 
@@ -73,6 +71,7 @@ campo por parámetro y el botón **Probar**.
 | `bool` | Interruptor |
 | `Literal["a", "b"]` | Selector con esas opciones |
 | `BaseChatModel \| None` | Selector de modelo, con la opción **Comparar con otro modelo** (dos resultados lado a lado) |
+| `ChatHistory` | No se dibuja: recibe la conversación del chat del taller, como tupla de `(quién, texto)` |
 
 - Un parámetro con valor por defecto es opcional y el campo arranca con ese valor.
 - `X | None` se dibuja como `X`.

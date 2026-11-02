@@ -149,8 +149,9 @@ mismo PR. Si cambiás cómo funcionan los talleres, actualizá la guía.
 Para sumar una prueba a un taller:
 
 1. Escribí la función en el módulo del rol, con tipo en **todos** los parámetros:
-   `str`, `int`, `float`, `bool`, `Literal[...]` o `BaseChatModel | None` (este
-   último se dibuja como selector de modelo, con opción de comparar dos).
+   `str`, `int`, `float`, `bool`, `Literal[...]`, `BaseChatModel | None` (se
+   dibuja como selector de modelo, con opción de comparar dos) o `ChatHistory`
+   (no se dibuja: recibe la conversación del chat del taller).
 2. Sumala a `tools` del `WORKSHOP` con `Tool(funcion, "Título", "Ayuda corta")`.
 3. Test de la función al lado, como siempre. `workshop_test.py` falla si un
    parámetro no tiene tipo o es uno que la interfaz no sabe dibujar.
