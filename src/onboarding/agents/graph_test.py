@@ -28,10 +28,9 @@ def test_grafo_sin_intent_va_a_responder_pregunta(fake_llm: FakeListChatModel) -
     assert result["output"] == "respuesta de prueba"
 
 
-@pytest.mark.parametrize(
-    "intent",
-    ["generate_quest", "answer_question", "validate_evidence", "extract_knowledge"],
-)
+# extract_knowledge no va acá: necesita un modelo con salida estructurada, que el
+# fake no tiene. Lo prueba su propio test (agents/extract_knowledge/node_test.py).
+@pytest.mark.parametrize("intent", ["generate_quest", "answer_question", "validate_evidence"])
 def test_cada_intencion_tiene_su_nodo_y_su_prompt(intent: str, fake_llm) -> None:
     graph = build_graph(fake_llm)
 

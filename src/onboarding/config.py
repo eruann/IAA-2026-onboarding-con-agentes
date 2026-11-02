@@ -30,11 +30,16 @@ class Settings(BaseSettings):
     slack_bot_token: SecretStr | None = None
     slack_signing_secret: SecretStr | None = None
 
+    # Firma las sesiones de la interfaz web (/ui). Sin valor se genera uno al
+    # arrancar y las sesiones no sobreviven a un reinicio.
+    ui_storage_secret: SecretStr | None = None
+
     @field_validator(
         "openrouter_api_key",
         "openai_compat_api_key",
         "slack_bot_token",
         "slack_signing_secret",
+        "ui_storage_secret",
         mode="before",
     )
     @classmethod

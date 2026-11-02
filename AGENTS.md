@@ -80,6 +80,31 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     [docs/setup.md](docs/setup.md#slack-solo-si-trabajás-en-el-bot) (local) y
     [docs/runbooks/deploy.md](docs/runbooks/deploy.md) (producción).
 
+## Talleres (interfaz `/ui`)
+
+La interfaz web (`src/onboarding/ui/`, NiceGUI) tiene un **taller por rol**: un
+chat con su agente y pruebas directas de sus funciones, con selector de modelo
+([ADR 0009](docs/adr/0009-interfaz-nicegui-y-talleres.md)). Cada taller se
+declara en un `workshop.py` de la carpeta del rol (hoy:
+`knowledge/informal_network/workshop.py`); su guía es el `LEEME.md` de al lado.
+
+Para sumar una prueba a un taller:
+
+1. Escribí la función en el módulo del rol, con tipo en **todos** los parámetros:
+   `str`, `int`, `float`, `bool`, `Literal[...]` o `BaseChatModel | None` (este
+   último se dibuja como selector de modelo, con opción de comparar dos).
+2. Sumala a `tools` del `WORKSHOP` con `Tool(funcion, "Título", "Ayuda corta")`.
+3. Test de la función al lado, como siempre. `workshop_test.py` falla si un
+   parámetro no tiene tipo o es uno que la interfaz no sabe dibujar.
+
+No hace falta tocar `ui/`: el formulario y la forma de mostrar el resultado
+(texto, tabla o JSON) salen solos. Si la función todavía tira
+`NotImplementedError`, el taller la muestra como pendiente con su archivo.
+
+Un taller nuevo (otro rol): crear su `workshop.py` + `LEEME.md`, exportar
+`WORKSHOP` por la interfaz pública del módulo y sumarlo en
+`onboarding/workshop.py` (`all_workshops`).
+
 ## Recorridos guiados (`.tours/`)
 
 El equipo aprende el código con recorridos de CodeTour (`.tours/*.tour`). Las

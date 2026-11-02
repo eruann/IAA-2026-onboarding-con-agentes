@@ -16,6 +16,10 @@ x-app: &app
     # El contenedor corre como root: sin esto deja __pycache__ de root adentro de
     # ./src y en Linux después no se pueden borrar sin sudo.
     PYTHONDONTWRITEBYTECODE: "1"
+  # En Linux, para llegar a un Ollama que corre en tu máquina (fuera de Docker)
+  # con OPENAI_COMPAT_BASE_URL=http://host.docker.internal:11434/v1
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   volumes:
     - ./src:/app/src # incluye los *_test.py, que no están en la imagen
     - ./corpus:/app/corpus

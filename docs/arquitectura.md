@@ -7,7 +7,8 @@ deploy): [diagramas.md](diagramas.md).
 
 ## Componentes
 
-Un solo proceso sirve la API, el panel del jefe y el endpoint de Slack. Al lado,
+Un solo proceso sirve la API, la interfaz web (`/ui`, NiceGUI), el panel del jefe
+y el endpoint de Slack. Al lado,
 una sola base: Postgres con pgvector guarda documentos, estado del juego y red
 informal.
 
@@ -50,11 +51,12 @@ flowchart LR
   subgraph FONDO[" "]
     direction LR
     SLACK[Slack<br/>ingresante y jefe] -->|POST /slack/events| APP
-    BROWSER[Navegador<br/>jefe / RRHH] -->|/panel| APP
+    BROWSER[Navegador<br/>equipo · jefe · RRHH] -->|/ui · /panel| APP
 
     subgraph APP["Proceso único · FastAPI"]
       BOT[bot<br/>handlers Bolt]
       API[api<br/>rutas + panel HTMX]
+      UI[ui<br/>interfaz NiceGUI y talleres]
       GAME[game<br/>misiones, puntos, canje, tono]
       AG[agents<br/>grafo LangGraph]
       LLM[llm<br/>elección de modelo + costo]
@@ -73,6 +75,8 @@ flowchart LR
     BOT --> AG
     API --> GAME
     API --> AG
+    UI --> AG
+    UI --> KAPI
     AG --> KAPI
     KAPI --> RAG
     KAPI --> KG
@@ -90,8 +94,8 @@ flowchart LR
 
 Reglas de dependencia:
 
-- `bot` y `api` son **canales**: no tienen lógica de negocio, llaman a `game` y
-  `agents`.
+- `bot`, `api` y `ui` son **canales**: no tienen lógica de negocio, llaman a
+  `game`, `agents` y (los talleres de `ui`) a la knowledge layer por su puerta.
 - `agents` orquesta. `game` y la knowledge layer no se importan entre sí.
 - A la knowledge layer se entra solo por `onboarding.knowledge`. Adentro, `rag` e
   `informal_network` se pueden cruzar por clave.
@@ -165,7 +169,7 @@ esa es la métrica de horas-persona del TP.
 |---|---|---|---|
 | `db` | `pgvector/pgvector:pg16` | sí (puerto 5433 en el host) | Neon |
 | `migrate` | misma imagen, `alembic upgrade head` | sí | no existe: el `CMD` de la etapa `prod` migra al arrancar |
-| `app` | API + panel + `/slack/events` | sí, puerto 8000 con hot reload | único servicio web |
+| `app` | API + interfaz `/ui` + panel + `/slack/events` | sí, puerto 8000 con hot reload | único servicio web |
 | `tunnel` | `cloudflared`, URL pública para Slack (cambia al reiniciar) | perfil `tunnel` | no |
 | `ngrok` | alternativa con dominio fijo; cuenta gratuita por persona | perfil `ngrok` | no |
 | `ollama` | modelo abierto para comparar | perfil `local-llm` | no |
