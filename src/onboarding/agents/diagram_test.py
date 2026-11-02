@@ -31,3 +31,7 @@ def test_dice_que_usa_de_la_knowledge_layer_cada_prueba() -> None:
     # Algo que no toca la capa no marca nada
     assert knowledge_used_by(lambda texto: texto.upper()) == []
     assert knowledge_used_by(len) == []
+    # Una prueba que pasa por el grafo se ve en el recorrido, no en violeta
+    from onboarding.agents.workshop import ask_node
+
+    assert knowledge_used_by(ask_node) == []

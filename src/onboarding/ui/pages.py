@@ -16,7 +16,7 @@ from pathlib import Path
 
 from nicegui import run, ui
 
-from onboarding.agents import TurnError, knowledge_used_by, load_lineage, run_turn
+from onboarding.agents import TurnError, knowledge_used_by, load_lineage, path_text, run_turn
 from onboarding.llm import ModelCatalog, ModelOption, get_chat_model, model_catalog
 from onboarding.ui import prefs as browser_prefs
 from onboarding.ui.errors import explain
@@ -66,12 +66,6 @@ def next_model(current: int, total: int) -> int | None:
     return (current + 1) % total if total > 1 else None
 
 
-def path_caption(path: Sequence[str], failed: str | None = None) -> str:
-    """El recorrido de un mensaje, para mostrarlo debajo de la respuesta."""
-    steps = ["Inicio", *path, f"{failed} ✗" if failed else "Fin"]
-    return "Recorrido: " + " → ".join(steps)
-
-
 # recorrido: chat-taller
 def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str, on_turn) -> None:
     """Chat con el agente del taller. `on_turn(path, failed)` se llama después de cada
@@ -86,19 +80,20 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
         f"Hola {name}, preguntame quién es quién en la empresa o cómo funciona Tesorería."
     ).classes("texto-suave")
     messages = ui.column().classes("w-full gap-4 q-my-sm")
+    nodes = (workshop.intent, *workshop.intents)
 
     def disable_retry() -> None:
         for button in retry_buttons:
             button.disable()
         retry_buttons.clear()
 
-    def offer_retry(text: str, bubble, footer, failed_index: int) -> None:
+    def offer_retry(text: str, bubble, footer, failed_index: int, node: str) -> None:
         async def retry(index: int) -> None:
             disable_retry()
             # El reintento borra estos botones: sin un contexto propio, lo que viene
             # después (avisarle al grafo) quedaría colgado del botón borrado.
             with messages:
-                await answer(text, bubble, footer, index, retrying=True)
+                await answer(text, bubble, footer, index, node, retrying=True)
 
         async def auto() -> None:
             following = next_model(failed_index, len(models))
@@ -128,7 +123,9 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
                     .classes("boton-borde")
                 )
 
-    async def answer(text: str, bubble, footer, index: int, retrying: bool = False) -> None:
+    async def answer(
+        text: str, bubble, footer, index: int, node: str, retrying: bool = False
+    ) -> None:
         option = models[index]
         bubble.clear()
         footer.clear()
@@ -140,7 +137,7 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
             result = await run.io_bound(
                 lambda: run_turn(
                     text,
-                    intent=workshop.intent,
+                    intent=node,
                     actor_name=name,
                     history=list(history),
                     model=get_chat_model(provider=option.provider, model=option.model),
@@ -158,17 +155,17 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
                 render_error(error)
             with footer:
                 if failed:
-                    ui.label(path_caption(path, failed)).classes("text-caption texto-suave")
+                    ui.label(path_text(path, failed)).classes("text-caption texto-suave")
                 # Si lo que falta es un TODO, cambiar de modelo no lo arregla
                 if explain(error)[0] != "pending":
-                    offer_retry(text, bubble, footer, index)
+                    offer_retry(text, bubble, footer, index, node)
             on_turn(path, failed)
             return
         bubble.clear()
         with bubble:
             ui.markdown(result.output)
         with footer:
-            ui.label(path_caption(result.path)).classes("text-caption texto-suave")
+            ui.label(path_text(result.path)).classes("text-caption texto-suave")
         history.extend([("user", text), ("assistant", result.output)])
         on_turn(result.path, None)
 
@@ -184,8 +181,16 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
             bubble = _bubble("assistant", "Onboarding")
         with bubble.parent_slot.parent:
             footer = ui.column().classes("gap-2")
-        await answer(text, bubble, footer, model_select.value)
+        # El nodo se fija al mandar: un reintento va al mismo, aunque después cambie
+        node = node_select.value if node_select else workshop.intent
+        await answer(text, bubble, footer, model_select.value, node)
 
+    # Si el taller trabaja sobre varios nodos, se elige con cuál hablar
+    node_select = (
+        ui.select(list(nodes), label="Nodo", value=workshop.intent).classes("w-64")
+        if workshop.intents
+        else None
+    )
     with ui.row().classes("w-full items-center no-wrap"):
         box = (
             ui.input(placeholder="Escribí tu pregunta acá...")

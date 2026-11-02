@@ -61,6 +61,9 @@ class Workshop:
     tools: tuple[Tool, ...] = ()
     guide: Path | None = None  # LEEME.md que muestra la interfaz
     embeds: tuple[Embed, ...] = ()  # páginas del rol que se ven dentro del taller
+    # Otros nodos con los que se puede chatear, además de `intent` (el chat muestra
+    # un selector). Para quien trabaja sobre varios nodos, como Agentes.
+    intents: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -154,11 +157,12 @@ def markdown_row(cells: tuple[Any, ...]) -> str:
 def all_workshops() -> list[Workshop]:
     """Los talleres que ya existen, en el orden en que se muestran."""
     # Import adentro: cada módulo importa este archivo para declarar su taller.
+    from onboarding.agents import WORKSHOP as agents_workshop
     from onboarding.game import WORKSHOP as game_workshop
     from onboarding.knowledge import WORKSHOPS as knowledge_workshops
 
-    return [*knowledge_workshops, game_workshop]
+    return [agents_workshop, *knowledge_workshops, game_workshop]
 
 
 # Roles que todavía no tienen taller: la interfaz los muestra como "próximamente"
-UPCOMING = ("Agentes y orquestación", "Tech Lead")
+UPCOMING = ("Diseñador de misiones", "Tech Lead")

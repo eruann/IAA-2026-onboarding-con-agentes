@@ -13,10 +13,11 @@ sale solo de la firma de la función.
 
 | Rol | Taller | Guía |
 |---|---|---|
+| Agentes y orquestación | [`agents/workshop.py`](../src/onboarding/agents/workshop.py) | [`LEEME.md`](../src/onboarding/agents/LEEME.md) |
 | RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
 | Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
 | Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
-| Agentes, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
+| Diseñador de misiones, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
 
 ## El archivo `workshop.py`
 
@@ -49,6 +50,7 @@ WORKSHOP = Workshop(
 | `tools` | Las pruebas: una línea `Tool(función, "Título", "Ayuda corta")` por función. |
 | `guide` | El `LEEME.md` de al lado, que se muestra en la sección **Guía**. |
 | `embeds` | Opcional. Páginas de la app que construye el rol y se ven dentro del taller, cada una en su sección con botón **Recargar**: `Embed("Panel del jefe", "/panel", "Ayuda corta")`. Un test revisa que la ruta exista. |
+| `intents` | Opcional. Otros nodos con los que se puede chatear, además de `intent`: el chat muestra un selector **Nodo**. Para quien trabaja sobre varios nodos, como Agentes. |
 
 ## Sumar una prueba
 

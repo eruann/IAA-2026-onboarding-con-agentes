@@ -9,12 +9,31 @@ ejecutarla solo. El backup la cubre si el titular desaparece una semana.
 | # | Perfil | Titular | Backup |
 |---|---|---|---|
 | 1 | PM / Producto | | |
-| 2 | Tech Lead / Plataforma | | |
-| 3 | Agentes y orquestación | | |
-| 4 | RAG y evaluación | | |
-| 5 | Grafo cultural y datos | | |
-| 6 | Experiencia: interfaz y game design | | |
-| 7 | Comms y entregables (sombrero chico) | | |
+| 2 | Tech Lead / Plataforma | Matías Rodriguez (@eruann) | |
+| 3 | Agentes y orquestación | Matías Rodriguez (@eruann) | |
+| 4 | RAG y evaluación | Andrés Salinas (@silo86) | |
+| 5 | Grafo cultural y datos | Gabriel Figueiro (@ghfigueiro) | |
+| 6 | Experiencia: interfaz y game design | Fausto Baritoli (@faustoabc) | |
+| 7 | Diseñador de misiones | | |
+| 8 | Comms y entregables (sombrero chico) | | |
+
+## Un agente por rol
+
+Cada rol construye **su agente**, un nodo del grafo de LangGraph, y lo prueba en
+su taller de la interfaz web (`/ui`, ver [talleres.md](talleres.md)). Agentes y
+orquestación arma lo que los une: el coordinador que decide a qué nodo va cada
+mensaje.
+
+| Nodo | Qué hace | Rol |
+|---|---|---|
+| `answer_question` | Responde con la knowledge layer, citando la fuente; si no hay soporte, deriva ("preguntale a X") | RAG y evaluación |
+| `validate_evidence` | Revisa la evidencia que entrega el ingresante para una misión | Experiencia |
+| `extract_knowledge` | Saca quién sabe qué de las conversaciones | Grafo cultural y datos |
+| `generate_quest` | Propone misiones nuevas a partir de la documentación del puesto | Diseñador de misiones |
+| Coordinador | Decide a qué nodo va cada mensaje | Agentes y orquestación |
+
+Un nodo arranca en `agents/nodes.py`; cuando su rol empieza a trabajarlo, lo pasa
+a `agents/<nodo>/` con su test (como `agents/extract_knowledge/`).
 
 ## 1. PM / Producto
 
@@ -41,19 +60,33 @@ Slack), persistir `llm_calls` (costo por corrida), secretos.
 
 ## 3. Agentes y orquestación
 
-**Carpetas:** `src/onboarding/agents/`, `llm/factory.py`
+**Carpetas:** `src/onboarding/agents/` (grafo, `run.py`, `state.py`, `tools.py`,
+`prompts/`), `llm/factory.py`, `llm/prompts.py`. Los nodos son de cada rol (ver
+la tabla de arriba).
 
-**Primer PR:** el nodo `answer_question` de verdad, contra `knowledge.retrieve`, con el
-guardrail de "no sé, preguntale a X" cuando no hay soporte documental.
+Lo que une a los agentes de todos los roles:
 
-Después: los otros tres nodos, las tools, versionado de prompts, y la comparación
-de dos modelos vía `LLM_MODEL` para justificar costo y latencia con datos.
+1. **Coordinador:** decide a qué nodo va cada mensaje (hoy, un ruteo por
+   `intent` que elige quien llama).
+2. **Grafo y `run_turn`:** cómo se conectan los nodos y la entrada única que
+   usan la interfaz y Slack.
+3. **Tools** (`agents/tools.py`): funciones chicas que los agentes pueden
+   llamar, envolviendo la interfaz pública de otros módulos.
+4. **Prompts:** dónde viven, cómo se cargan y cómo se versionan.
+5. **Comparación de modelos:** costo y latencia por modelo, con datos (sale de
+   `llm_calls`), para justificar la elección.
+
+**Primer PR:** el coordinador decidiendo el nodo a partir del mensaje, probado
+con el modelo fake.
 
 ## 4. RAG y evaluación
 
 **Carpetas:** `src/onboarding/knowledge/rag/`, `eval/rag_questions.yaml`
 
 Parte de la knowledge layer: **lo escrito**.
+
+**Su agente:** `answer_question`, que responde citando documento y sección y,
+si no hay soporte, deriva con `who_knows_about` ("preguntale a X").
 
 **Primer PR:** decidir el modelo de embeddings (ADR 0005), crear la tabla de
 chunks y dejar la ingesta andando de punta a punta.
@@ -70,6 +103,8 @@ respuesta, y estimación de tokens y costo por ingresante.
 Parte de la knowledge layer: **lo no escrito**, la red informal que el
 organigrama no muestra (quién sabe de qué, a quién se consulta de verdad).
 
+**Su agente:** `extract_knowledge` (`agents/extract_knowledge/`).
+
 **Primer PR:** tablas `nodes` y `edges` con su migración, y el esquema de
 extracción (sujeto, relación, objeto, frase textual de respaldo).
 
@@ -81,6 +116,15 @@ alimentan las próximas misiones.
 
 **Carpetas:** `src/onboarding/game/`, `api/`, `bot/`
 
+Dueño del **ciclo de vida de una misión**: qué es una misión (`Quest` y sus
+tablas), las 6-8 misiones del TP en `data/quests.yaml` (con PM), asignarlas al
+ingresante, la entrega de evidencia, la aprobación del jefe, puntos, niveles,
+canje y tono. Las misiones nuevas que propone el Diseñador de misiones entran
+solo si Experiencia y PM las aprueban.
+
+**Su agente:** `validate_evidence`, que revisa la evidencia de una misión. La
+aprobación final del jefe siempre gana sobre el agente.
+
 **Primer PR:** tablas del juego y panel del jefe mostrando ingresantes y misiones
 pendientes.
 
@@ -88,7 +132,20 @@ Después: `/misiones` en Slack, aprobación de un clic, las 6-8 misiones y el
 catálogo de canje en `data/`, dial de tono, y la pantalla de transparencia que
 le muestra al ingresante qué captura el agente.
 
-## 7. Comms y entregables
+## 7. Diseñador de misiones
+
+**Carpetas:** su nodo `generate_quest` (en `agents/nodes.py`, y después en
+`agents/generate_quest/`) y su prompt `agents/prompts/generate_quest.md`.
+
+**Su agente:** `generate_quest`, que propone misiones nuevas para un puesto a
+partir de su documentación (`retrieve`, de RAG) y de quién sabe qué
+(`who_knows_about`, de Grafo). Entrega borradores con la forma de `Quest`: no
+toca el juego. Cuáles entran a `data/quests.yaml` lo deciden Experiencia y PM.
+
+**Primer PR:** `generate_quest` devolviendo misiones con la forma de `Quest`, que
+pasen la revisión de misiones del taller de Experiencia.
+
+## 8. Comms y entregables
 
 **Carpetas:** `docs/minutas/`
 
