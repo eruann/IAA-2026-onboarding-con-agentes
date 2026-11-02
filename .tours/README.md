@@ -13,7 +13,7 @@ que tiene que seguir para no romper nada.
 ```json
 {
   "title": "Tu primer PR está acá",
-  "file": "src/onboarding/agents/nodes.py",
+  "file": "src/onboarding/agents/answer_question/node.py",
   "pattern": "recorrido: nodo-respuesta$",
   "description": "Texto del paso...\n\n---\n\n(bloque de preguntas)"
 }

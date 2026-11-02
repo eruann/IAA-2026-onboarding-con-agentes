@@ -80,6 +80,28 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     [docs/setup.md](docs/setup.md#slack-solo-si-trabajás-en-el-bot) (local) y
     [docs/runbooks/deploy.md](docs/runbooks/deploy.md) (producción).
 
+## Agentes y talleres
+
+Cada rol construye **su agente** (un nodo del grafo) y lo prueba en **su taller**
+([ADR 0009](docs/adr/0009-agente-por-rol-y-talleres.md)). La tabla de qué nodo
+es de quién está en `src/onboarding/agents/registry.py`.
+
+- **Un agente** vive en `agents/<key>/`: `node.py` (con `make_node(model)`, que
+  devuelve solo las claves del estado que cambia), `node_test.py` y su prompt en
+  `agents/prompts/<key>.md`. Para que exista en el grafo, se suma una entrada a
+  `AGENTS` en `registry.py`; el grafo, el dibujo y el selector se arman solos.
+- **Un turno** entra siempre por `agents.run_turn(...)`: no armes el estado a mano.
+- **Un taller** es el `workshop.py` de la carpeta del rol (lo dice el `LEEME.md`
+  de al lado). Para sumar una prueba:
+  1. Escribí la función en tu módulo, con tipos en todos los parámetros
+     (`str`, `int`, `float`, `bool`, `Literal[...]`, `BaseChatModel | None`).
+     Con eso la interfaz arma el formulario sola; otro tipo da error en el test.
+  2. Sumala a `tools` con `Tool(funcion, "Título", "Ayuda corta")`.
+  3. Test de la función al lado del módulo, como siempre.
+
+  No hace falta tocar la interfaz. Si una función todavía tira
+  `NotImplementedError`, el taller la muestra como pendiente.
+
 ## Recorridos guiados (`.tours/`)
 
 El equipo aprende el código con recorridos de CodeTour (`.tours/*.tour`). Las

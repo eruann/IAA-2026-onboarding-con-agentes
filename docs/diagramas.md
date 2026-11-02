@@ -251,8 +251,11 @@ cuenta.
 
 ### Hoy (`agents/graph.py`)
 
-Cableado completo con nodos de prueba: cada intención llega a su nodo, que llama
-al modelo con su prompt.
+El grafo se arma solo desde el registro (`agents/registry.py`). El coordinador
+elige un agente (hoy: el que se eligió en el taller o, si no, Conocimiento), el
+agente responde con su prompt y al final la red informal corre siempre, sin
+responder. Entre paréntesis, el rol que construye cada nodo. La interfaz dibuja
+este mismo grafo, generado del código, con el recorrido de cada mensaje.
 
 ```mermaid
 %%{init: {
@@ -286,15 +289,14 @@ flowchart LR
   %% Recuadro amarillo: fondo fijo, igual en editores claros y oscuros
   subgraph FONDO[" "]
     direction LR
-    S((START)) --> R{"_route<br/>según intent"}
-    R -- generate_quest --> GQ["generate_quest"]
-    R -- "answer_question<br/>(default)" --> AQ["answer_question"]
-    R -- validate_evidence --> VE["validate_evidence"]
-    R -- extract_knowledge --> EK["extract_knowledge"]
-    GQ --> E((END))
-    AQ --> E
-    VE --> E
-    EK --> E
+    S((START)) --> R{{"coordinator<br/>(Tech Lead)"}}
+    R -. "default" .-> AQ["answer_question · Conocimiento<br/>(RAG)"]
+    R -.-> QU["quests · Mis misiones<br/>(Experiencia)"]
+    R -.-> GQ["generate_quest · Diseñador de misiones<br/>(Agentes)"]
+    AQ --> EK[["extract_knowledge · Red informal<br/>(Grafo)"]]
+    QU --> EK
+    GQ --> EK
+    EK --> E((END))
   end
   style FONDO fill:#fef9c3,stroke:#fef9c3
 ```

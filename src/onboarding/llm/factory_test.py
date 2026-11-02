@@ -40,3 +40,15 @@ def test_openrouter_usa_su_base_url_y_el_modelo_configurado() -> None:
 
     assert model.model_name == "qwen/qwen-2.5-72b-instruct"
     assert "openrouter.ai" in str(model.openai_api_base)
+
+
+def test_el_modelo_se_puede_elegir_por_llamada() -> None:
+    settings = Settings(
+        llm_provider="openrouter",
+        openrouter_api_key="sk-test",
+        llm_model="anthropic/claude-haiku-4.5",
+    )
+
+    model = get_chat_model(settings, model="openai/gpt-4o-mini")
+
+    assert model.model_name == "openai/gpt-4o-mini"

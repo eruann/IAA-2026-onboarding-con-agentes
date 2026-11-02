@@ -8,7 +8,7 @@ def register(app: App) -> None:
     def on_mention(event, say, ack):
         ack()
         # TODO(experiencia + agentes): mandar el texto al grafo con
-        # intent="answer_question" y responder citando la fuente.
+        # agents.run_turn y responder citando la fuente.
         # El trabajo pesado va en un listener lazy: acá solo se acusa recibo.
         say("Estoy leyendo la documentación... (TODO agentes)")
 

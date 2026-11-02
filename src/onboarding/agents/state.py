@@ -1,22 +1,25 @@
 """Estado que viaja por el grafo."""
 
-from typing import Literal, TypedDict
+from typing import Annotated, Literal, TypedDict
 
-Intent = Literal[
-    "generate_quest",  # armar una misión para un rol
-    "answer_question",  # responder una duda del ingresante con RAG
-    "validate_evidence",  # revisar la evidencia de una misión completada
-    "extract_knowledge",  # sacar "quién sabe qué" de una conversación
-]
+from langchain_core.messages import AnyMessage
+from langgraph.graph.message import add_messages
+
+# Desde dónde habla la persona. Cambia qué puede pedir, no cómo se rutea.
+Mode = Literal["employee", "manager", "test", "admin"]
 
 
 # recorrido: estado-grafo
 class OnboardingState(TypedDict, total=False):
-    intent: Intent
-    # Quién habla (id de Slack) y en qué empresa/rol está
-    actor_id: str
-    role: str
-    # Texto de entrada (pregunta, evidencia, mensaje del jefe)
+    # A qué agente va el mensaje. Si viene vacío lo decide el coordinador; en el
+    # modo Test lo elige quien prueba (ver agents/registry.py).
+    agent: str
+    mode: Mode
+    # Quién habla: la key de data/people.yaml (people.key en la base)
+    person_key: str | None
+    # Conversación previa. add_messages las acumula en vez de pisarlas.
+    messages: Annotated[list[AnyMessage], add_messages]
+    # Texto de este turno (pregunta, evidencia, pedido del jefe)
     input: str
     # Salida para el usuario y de dónde salió
     output: str

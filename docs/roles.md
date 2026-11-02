@@ -3,6 +3,20 @@
 Los perfiles y sus tareas salen del documento de plataforma y roles del equipo.
 Acá está la traducción a carpetas del repo y al primer PR de cada uno.
 
+**Cada rol construye su agente** (un nodo del grafo de LangGraph) y lo prueba en
+su **taller**, dentro de la interfaz: chat con su agente y pruebas directas de sus
+funciones. Qué agente es de quién está en `src/onboarding/agents/registry.py`;
+cómo agregar pruebas al taller, en la sección "Agentes y talleres" de
+`AGENTS.md`. El porqué, en [ADR 0009](adr/0009-agente-por-rol-y-talleres.md).
+
+| Rol | Agente o nodo | Taller (`workshop.py` + `LEEME.md`) |
+|---|---|---|
+| Tech Lead | Coordinador (`agents/coordinator/`) | `agents/coordinator/` |
+| Agentes y orquestación | Diseñador de misiones (`agents/generate_quest/`) | `agents/` |
+| RAG y evaluación | Conocimiento (`agents/answer_question/`) | `knowledge/rag/` |
+| Grafo cultural y datos | Red informal (`agents/extract_knowledge/`), nodo final | `knowledge/informal_network/` |
+| Experiencia | Mis misiones (`agents/quests/`) | `game/` |
+
 El titular es responsable de que la tarea **exista y se termine**, no de
 ejecutarla solo. El backup la cubre si el titular desaparece una semana.
 
@@ -37,23 +51,30 @@ alguien de cada sistema confirmándolo.
 
 Después: repo en GitHub con `main` protegida y CODEOWNERS, la demo online
 siguiendo [runbooks/deploy.md](runbooks/deploy.md) (Neon, OpenRouter, Render,
-Slack), persistir `llm_calls` (costo por corrida), secretos.
+Slack), persistir `llm_calls` (costo por corrida), secretos, la interfaz web
+(talleres incluidos) y el coordinador que elige el agente de cada mensaje.
 
 ## 3. Agentes y orquestación
 
 **Carpetas:** `src/onboarding/agents/`, `llm/factory.py`
 
-**Primer PR:** el nodo `answer_question` de verdad, contra `knowledge.retrieve`, con el
-guardrail de "no sé, preguntale a X" cuando no hay soporte documental.
+**Tu agente:** el Diseñador de misiones (`agents/generate_quest/`): propone
+misiones nuevas a partir de la documentación de un puesto.
 
-Después: los otros tres nodos, las tools, versionado de prompts, y la comparación
-de dos modelos vía `LLM_MODEL` para justificar costo y latencia con datos.
+**Primer PR:** el Diseñador de verdad, contra `knowledge.retrieve`, devolviendo
+misiones con el formato de `data/quests.yaml`.
+
+Después: las tools que usan todos los agentes (`agents/tools.py`), versionado de
+prompts, y la comparación de dos modelos para justificar costo y latencia con datos.
 
 ## 4. RAG y evaluación
 
 **Carpetas:** `src/onboarding/knowledge/rag/`, `eval/rag_questions.yaml`
 
 Parte de la knowledge layer: **lo escrito**.
+
+**Tu agente:** Conocimiento (`agents/answer_question/`): responde dudas citando
+documento y sección y, si no hay respaldo, deriva con `who_knows_about`.
 
 **Primer PR:** decidir el modelo de embeddings (ADR 0005), crear la tabla de
 chunks y dejar la ingesta andando de punta a punta.
@@ -70,6 +91,9 @@ respuesta, y estimación de tokens y costo por ingresante.
 Parte de la knowledge layer: **lo no escrito**, la red informal que el
 organigrama no muestra (quién sabe de qué, a quién se consulta de verdad).
 
+**Tu nodo:** la Red informal (`agents/extract_knowledge/`): corre al final de
+todas las conversaciones y guarda quién sabe qué, sin responder al usuario.
+
 **Primer PR:** tablas `nodes` y `edges` con su migración, y el esquema de
 extracción (sujeto, relación, objeto, frase textual de respaldo).
 
@@ -80,6 +104,9 @@ alimentan las próximas misiones.
 ## 6. Experiencia: interfaz y game design
 
 **Carpetas:** `src/onboarding/game/`, `api/`, `bot/`
+
+**Tu agente:** Mis misiones (`agents/quests/`): acompaña al ingresante en sus
+misiones y le cuenta al jefe cómo viene su equipo, usando las funciones de `game/`.
 
 **Primer PR:** tablas del juego y panel del jefe mostrando ingresantes y misiones
 pendientes.

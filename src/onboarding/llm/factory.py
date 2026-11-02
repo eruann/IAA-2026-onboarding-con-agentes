@@ -24,9 +24,12 @@ FAKE_RESPONSES = ["[fake] respuesta de prueba"]
 def get_chat_model(
     settings: Settings | None = None,
     *,
+    model: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 1024,
 ) -> BaseChatModel:
+    """`model` pisa a LLM_MODEL para esta llamada: lo usan los talleres para elegir
+    o comparar modelos sin tocar el .env. El proveedor y las keys no cambian."""
     settings = settings or get_settings()
 
     if settings.llm_provider == "fake":
@@ -44,7 +47,7 @@ def get_chat_model(
         base_url = settings.openai_compat_base_url
 
     return ChatOpenAI(
-        model=settings.llm_model,
+        model=model or settings.llm_model,
         base_url=base_url,
         api_key=api_key,
         temperature=temperature,

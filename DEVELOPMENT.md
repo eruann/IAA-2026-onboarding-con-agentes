@@ -47,10 +47,10 @@ las que empiezan en la raíz del repo.
 |---|---|---|
 | **PM / Producto** | `docs/`, `corpus/`, `data/`, `eval/baseline/` | `eval/rag_questions.yaml`, `data/quests.yaml` |
 | **Tech Lead / Plataforma** | `config.py`, `db/`, `llm/callbacks.py`, `llm/models.py`, `conftest.py`; en la raíz: `Dockerfile`, `docker-compose.yml`, `pyproject.toml`, `alembic.ini`, `render.yaml`, `.github/` | `api/main.py`, `docs/runbooks/` |
-| **Agentes y orquestación** | `agents/` (incluye `agents/prompts/`), `llm/factory.py` | `knowledge/__init__.py` (la puerta de la knowledge layer), `game/` |
-| **RAG y evaluación** · lo escrito | `knowledge/rag/`; en la raíz: `corpus/`, `eval/rag_questions.yaml` | `knowledge/__init__.py`, `docs/adr/0005-embeddings.md` |
-| **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`; en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `agents/prompts/extract_knowledge.md`, `data/people.yaml` |
-| **Experiencia: interfaz y game design** | `game/`, `api/`, `bot/`; en la raíz: `data/quests.yaml`, `data/rewards.yaml` | `agents/__init__.py`, `bot/manifest.yaml` |
+| **Agentes y orquestación** | `agents/` (incluye `agents/prompts/`), `llm/factory.py`; su agente: `agents/generate_quest/` | `knowledge/__init__.py` (la puerta de la knowledge layer), `game/` |
+| **RAG y evaluación** · lo escrito | `knowledge/rag/`, su agente `agents/answer_question/`; en la raíz: `corpus/`, `eval/rag_questions.yaml` | `knowledge/__init__.py`, `docs/adr/0005-embeddings.md` |
+| **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`, su nodo `agents/extract_knowledge/`; en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `agents/prompts/extract_knowledge.md`, `data/people.yaml` |
+| **Experiencia: interfaz y game design** | `game/`, `api/`, `bot/`, su agente `agents/quests/`; en la raíz: `data/quests.yaml`, `data/rewards.yaml` | `agents/__init__.py`, `bot/manifest.yaml` |
 | **Comms y entregables** | `docs/minutas/`, `docs/README.md` | `docs/adr/` |
 
 El detalle de cada rol, con su primer PR, está en [docs/roles.md](docs/roles.md).

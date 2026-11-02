@@ -15,8 +15,8 @@ class LLMCall(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
-    # Para qué se llamó: generate_quest, answer_question, validate_evidence,
-    # extract_knowledge. Permite separar el costo por tipo de interacción.
+    # Para qué se llamó: el agente del registro (answer_question, quests,
+    # generate_quest, extract_knowledge...). Permite separar el costo por tipo de interacción.
     purpose: Mapped[str] = mapped_column(String(64), index=True)
     model: Mapped[str] = mapped_column(String(128))
     input_tokens: Mapped[int] = mapped_column(Integer, default=0)

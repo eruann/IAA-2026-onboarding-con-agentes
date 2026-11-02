@@ -140,7 +140,7 @@ sequenceDiagram
   end
   I->>B: ¿cómo pido una compra?
   B-->>I: ack (menos de 3 s)
-  B->>A: intent=answer_question
+  B->>A: run_turn(pregunta)
   A->>K: retrieve(pregunta)
   K-->>A: fragmentos + documento y sección
   A->>A: responder citando la fuente

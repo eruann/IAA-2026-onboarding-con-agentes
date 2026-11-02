@@ -19,5 +19,6 @@ Estados: `propuesta` → `aceptada` → `reemplazada por 000X`.
 | [0006](0006-llm-via-openrouter.md) | Acceso a modelos vía OpenRouter | aceptada |
 | [0007](0007-knowledge-layer.md) | Knowledge layer: documentos y red informal detrás de una sola puerta | aceptada |
 | [0008](0008-migraciones-al-arrancar.md) | Migraciones al arrancar el contenedor, no como pre-deploy | aceptada |
+| [0009](0009-agente-por-rol-y-talleres.md) | Un agente por rol, coordinador y talleres | aceptada |
 
 Plantilla: [_plantilla.md](_plantilla.md)
