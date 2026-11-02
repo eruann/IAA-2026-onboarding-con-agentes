@@ -11,13 +11,15 @@ de onboarding y prueba de extracción de relaciones. Acá cada rol tiene su tall
 """
 
 import json
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from nicegui import run, ui
 
-from onboarding.agents import load_lineage, run_turn
+from onboarding.agents import TurnError, knowledge_used_by, load_lineage, run_turn
 from onboarding.llm import ModelCatalog, ModelOption, get_chat_model, model_catalog
 from onboarding.ui import prefs as browser_prefs
+from onboarding.ui.errors import explain
 from onboarding.ui.tool_form import render_error, tool_card
 from onboarding.workshop import UPCOMING, Embed, Workshop, all_workshops
 
@@ -59,27 +61,81 @@ def _bubble(who: str, name: str):
     return card
 
 
+def next_model(current: int, total: int) -> int | None:
+    """El modelo que sigue en la lista (al final vuelve al primero); None si hay uno solo."""
+    return (current + 1) % total if total > 1 else None
+
+
+def path_caption(path: Sequence[str], failed: str | None = None) -> str:
+    """El recorrido de un mensaje, para mostrarlo debajo de la respuesta."""
+    steps = ["Inicio", *path, f"{failed} ✗" if failed else "Fin"]
+    return "Recorrido: " + " → ".join(steps)
+
+
 # recorrido: chat-taller
 def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str, on_turn) -> None:
-    """Chat con el agente del taller. `on_turn(path)` se llama después de cada respuesta."""
+    """Chat con el agente del taller. `on_turn(path, failed)` se llama después de cada
+    mensaje, salga bien o falle, para marcar el recorrido en el grafo.
+
+    Si un mensaje falla, su globo ofrece reintentarlo con otro modelo. Esos botones
+    valen mientras el mensaje que falló sea lo último de la conversación.
+    """
     history: list[tuple[str, str]] = []
+    retry_buttons: list = []  # los del último mensaje que falló (como mucho, un par)
     ui.label(
         f"Hola {name}, preguntame quién es quién en la empresa o cómo funciona Tesorería."
     ).classes("texto-suave")
     messages = ui.column().classes("w-full gap-4 q-my-sm")
 
-    async def enviar() -> None:
-        text = box.value.strip()
-        if not text:
-            return
-        box.value = ""
-        option = models[model_select.value]
-        with messages:
-            with _bubble("user", name):
-                ui.markdown(text)
-            answer = _bubble("assistant", "Onboarding")
-        with answer:
+    def disable_retry() -> None:
+        for button in retry_buttons:
+            button.disable()
+        retry_buttons.clear()
+
+    def offer_retry(text: str, bubble, footer, failed_index: int) -> None:
+        async def retry(index: int) -> None:
+            disable_retry()
+            # El reintento borra estos botones: sin un contexto propio, lo que viene
+            # después (avisarle al grafo) quedaría colgado del botón borrado.
+            with messages:
+                await answer(text, bubble, footer, index, retrying=True)
+
+        async def auto() -> None:
+            following = next_model(failed_index, len(models))
+            if following is None:
+                ui.notify("No hay otro modelo en la lista.", type="warning")
+                return
+            model_select.value = following  # cambia el selector y queda guardado
+            await retry(following)
+
+        async def manual() -> None:
+            if model_select.value == failed_index:
+                ui.notify(
+                    "Elegí otro modelo en la barra lateral y volvé a tocar este botón.",
+                    type="warning",
+                )
+                return
+            await retry(model_select.value)
+
+        with ui.row().classes("gap-2"):
+            for label, icon, action in (
+                ("Usar otro modelo (Auto)", "autorenew", auto),
+                ("Usar otro modelo (manual)", "tune", manual),
+            ):
+                retry_buttons.append(
+                    ui.button(label, icon=icon, on_click=action, color=None)
+                    .props("outline size=sm")
+                    .classes("boton-borde")
+                )
+
+    async def answer(text: str, bubble, footer, index: int, retrying: bool = False) -> None:
+        option = models[index]
+        bubble.clear()
+        footer.clear()
+        with bubble, ui.row().classes("items-center gap-2"):
             ui.spinner("dots", size="md")
+            if retrying:
+                ui.label(f"Probando con {option.label}…").classes("texto-suave")
         try:
             result = await run.io_bound(
                 lambda: run_turn(
@@ -90,20 +146,45 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
                     model=get_chat_model(provider=option.provider, model=option.model),
                 )
             )
-        except Exception as error:  # la pregunta falló: no queda en el historial
-            answer.clear()
-            with answer:
-                render_error(error)
-            return
-        answer.clear()
-        with answer:
-            ui.markdown(result.output)
-        with answer.parent_slot.parent:
-            ui.label("Recorrido: Inicio → " + " → ".join(result.path) + " → Fin").classes(
-                "text-caption texto-suave"
+        except Exception as failure:  # la pregunta falló: no queda en el historial
+            error = failure.__cause__ if isinstance(failure, TurnError) else failure
+            path, failed = (
+                (failure.path, failure.failed_node)
+                if isinstance(failure, TurnError)
+                else ([], None)
             )
+            bubble.clear()
+            with bubble:
+                render_error(error)
+            with footer:
+                if failed:
+                    ui.label(path_caption(path, failed)).classes("text-caption texto-suave")
+                # Si lo que falta es un TODO, cambiar de modelo no lo arregla
+                if explain(error)[0] != "pending":
+                    offer_retry(text, bubble, footer, index)
+            on_turn(path, failed)
+            return
+        bubble.clear()
+        with bubble:
+            ui.markdown(result.output)
+        with footer:
+            ui.label(path_caption(result.path)).classes("text-caption texto-suave")
         history.extend([("user", text), ("assistant", result.output)])
-        on_turn(result.path)
+        on_turn(result.path, None)
+
+    async def enviar() -> None:
+        text = box.value.strip()
+        if not text:
+            return
+        box.value = ""
+        disable_retry()  # una pregunta nueva deja atrás a la que falló
+        with messages:
+            with _bubble("user", name):
+                ui.markdown(text)
+            bubble = _bubble("assistant", "Onboarding")
+        with bubble.parent_slot.parent:
+            footer = ui.column().classes("gap-2")
+        await answer(text, bubble, footer, model_select.value)
 
     with ui.row().classes("w-full items-center no-wrap"):
         box = (
@@ -152,6 +233,11 @@ STYLE = """
      que dibuja rough.js; el primero es el relleno) y las líneas */
   .pizarra [data-id].resaltado:not(.flecha) > g > path:last-of-type,
   .pizarra .flecha.resaltado path { stroke: #e11d48; stroke-width: 3; transition: stroke 0.2s; }
+  /* Donde falló el último mensaje, y lo que usó la última prueba del taller */
+  .pizarra [data-id].fallido > g > path:last-of-type {
+    stroke: #e11d48; stroke-width: 4; stroke-dasharray: 8 5;
+  }
+  .pizarra [data-id].en-uso > g > path:last-of-type { stroke: #7c3aed; stroke-width: 3; }
   .avisos .q-expansion-item__container > .q-item { color: #b26b00; }
   .body--dark .avisos .q-expansion-item__container > .q-item { color: #ffbd45; }
   /* Globos del chat */
@@ -248,7 +334,8 @@ GRAPH_LEGEND = (
     "**Línea celeste punteada**: qué usa cada nodo de la knowledge layer · "
     "**Azul**: función usada por el grafo · **Rojo**: todavía es un TODO · "
     "**Naranja**: nadie la usa · **Gris**: se usa fuera del grafo (ingesta, seed) · "
-    "**⚙ modelo**: llama al modelo · **Borde rojo**: recorrido del último mensaje. "
+    "**⚙ modelo**: llama al modelo · **Borde rojo**: recorrido del último mensaje · "
+    "**Borde rojo punteado**: donde falló · **Borde violeta**: lo que usó la última prueba. "
     "Rueda del mouse: zoom · arrastrar: mover · doble clic: ver todo."
 )
 CHECK_ICONS = {True: "✅", False: "❌", None: "ℹ️"}
@@ -267,9 +354,11 @@ def _checks(lineage: dict) -> None:
 # recorrido: panel-grafo
 def _graph_panel():
     """Panel a la derecha con el grafo completo (sale de agents/grafo.json), con
-    botón para ampliarlo. Devuelve la función que marca el recorrido de un mensaje."""
+    botón para ampliarlo. Devuelve dos funciones: una marca el recorrido de un mensaje
+    y la otra lo que usó una prueba."""
     lineage = load_lineage()
-    last_path: list[str] = []
+    # Lo último marcado, para repetirlo al ampliar
+    last = {"path": [], "failed": None, "uses": []}
 
     def drawing_area(*classes: str):
         ui.label(GRAPH_NOTICE).classes("texto-suave text-caption")
@@ -293,7 +382,7 @@ def _graph_panel():
             ).props("outline").classes("boton-borde")
         ui.label(
             "El grafo completo y lo que usa cada nodo. Después de cada mensaje se "
-            "marca por dónde pasó."
+            "marca por dónde pasó; después de cada prueba, qué usó."
         ).classes("texto-suave text-caption")
         drawing = drawing_area()
         with ui.expansion("Chequeos de reglas", icon="rule").classes("w-full seccion"):
@@ -301,22 +390,28 @@ def _graph_panel():
     with ui.page_sticky(position="top-right", x_offset=16, y_offset=16):
         ui.button("Grafo", icon="account_tree", on_click=panel.toggle).props("outline")
 
-    def draw(target, path) -> None:
-        ui.run_javascript(
-            f"dibujarGrafo('c{target.id}', {json.dumps(lineage)}, {json.dumps(list(path))})"
-        )
+    def draw(target) -> None:
+        args = [lineage, last["path"], last["failed"], last["uses"]]
+        ui.run_javascript(f"dibujarGrafo('c{target.id}', {', '.join(map(json.dumps, args))})")
 
     def open_big() -> None:
         big.open()
-        draw(big_drawing, last_path)
+        draw(big_drawing)
 
-    def mark(path: list[str] | tuple[str, ...]) -> None:
-        last_path[:] = path
+    def mark(path: Sequence[str], failed: str | None = None) -> None:
+        last.update(path=list(path), failed=failed)
         for target in (drawing, big_drawing):
-            ui.run_javascript(f"marcarRecorrido('c{target.id}', {json.dumps(list(path))})")
+            ui.run_javascript(
+                f"marcarRecorrido('c{target.id}', {json.dumps(list(path))}, {json.dumps(failed)})"
+            )
 
-    draw(drawing, ())
-    return mark
+    def mark_uses(fn: Callable) -> None:
+        last["uses"] = knowledge_used_by(fn)
+        for target in (drawing, big_drawing):
+            ui.run_javascript(f"marcarUso('c{target.id}', {json.dumps(last['uses'])})")
+
+    draw(drawing)
+    return mark, mark_uses
 
 
 def _embed(embed: Embed) -> None:
@@ -363,7 +458,7 @@ async def index(taller: int = 0) -> None:
     catalog = await run.io_bound(model_catalog)
     models = catalog.options
     model_select = _sidebar(prefs, workshops, current, catalog, dark)
-    mark_path = _graph_panel()
+    mark_path, mark_uses = _graph_panel()
 
     # Una sola pantalla: el chat abierto y el resto en secciones que se despliegan
     with ui.column().classes("w-full max-w-3xl mx-auto q-px-md q-py-xl gap-4"):
@@ -379,7 +474,7 @@ async def index(taller: int = 0) -> None:
             )
         with ui.expansion("Pruebas", icon="science").classes("w-full seccion"):
             for tool in workshop.tools:
-                tool_card(tool, models, model_select.value)
+                tool_card(tool, models, model_select.value, on_run=mark_uses)
         for embed in workshop.embeds:
             _embed(embed)
         if workshop.guide:

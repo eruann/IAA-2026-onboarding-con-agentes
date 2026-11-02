@@ -95,6 +95,20 @@ campo por parámetro y el botón **Probar**.
 - Si falla el modelo (key inválida, límite gratis, Ollama apagado...), el error
   se explica en castellano en vez de mostrar el traceback.
 
+- Si un mensaje del **chat** falla por el modelo, su globo ofrece **Usar otro
+  modelo (Auto)**, que pasa al siguiente de la lista y cambia el selector, y
+  **Usar otro modelo (manual)**, que reintenta con el que elijas en la barra
+  lateral. Los botones valen mientras ese mensaje sea lo último de la
+  conversación.
+
+### Qué marca el grafo
+
+El panel **Grafo** (arriba a la derecha) marca en rojo por dónde pasó el último
+mensaje del chat; si falló, llega hasta el nodo donde falló y le pone el borde
+rojo punteado. Cuando corrés una prueba, marca en violeta las funciones de la
+knowledge layer que usa (sale del mismo análisis del código que dibuja el
+grafo). Nada de esto se configura por taller.
+
 ## Crear el taller de un rol nuevo
 
 1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`)

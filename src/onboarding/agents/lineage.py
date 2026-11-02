@@ -61,7 +61,7 @@ MODEL_METHODS = {"invoke", "ainvoke", "stream", "astream", "batch", "with_struct
 MAX_DEPTH = 6
 
 
-def _knowledge_exports() -> dict[str, Callable]:
+def knowledge_exports() -> dict[str, Callable]:
     """La única puerta de la knowledge layer: sus funciones públicas."""
     return {
         name: getattr(knowledge, name)
@@ -110,7 +110,7 @@ def _ours(obj: object) -> bool:
     return inspect.isfunction(obj) and obj.__module__.startswith("onboarding.")
 
 
-def _follow(fn: Callable, exports: dict[str, Callable], depth: int = 0, seen=None) -> dict:
+def follow(fn: Callable, exports: dict[str, Callable], depth: int = 0, seen=None) -> dict:
     """Recorre las llamadas de `fn`: devuelve qué funciones de la knowledge layer usa
     (con la cadena por la que llega) y por qué cadena llega al modelo."""
     seen = seen if seen is not None else set()
@@ -126,7 +126,7 @@ def _follow(fn: Callable, exports: dict[str, Callable], depth: int = 0, seen=Non
         if id(target) in by_object:
             found["knowledge"].setdefault(by_object[id(target)], [fn.__name__])
         elif _ours(target):
-            inner = _follow(target, exports, depth + 1, seen)
+            inner = follow(target, exports, depth + 1, seen)
             for name, chain in inner["knowledge"].items():
                 found["knowledge"].setdefault(name, [fn.__name__, *chain])
             if inner["model"] and found["model"] is None:
@@ -249,14 +249,14 @@ def _graph():
 def build_lineage() -> dict:
     """La arquitectura, lista para guardar como JSON: nodos, flechas y knowledge layer."""
     graph = _graph()
-    exports = _knowledge_exports()
+    exports = knowledge_exports()
 
     nodes = []
     for key, node in graph.nodes.items():
         if key in (START, END):
             continue
         fn = node.data.func
-        found = _follow(fn, exports)
+        found = follow(fn, exports)
         nodes.append(
             {
                 "id": key,
@@ -275,7 +275,7 @@ def build_lineage() -> dict:
     layer = []
     for name in sorted(exports):
         fn = exports[name]
-        model = _follow(fn, {})["model"]
+        model = follow(fn, {})["model"]
         layer.append(
             {
                 "funcion": name,
@@ -303,7 +303,7 @@ def current_state(lineage: dict) -> dict:
     functions = {
         key: node.data.func for key, node in _graph().nodes.items() if key not in (START, END)
     }
-    exports = _knowledge_exports()
+    exports = knowledge_exports()
     callers = _callers()
 
     for node in lineage["nodos"]:

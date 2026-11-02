@@ -92,7 +92,10 @@ def _value(param: Param, field) -> Any:
 
 
 # recorrido: tarjeta-prueba
-def tool_card(tool: Tool, models: list[ModelOption], model_index: int) -> None:
+def tool_card(
+    tool: Tool, models: list[ModelOption], model_index: int, on_run: Callable | None = None
+) -> None:
+    """La tarjeta de una prueba. `on_run(fn)` se llama cada vez que se corre."""
     params = describe_params(tool.fn)
     fields: dict[str, Any] = {}
     model_param = next((param.name for param in params if param.kind == "model"), None)
@@ -127,6 +130,8 @@ def tool_card(tool: Tool, models: list[ModelOption], model_index: int) -> None:
                 ui.notify(f"Completá: {', '.join(missing)}", type="warning")
                 return
             kwargs = {p.name: _value(p, fields[p.name]) for p in params if p.kind != "model"}
+            if on_run:
+                on_run(tool.fn)
             chosen = [None]
             if model_param:
                 chosen = [first.value] + ([second.value] if compare.value else [])
