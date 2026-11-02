@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Un turno de conversación: la puerta de entrada al grafo para las interfaces.
 
 La interfaz web lo usa hoy y Slack después. Quien llama no arma el estado: pasa

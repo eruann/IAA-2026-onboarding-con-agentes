@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Panel del jefe: ver progreso y validar misiones. Titular: rol Experiencia."""
 
 from pathlib import Path

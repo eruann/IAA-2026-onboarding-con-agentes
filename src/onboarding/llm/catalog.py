@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Qué modelos se pueden elegir desde la interfaz.
 
 Sale de dos listas del .env (OPENROUTER_MODELS y OLLAMA_MODELS), filtradas por lo

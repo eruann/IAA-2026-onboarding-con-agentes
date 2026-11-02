@@ -1,3 +1,9 @@
+> **andamiaje**
+>
+> Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+> construya, pruebe o entienda el producto (talleres, diagramas, guías).
+> No es parte del producto.
+
 # Taller Grafo cultural y datos
 
 **Tu parte:** lo no escrito, quién sabe qué más allá del organigrama.

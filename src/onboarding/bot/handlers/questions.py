@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Preguntas libres del ingresante: mención al bot o mensaje directo."""
 
 from slack_bolt import App

@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Páginas de la interfaz: entrada con nombre y talleres.
 
 Retoma el primer prototipo de interfaz del proyecto (PR #15): entrada con

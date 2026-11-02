@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Registro de uso: tokens, costo y latencia de cada llamada al modelo.
 
 La propuesta se compromete a justificar costo por ingresante con datos, así que

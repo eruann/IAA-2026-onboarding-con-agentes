@@ -1,3 +1,9 @@
+> **andamiaje**
+>
+> Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+> construya, pruebe o entienda el producto (talleres, diagramas, guías).
+> No es parte del producto.
+
 # Taller RAG y evaluación
 
 **Tu parte:** lo escrito. Que el bot encuentre el documento y la sección que

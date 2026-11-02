@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Carga los datos de la empresa ficticia en la base.
 
     docker compose run --rm app python -m onboarding.seed

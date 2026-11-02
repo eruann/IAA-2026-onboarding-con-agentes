@@ -112,6 +112,15 @@ src/onboarding/
 
 Cada módulo tiene su test al lado: `chunking.py` + `chunking_test.py`.
 
+**Producto y andamiaje.** Cada archivo de `src/` empieza diciendo qué es:
+
+- `# producto`: parte del asistente de onboarding que se entrega y se evalúa.
+- `# andamiaje`: una ayuda para que el equipo construya, pruebe o entienda el
+  producto (los talleres de `/ui`, el dibujo del grafo, las guías). No es parte
+  del producto.
+
+Detalle en [AGENTS.md](AGENTS.md#producto-y-andamiaje).
+
 - **Empezar a desarrollar** (roles, carpetas, forma de trabajo): [DEVELOPMENT.md](DEVELOPMENT.md)
 - Arquitectura completa: [docs/arquitectura.md](docs/arquitectura.md)
 - Quién hace qué y cuál es tu primer PR: [docs/roles.md](docs/roles.md)

@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Extracción de relaciones desde conversación libre. Titular: rol Grafo cultural y datos."""
 
 from dataclasses import dataclass

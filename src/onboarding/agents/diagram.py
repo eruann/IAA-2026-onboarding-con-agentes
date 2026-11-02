@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """El lineage del grafo (`agents/grafo.json`, ver lineage.py), para dibujarlo.
 
 El dibujo no lee el código: solo muestra lo que dice el lineage generado. Lo arma

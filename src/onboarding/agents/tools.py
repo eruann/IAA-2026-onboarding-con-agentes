@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Herramientas que los agentes pueden llamar. Titular: rol Agentes.
 
 Regla: una tool es una función chica con tipos claros que envuelve la interfaz

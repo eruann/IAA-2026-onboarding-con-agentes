@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Comandos de misiones: ver las propias, entregar evidencia."""
 
 from slack_bolt import App

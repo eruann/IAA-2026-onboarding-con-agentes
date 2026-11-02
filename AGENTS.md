@@ -92,6 +92,40 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     Codex: `/plan`) y esperá su OK. La idea es que quien pide entienda el
     cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
 
+## Producto y andamiaje
+
+Cada archivo de `src/` empieza con una marca y su leyenda (`file_tags_test.py`
+falla si falta y muestra qué copiar):
+
+```python
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+```
+
+```python
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+```
+
+En `.js` va con `//` y en los `LEEME.md` como cita (`>`). Buscar:
+`grep -rl "^# andamiaje" src/`.
+
+- **Producto:** el asistente en sí: `agents/` (grafo, nodos, estado, prompts),
+  `knowledge/`, `llm/factory.py`, `game/`, `bot/`, `api/`, `db/`, `config.py`,
+  `seed.py`. Las migraciones (`db/migrations/versions/`) son producto y no
+  llevan marca: las genera Alembic.
+- **Andamiaje:** `ui/` (los talleres), `onboarding/workshop.py`, cada
+  `*/workshop.py` y su `LEEME.md`, `agents/lineage.py` y `agents/diagram.py`,
+  `llm/catalog.py`. Fuera de `src/` y sin marca porque el formato no admite
+  comentarios: `agents/grafo.json` y `.tours/`.
+
+Archivo nuevo: elegí la marca según para qué sirve. Si es para el asistente, es
+producto; si es para que el equipo trabaje o entienda, es andamiaje. Si una
+parte de un archivo es de cada cosa, conviene separarlo en dos archivos.
+
 ## Talleres (interfaz `/ui`)
 
 La interfaz web (`src/onboarding/ui/`, NiceGUI) tiene un **taller por rol**: un

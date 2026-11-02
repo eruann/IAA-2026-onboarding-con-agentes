@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Carga de prompts.
 
 Los prompts viven en archivos .md al lado de este módulo para que los cambios se

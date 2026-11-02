@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Orquestación de agentes con LangGraph. Titular: rol Agentes.
 
 Interfaz pública del módulo: lo que otros módulos pueden importar.

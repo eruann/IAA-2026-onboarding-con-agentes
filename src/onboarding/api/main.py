@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Aplicación única: API + panel del jefe + endpoint de Slack.
 
 Un solo proceso y un solo contenedor en producción. Slack entra por Events API

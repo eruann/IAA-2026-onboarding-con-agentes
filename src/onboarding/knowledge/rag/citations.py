@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Guardrail contra citas inventadas.
 
 La propuesta se compromete a que toda respuesta cite la fuente y a verificar que

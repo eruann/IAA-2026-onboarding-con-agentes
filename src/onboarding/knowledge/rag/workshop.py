@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Taller del rol RAG y evaluación.
 
 Declara las pruebas y suma dos ayudas para mirar y medir lo que construye el rol

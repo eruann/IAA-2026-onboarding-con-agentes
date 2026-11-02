@@ -1,3 +1,8 @@
+// andamiaje
+// Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+// construya, pruebe o entienda el producto (talleres, diagramas, guías).
+// No es parte del producto.
+
 // Dibujo del grafo de agentes como diagrama de flujo, con trazo de Excalidraw.
 //
 // Lee el lineage (agents/grafo.json, generado desde el código) y lo dibuja: ELK

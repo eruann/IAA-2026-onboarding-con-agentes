@@ -1,3 +1,7 @@
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
+
 """Generación de embeddings.
 
 DECISIÓN ABIERTA (ADR 0005, titular: rol RAG). Define la dimensión del vector,

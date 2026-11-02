@@ -97,7 +97,8 @@ campo por parámetro y el botón **Probar**.
 
 1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`)
    y `LEEME.md` (qué construye el rol, qué falta, cómo probar y pedidos de plan
-   de ejemplo).
+   de ejemplo). Los dos son andamiaje: empiezan con la marca `andamiaje` y su
+   leyenda ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
 2. Exportar `WORKSHOP` por la interfaz pública del módulo (su `__init__.py`).
 3. Sumarlo en `all_workshops()` de [`onboarding/workshop.py`](../src/onboarding/workshop.py)
    y sacar el rol de `UPCOMING`.

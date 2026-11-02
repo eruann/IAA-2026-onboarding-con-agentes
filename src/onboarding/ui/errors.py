@@ -1,3 +1,8 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 """Errores explicados en castellano, para mostrar en pantalla.
 
 Se reconocen por el nombre de la clase y no importando el SDK del proveedor:
