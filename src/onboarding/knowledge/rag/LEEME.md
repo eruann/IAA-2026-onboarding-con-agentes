@@ -3,9 +3,9 @@
 **Tu parte:** lo escrito. Que el bot encuentre el documento y la sección que
 responden cada pregunta, y medir qué tan bien lo hace.
 
-## Qué es de quién
+## Qué construís y qué trae el taller
 
-**Lo construye el rol RAG** (todo en `knowledge/rag/`):
+**Lo construís vos** (todo en `knowledge/rag/`):
 
 - `chunking.py` → `chunk_text`: corta un documento en fragmentos. **Ya
   funciona**, pero por párrafos y sin mirar los títulos `##` (ver más abajo).
@@ -18,8 +18,8 @@ responden cada pregunta, y medir qué tan bien lo hace.
 - `citations.py` → `quote_is_supported`: verifica que una cita esté textual.
   **Ya funciona.**
 
-**Lo armó el Tech Lead para el taller** (`knowledge/rag/workshop.py`): la
-declaración del taller y dos ayudas para mirar y medir tu trabajo:
+**Lo trae el taller** (`knowledge/rag/workshop.py`): la declaración de las
+pruebas y dos ayudas para mirar y medir tu trabajo:
 
 - `chunk_document`: muestra cómo corta `chunk_text` un documento del corpus.
 - `evaluate_retrieval`: corre las preguntas de `eval/rag_questions.yaml` contra

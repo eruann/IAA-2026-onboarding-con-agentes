@@ -1,9 +1,8 @@
 """Taller del rol RAG y evaluación.
 
-Este archivo lo armó el Tech Lead para el taller: declara las pruebas y suma dos
-ayudas para mirar y medir el trabajo del rol (`chunk_document` y
-`evaluate_retrieval`). Lo que hace cada prueba por dentro (cómo se corta, cómo
-se busca) es del rol RAG: está en `chunking.py`, `retriever.py` y compañía.
+Declara las pruebas y suma dos ayudas para mirar y medir lo que construye el rol
+(`chunk_document` y `evaluate_retrieval`). Lo que hace cada prueba por dentro
+(cómo se corta, cómo se busca) está en `chunking.py`, `retriever.py` y compañía.
 """
 
 from pathlib import Path
