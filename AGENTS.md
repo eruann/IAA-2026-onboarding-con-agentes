@@ -100,6 +100,13 @@ chat con su agente y pruebas directas de sus funciones, con selector de modelo
 declara en un `workshop.py` de la carpeta del rol (hoy:
 `knowledge/informal_network/workshop.py`); su guía es el `LEEME.md` de al lado.
 
+**Guía completa para el equipo: [docs/talleres.md](docs/talleres.md)** (campos
+del `Workshop`, tipos de parámetro y cómo se dibujan, cómo se muestra el
+resultado, taller nuevo). Si alguien pregunta cómo armar o configurar su taller,
+partí de esa guía y confirmalo en el código (`onboarding/workshop.py` y
+`ui/tool_form.py`); si no coinciden, gana el código y corregí la guía en el
+mismo PR. Si cambiás cómo funcionan los talleres, actualizá la guía.
+
 Para sumar una prueba a un taller:
 
 1. Escribí la función en el módulo del rol, con tipo en **todos** los parámetros:
