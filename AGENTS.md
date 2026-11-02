@@ -89,8 +89,8 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     aprobado (no estás en modo plan y no hay un plan aceptado en la
     conversación), no edites todavía: contá en pocas líneas qué vas a hacer, qué
     archivos tocás y por qué, sugerile el modo plan (Claude Code: `Shift+Tab`;
-    Codex: `/plan`) y esperá su OK. El equipo está aprendiendo: tiene que
-    entender el cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
+    Codex: `/plan`) y esperá su OK. La idea es que quien pide entienda el
+    cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
 
 ## Talleres (interfaz `/ui`)
 
