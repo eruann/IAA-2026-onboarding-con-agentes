@@ -51,11 +51,16 @@ def _is_positive_int(value: object) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value > 0
 
 
-def review_quests() -> str:
-    """Las misiones de data/quests.yaml en una tabla, con lo que no cierra."""
-    quests = _load("quests.yaml")
+def quests_in_data() -> list[dict]:
+    """Las misiones de data/quests.yaml, tal cual están escritas."""
+    return _load("quests.yaml")
+
+
+def quest_table(quests: list[dict], seen: set | None = None) -> tuple[str, int]:
+    """Las misiones en una tabla Markdown, con lo que no cierra de cada una, y cuántas
+    tienen algo para revisar. `seen`: keys que ya existen (cuentan como repetidas)."""
+    seen = set(seen or ())
     rows = []
-    seen: set = set()
     with_problems = 0
     for quest in quests:
         problems = _problems(quest, QUEST_FIELDS, seen)
@@ -75,6 +80,14 @@ def review_quests() -> str:
                 )
             )
         )
+    header = ["| key | título | puntos | aprueba | revisión |", "|---|---|---|---|---|"]
+    return "\n".join([*header, *rows]), with_problems
+
+
+def review_quests() -> str:
+    """Las misiones de data/quests.yaml en una tabla, con lo que no cierra."""
+    quests = quests_in_data()
+    table, with_problems = quest_table(quests)
 
     total = sum(q["points"] for q in quests if _is_positive_int(q.get("points")))
     if MIN_QUESTS <= len(quests) <= MAX_QUESTS:
@@ -87,9 +100,7 @@ def review_quests() -> str:
             "",
             f"**{with_problems}** con algo para revisar · **{total}** puntos en total.",
             "",
-            "| key | título | puntos | aprueba | revisión |",
-            "|---|---|---|---|---|",
-            *rows,
+            table,
         ]
     )
 

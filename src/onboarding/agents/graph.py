@@ -13,11 +13,8 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 
 from onboarding.agents.extract_knowledge import make_extract_knowledge
-from onboarding.agents.nodes import (
-    make_answer_question,
-    make_generate_quest,
-    make_validate_evidence,
-)
+from onboarding.agents.generate_quest import make_generate_quest
+from onboarding.agents.nodes import make_answer_question, make_validate_evidence
 from onboarding.agents.state import OnboardingState
 from onboarding.llm import get_chat_model
 

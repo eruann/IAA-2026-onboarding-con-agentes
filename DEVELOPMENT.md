@@ -53,7 +53,7 @@ las que empiezan en la raíz del repo.
 | **RAG y evaluación** · lo escrito | `knowledge/rag/`, su nodo `answer_question`; en la raíz: `corpus/`, `eval/rag_questions.yaml` | `knowledge/__init__.py`, `docs/adr/0005-embeddings.md` |
 | **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`, su nodo `agents/extract_knowledge/`; en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `agents/prompts/extract_knowledge.md`, `data/people.yaml` |
 | **Experiencia: interfaz y game design** | `game/`, `api/`, `bot/`, su nodo `validate_evidence`; en la raíz: `data/quests.yaml`, `data/rewards.yaml` | `agents/__init__.py`, `bot/manifest.yaml` |
-| **Diseñador de misiones** | su nodo `generate_quest` y `agents/prompts/generate_quest.md` | `game/quests.py`, `data/quests.yaml`, `knowledge/__init__.py` |
+| **Diseñador de misiones** | `agents/generate_quest/` y `agents/prompts/generate_quest.md` | `game/quests.py`, `data/quests.yaml`, `knowledge/__init__.py` |
 | **Comms y entregables** | `docs/minutas/`, `docs/README.md` | `docs/adr/` |
 
 El detalle de cada rol, con su primer PR, está en [docs/roles.md](docs/roles.md).
