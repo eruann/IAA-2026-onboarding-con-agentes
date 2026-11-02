@@ -45,12 +45,22 @@ class Tool:
 
 
 @dataclass(frozen=True)
+class Embed:
+    """Una página de la app que el taller muestra adentro, p. ej. el panel del jefe."""
+
+    title: str
+    path: str  # ruta dentro de la app, p. ej. "/panel"
+    help: str = ""
+
+
+@dataclass(frozen=True)
 class Workshop:
     role: str  # nombre del rol, como en docs/roles.md: es el nombre del taller
     intent: str  # a qué nodo del grafo va el chat de este taller
     summary: str  # qué construye el rol, en una o dos líneas
     tools: tuple[Tool, ...] = ()
     guide: Path | None = None  # LEEME.md que muestra la interfaz
+    embeds: tuple[Embed, ...] = ()  # páginas del rol que se ven dentro del taller
 
 
 @dataclass(frozen=True)
@@ -133,13 +143,22 @@ def is_pending(fn: Callable) -> bool:
     return False
 
 
+def markdown_row(cells: tuple[Any, ...]) -> str:
+    """Una fila de tabla Markdown, para las pruebas que devuelven un informe.
+
+    Un "|" dentro de una celda la partiría en dos: se escapa.
+    """
+    return "| " + " | ".join(str(cell).replace("|", "\\|") for cell in cells) + " |"
+
+
 def all_workshops() -> list[Workshop]:
     """Los talleres que ya existen, en el orden en que se muestran."""
     # Import adentro: cada módulo importa este archivo para declarar su taller.
+    from onboarding.game import WORKSHOP as game_workshop
     from onboarding.knowledge import WORKSHOPS as knowledge_workshops
 
-    return [*knowledge_workshops]
+    return [*knowledge_workshops, game_workshop]
 
 
 # Roles que todavía no tienen taller: la interfaz los muestra como "próximamente"
-UPCOMING = ("Experiencia", "Agentes y orquestación", "Tech Lead")
+UPCOMING = ("Agentes y orquestación", "Tech Lead")

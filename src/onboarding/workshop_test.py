@@ -3,7 +3,7 @@ from typing import Literal
 import pytest
 from langchain_core.language_models import BaseChatModel
 
-from onboarding.workshop import all_workshops, describe_params, is_pending
+from onboarding.workshop import all_workshops, describe_params, is_pending, markdown_row
 
 
 def _ejemplo(
@@ -70,3 +70,20 @@ def test_cada_taller_se_puede_dibujar(workshop) -> None:
     for tool in workshop.tools:
         describe_params(tool.fn)
     assert workshop.guide is not None and workshop.guide.exists()
+
+
+def test_una_fila_markdown_escapa_el_pipe() -> None:
+    assert markdown_row(("a | b", 3, "✅")) == "| a \\| b | 3 | ✅ |"
+
+
+@pytest.mark.parametrize("workshop", all_workshops(), ids=lambda workshop: workshop.role)
+def test_cada_pagina_embebida_existe_en_la_app(workshop) -> None:
+    from starlette.routing import Match
+
+    from onboarding.api.main import app
+
+    for embed in workshop.embeds:
+        scope = {"type": "http", "path": embed.path, "method": "GET", "root_path": ""}
+        assert any(route.matches(scope)[0] == Match.FULL for route in app.router.routes), (
+            f"{workshop.role}: {embed.path} no es una ruta de la app"
+        )
