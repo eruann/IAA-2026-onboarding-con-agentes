@@ -19,7 +19,9 @@ from onboarding.agents.state import OnboardingState
 from onboarding.llm import get_chat_model
 
 
-def _route(state: OnboardingState) -> str:
+def route(state: OnboardingState) -> str:
+    """El coordinador: a qué nodo va el mensaje. Hoy, el que pide `intent`; sin
+    `intent`, a responder preguntas."""
     return state.get("intent", "answer_question")
 
 
@@ -36,7 +38,7 @@ def build_graph(model: BaseChatModel | None = None):
 
     builder.add_conditional_edges(
         START,
-        _route,
+        route,
         {
             "generate_quest": "generate_quest",
             "answer_question": "answer_question",

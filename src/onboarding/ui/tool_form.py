@@ -93,9 +93,14 @@ def _value(param: Param, field) -> Any:
 
 # recorrido: tarjeta-prueba
 def tool_card(
-    tool: Tool, models: list[ModelOption], model_index: int, on_run: Callable | None = None
+    tool: Tool,
+    models: list[ModelOption],
+    model_index: int,
+    on_run: Callable | None = None,
+    chat_history: Callable[[], tuple] = tuple,
 ) -> None:
-    """La tarjeta de una prueba. `on_run(fn)` se llama cada vez que se corre."""
+    """La tarjeta de una prueba. `on_run(fn)` se llama cada vez que se corre;
+    `chat_history()` da la conversación del chat, para los parámetros `ChatHistory`."""
     params = describe_params(tool.fn)
     fields: dict[str, Any] = {}
     model_param = next((param.name for param in params if param.kind == "model"), None)
@@ -110,7 +115,7 @@ def tool_card(
             ui.label(tool.help).classes("texto-suave")
 
         for param in params:
-            if param.kind != "model":
+            if param.kind not in ("model", "history"):
                 fields[param.name] = _field(param)
         if model_param:
             first = ui.select(options, label="Modelo", value=model_index).classes("w-full")
@@ -124,12 +129,13 @@ def tool_card(
             missing = [
                 p.name
                 for p in params
-                if p.required and p.kind != "model" and fields[p.name].value in (None, "")
+                if p.required and p.name in fields and fields[p.name].value in (None, "")
             ]
             if missing:
                 ui.notify(f"Completá: {', '.join(missing)}", type="warning")
                 return
-            kwargs = {p.name: _value(p, fields[p.name]) for p in params if p.kind != "model"}
+            kwargs = {p.name: _value(p, fields[p.name]) for p in params if p.name in fields}
+            kwargs |= {p.name: chat_history() for p in params if p.kind == "history"}
             if on_run:
                 on_run(tool.fn)
             chosen = [None]

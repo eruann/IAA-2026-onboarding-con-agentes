@@ -3,7 +3,13 @@ from typing import Literal
 import pytest
 from langchain_core.language_models import BaseChatModel
 
-from onboarding.workshop import all_workshops, describe_params, is_pending, markdown_row
+from onboarding.workshop import (
+    ChatHistory,
+    all_workshops,
+    describe_params,
+    is_pending,
+    markdown_row,
+)
 
 
 def _ejemplo(
@@ -87,3 +93,13 @@ def test_cada_pagina_embebida_existe_en_la_app(workshop) -> None:
         assert any(route.matches(scope)[0] == Match.FULL for route in app.router.routes), (
             f"{workshop.role}: {embed.path} no es una ruta de la app"
         )
+
+
+def test_la_conversacion_del_chat_no_se_dibuja_como_campo() -> None:
+    def con_historia(pregunta: str, history: ChatHistory = ()) -> str:
+        return pregunta
+
+    assert [(p.name, p.kind) for p in describe_params(con_historia)] == [
+        ("pregunta", "text"),
+        ("history", "history"),
+    ]

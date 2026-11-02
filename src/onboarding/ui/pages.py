@@ -67,9 +67,12 @@ def next_model(current: int, total: int) -> int | None:
 
 
 # recorrido: chat-taller
-def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str, on_turn) -> None:
+def _chat(
+    workshop: Workshop, models: list[ModelOption], model_select, name: str, on_turn
+) -> list[tuple[str, str]]:
     """Chat con el agente del taller. `on_turn(path, failed)` se llama después de cada
-    mensaje, salga bien o falle, para marcar el recorrido en el grafo.
+    mensaje, salga bien o falle, para marcar el recorrido en el grafo. Devuelve la
+    conversación (se va llenando), para las pruebas que la usan.
 
     Si un mensaje falla, su globo ofrece reintentarlo con otro modelo. Esos botones
     valen mientras el mensaje que falló sea lo último de la conversación.
@@ -80,20 +83,19 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
         f"Hola {name}, preguntame quién es quién en la empresa o cómo funciona Tesorería."
     ).classes("texto-suave")
     messages = ui.column().classes("w-full gap-4 q-my-sm")
-    nodes = (workshop.intent, *workshop.intents)
 
     def disable_retry() -> None:
         for button in retry_buttons:
             button.disable()
         retry_buttons.clear()
 
-    def offer_retry(text: str, bubble, footer, failed_index: int, node: str) -> None:
+    def offer_retry(text: str, bubble, footer, failed_index: int) -> None:
         async def retry(index: int) -> None:
             disable_retry()
             # El reintento borra estos botones: sin un contexto propio, lo que viene
             # después (avisarle al grafo) quedaría colgado del botón borrado.
             with messages:
-                await answer(text, bubble, footer, index, node, retrying=True)
+                await answer(text, bubble, footer, index, retrying=True)
 
         async def auto() -> None:
             following = next_model(failed_index, len(models))
@@ -123,9 +125,7 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
                     .classes("boton-borde")
                 )
 
-    async def answer(
-        text: str, bubble, footer, index: int, node: str, retrying: bool = False
-    ) -> None:
+    async def answer(text: str, bubble, footer, index: int, retrying: bool = False) -> None:
         option = models[index]
         bubble.clear()
         footer.clear()
@@ -137,7 +137,7 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
             result = await run.io_bound(
                 lambda: run_turn(
                     text,
-                    intent=node,
+                    intent=workshop.intent,
                     actor_name=name,
                     history=list(history),
                     model=get_chat_model(provider=option.provider, model=option.model),
@@ -158,7 +158,7 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
                     ui.label(path_text(path, failed)).classes("text-caption texto-suave")
                 # Si lo que falta es un TODO, cambiar de modelo no lo arregla
                 if explain(error)[0] != "pending":
-                    offer_retry(text, bubble, footer, index, node)
+                    offer_retry(text, bubble, footer, index)
             on_turn(path, failed)
             return
         bubble.clear()
@@ -181,16 +181,8 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
             bubble = _bubble("assistant", "Onboarding")
         with bubble.parent_slot.parent:
             footer = ui.column().classes("gap-2")
-        # El nodo se fija al mandar: un reintento va al mismo, aunque después cambie
-        node = node_select.value if node_select else workshop.intent
-        await answer(text, bubble, footer, model_select.value, node)
+        await answer(text, bubble, footer, model_select.value)
 
-    # Si el taller trabaja sobre varios nodos, se elige con cuál hablar
-    node_select = (
-        ui.select(list(nodes), label="Nodo", value=workshop.intent).classes("w-64")
-        if workshop.intents
-        else None
-    )
     with ui.row().classes("w-full items-center no-wrap"):
         box = (
             ui.input(placeholder="Escribí tu pregunta acá...")
@@ -198,6 +190,7 @@ def _chat(workshop: Workshop, models: list[ModelOption], model_select, name: str
             .on("keydown.enter", enviar)
         )
         ui.button(icon="send", on_click=enviar).props("flat round")
+    return history
 
 
 # Aspecto parecido a Streamlit (el primer prototipo de interfaz era Streamlit)
@@ -470,7 +463,7 @@ async def index(taller: int = 0) -> None:
         ui.label(workshop.role).classes("titulo")
         ui.label(workshop.summary).classes("texto-suave")
         with ui.expansion("Chat", icon="chat", value=True).classes("w-full seccion"):
-            _chat(
+            history = _chat(
                 workshop,
                 models,
                 model_select,
@@ -479,7 +472,13 @@ async def index(taller: int = 0) -> None:
             )
         with ui.expansion("Pruebas", icon="science").classes("w-full seccion"):
             for tool in workshop.tools:
-                tool_card(tool, models, model_select.value, on_run=mark_uses)
+                tool_card(
+                    tool,
+                    models,
+                    model_select.value,
+                    on_run=mark_uses,
+                    chat_history=lambda: tuple(history),
+                )
         for embed in workshop.embeds:
             _embed(embed)
         if workshop.guide:
