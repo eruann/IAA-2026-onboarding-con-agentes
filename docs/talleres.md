@@ -17,7 +17,8 @@ sale solo de la firma de la función.
 | RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
 | Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
 | Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
-| Diseñador de misiones, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
+| Diseñador de misiones | [`agents/generate_quest/workshop.py`](../src/onboarding/agents/generate_quest/workshop.py) | [`LEEME.md`](../src/onboarding/agents/generate_quest/LEEME.md) |
+| Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
 
 ## El archivo `workshop.py`
 

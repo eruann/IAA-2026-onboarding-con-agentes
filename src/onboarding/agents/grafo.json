@@ -4,13 +4,13 @@
     {
       "id": "generate_quest",
       "titulo": "Armar misión",
-      "archivo": "src/onboarding/agents/nodes.py",
+      "archivo": "src/onboarding/agents/generate_quest/node.py",
       "funcion": "make_generate_quest.<locals>.generate_quest",
       "usa": [],
       "modelo": {
         "via": [
           "generate_quest",
-          "_ask"
+          "ask_model"
         ]
       }
     },
@@ -30,7 +30,7 @@
       "modelo": {
         "via": [
           "answer_question",
-          "_ask"
+          "ask_model"
         ]
       }
     },
@@ -43,7 +43,7 @@
       "modelo": {
         "via": [
           "validate_evidence",
-          "_ask"
+          "ask_model"
         ]
       }
     },

@@ -157,12 +157,14 @@ def markdown_row(cells: tuple[Any, ...]) -> str:
 def all_workshops() -> list[Workshop]:
     """Los talleres que ya existen, en el orden en que se muestran."""
     # Import adentro: cada módulo importa este archivo para declarar su taller.
-    from onboarding.agents import WORKSHOP as agents_workshop
+    from onboarding.agents import WORKSHOPS as agents_workshops
     from onboarding.game import WORKSHOP as game_workshop
     from onboarding.knowledge import WORKSHOPS as knowledge_workshops
 
-    return [agents_workshop, *knowledge_workshops, game_workshop]
+    agents, quest_design = agents_workshops
+    # En el orden de docs/roles.md
+    return [agents, *knowledge_workshops, game_workshop, quest_design]
 
 
 # Roles que todavía no tienen taller: la interfaz los muestra como "próximamente"
-UPCOMING = ("Diseñador de misiones", "Tech Lead")
+UPCOMING = ("Tech Lead",)

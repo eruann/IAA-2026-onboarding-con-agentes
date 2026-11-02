@@ -134,8 +134,8 @@ parte de un archivo es de cada cosa, conviene separarlo en dos archivos.
 La interfaz web (`src/onboarding/ui/`, NiceGUI) tiene un **taller por rol**: un
 chat con su agente y pruebas directas de sus funciones, con selector de modelo
 ([ADR 0009](docs/adr/0009-interfaz-nicegui-y-talleres.md)). Cada taller se
-declara en un `workshop.py` de la carpeta del rol (hoy: Agentes, RAG, Grafo y
-Experiencia; la lista está en `docs/talleres.md`); su guía es el `LEEME.md` de
+declara en un `workshop.py` de la carpeta del rol (hoy: Agentes, RAG, Grafo,
+Experiencia y Diseñador de misiones; la lista está en `docs/talleres.md`); su guía es el `LEEME.md` de
 al lado. Una página de la app que el rol construye (como el panel del jefe) se
 muestra dentro del taller con `embeds`.
 

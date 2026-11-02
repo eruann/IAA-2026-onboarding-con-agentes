@@ -134,8 +134,8 @@ le muestra al ingresante qué captura el agente.
 
 ## 7. Diseñador de misiones
 
-**Carpetas:** su nodo `generate_quest` (en `agents/nodes.py`, y después en
-`agents/generate_quest/`) y su prompt `agents/prompts/generate_quest.md`.
+**Carpetas:** `agents/generate_quest/` (su nodo y su taller) y su prompt
+`agents/prompts/generate_quest.md`.
 
 **Su agente:** `generate_quest`, que propone misiones nuevas para un puesto a
 partir de su documentación (`retrieve`, de RAG) y de quién sabe qué

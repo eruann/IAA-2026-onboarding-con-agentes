@@ -23,7 +23,9 @@ from onboarding.llm import load_prompt
 Node = Callable[[OnboardingState], dict]
 
 
-def _ask(model: BaseChatModel, prompt_name: str, state: OnboardingState, context: str = "") -> str:
+def ask_model(
+    model: BaseChatModel, prompt_name: str, state: OnboardingState, context: str = ""
+) -> str:
     """Prompt del agente (+ contexto opcional), conversación previa y texto del turno."""
     system = load_prompt(prompt_name)
     if context:
@@ -33,15 +35,6 @@ def _ask(model: BaseChatModel, prompt_name: str, state: OnboardingState, context
     messages: list[BaseMessage] = [SystemMessage(system), *state.get("messages", [])]
     messages.append(HumanMessage(state.get("input", "")))
     return str(model.invoke(messages).content)
-
-
-def make_generate_quest(model: BaseChatModel) -> Node:
-    def generate_quest(state: OnboardingState) -> dict:
-        # TODO(misiones): recuperar documentación del rol con knowledge.retrieve y
-        # consultar knowledge.who_knows_about para saber a quién involucrar.
-        return {"output": _ask(model, "generate_quest", state)}
-
-    return generate_quest
 
 
 # Transitorio: los documentos van enteros en el prompt, como en el primer chat del
@@ -57,7 +50,7 @@ def make_answer_question(model: BaseChatModel) -> Node:
         # inventar: derivar con knowledge.who_knows_about ("preguntale a X").
         context = f"<documentos>\n{read_documents(CONTEXT_DOCUMENTS)}\n</documentos>"
         return {
-            "output": _ask(model, "answer_question", state, context),
+            "output": ask_model(model, "answer_question", state, context),
             "citations": [],
             "referred_to": None,
         }
@@ -69,6 +62,6 @@ def make_validate_evidence(model: BaseChatModel) -> Node:
     def validate_evidence(state: OnboardingState) -> dict:
         # TODO(experiencia): decidir aprobada / rechazada / requiere revisión humana.
         # La aprobación final del jefe siempre gana sobre el agente.
-        return {"output": _ask(model, "validate_evidence", state)}
+        return {"output": ask_model(model, "validate_evidence", state)}
 
     return validate_evidence
