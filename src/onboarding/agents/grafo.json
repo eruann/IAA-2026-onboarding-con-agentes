@@ -6,9 +6,6 @@
       "titulo": "Armar misión",
       "archivo": "src/onboarding/agents/nodes.py",
       "funcion": "make_generate_quest.<locals>.generate_quest",
-      "todos": [
-        "TODO(agentes): recuperar documentación del rol con knowledge.retrieve y consultar knowledge.who_knows_about para saber a quién involucrar."
-      ],
       "usa": [],
       "modelo": {
         "via": [
@@ -22,9 +19,6 @@
       "titulo": "Responder pregunta",
       "archivo": "src/onboarding/agents/nodes.py",
       "funcion": "make_answer_question.<locals>.answer_question",
-      "todos": [
-        "TODO(agentes): 1) knowledge.retrieve en vez de CONTEXT_DOCUMENTS 2) responder citando documento y sección 3) si no hay soporte, no inventar: derivar con knowledge.who_knows_about (\"preguntale a X\")."
-      ],
       "usa": [
         {
           "funcion": "read_documents",
@@ -45,9 +39,6 @@
       "titulo": "Validar evidencia",
       "archivo": "src/onboarding/agents/nodes.py",
       "funcion": "make_validate_evidence.<locals>.validate_evidence",
-      "todos": [
-        "TODO(agentes): decidir aprobada / rechazada / requiere revisión humana. La aprobación final del jefe siempre gana sobre el agente."
-      ],
       "usa": [],
       "modelo": {
         "via": [
@@ -61,9 +52,6 @@
       "titulo": "Extraer relaciones",
       "archivo": "src/onboarding/agents/extract_knowledge/node.py",
       "funcion": "make_extract_knowledge.<locals>.extract_knowledge",
-      "todos": [
-        "TODO(grafo): guardar las relaciones en nodes/edges, y correr al final de cada conversación (no solo cuando se elige este nodo) sin pisar la respuesta que ya dio otro agente."
-      ],
       "usa": [
         {
           "funcion": "extract_triples",
@@ -121,102 +109,48 @@
     {
       "funcion": "chunk_text",
       "archivo": "src/onboarding/knowledge/rag/chunking.py",
-      "pendiente": false,
       "usada_por_el_grafo": false,
-      "usada_fuera_del_grafo": [
-        "src/onboarding/knowledge/rag/ingest.py",
-        "src/onboarding/knowledge/rag/workshop.py"
-      ],
-      "modelo": null,
-      "doc": ""
+      "modelo": null
     },
     {
       "funcion": "extract_triples",
       "archivo": "src/onboarding/knowledge/informal_network/extraction.py",
-      "pendiente": false,
       "usada_por_el_grafo": true,
-      "usada_fuera_del_grafo": [],
       "modelo": {
         "via": [
           "extract_triples"
         ]
-      },
-      "doc": ""
+      }
     },
     {
       "funcion": "ingest_directory",
       "archivo": "src/onboarding/knowledge/rag/ingest.py",
-      "pendiente": false,
       "usada_por_el_grafo": false,
-      "usada_fuera_del_grafo": [
-        "src/onboarding/seed.py"
-      ],
-      "modelo": null,
-      "doc": ""
+      "modelo": null
     },
     {
       "funcion": "quote_is_supported",
       "archivo": "src/onboarding/knowledge/rag/citations.py",
-      "pendiente": false,
       "usada_por_el_grafo": false,
-      "usada_fuera_del_grafo": [],
-      "modelo": null,
-      "doc": "True si `quote` aparece textualmente en `source_text`."
+      "modelo": null
     },
     {
       "funcion": "read_documents",
       "archivo": "src/onboarding/knowledge/rag/corpus.py",
-      "pendiente": false,
       "usada_por_el_grafo": true,
-      "usada_fuera_del_grafo": [],
-      "modelo": null,
-      "doc": "Los documentos pedidos, cada uno entre etiquetas <documento nombre=\"...\">."
+      "modelo": null
     },
     {
       "funcion": "retrieve",
       "archivo": "src/onboarding/knowledge/rag/retriever.py",
-      "pendiente": true,
       "usada_por_el_grafo": false,
-      "usada_fuera_del_grafo": [
-        "src/onboarding/knowledge/rag/workshop.py"
-      ],
-      "modelo": null,
-      "doc": ""
+      "modelo": null
     },
     {
       "funcion": "who_knows_about",
       "archivo": "src/onboarding/knowledge/informal_network/queries.py",
-      "pendiente": true,
       "usada_por_el_grafo": false,
-      "usada_fuera_del_grafo": [],
-      "modelo": null,
-      "doc": "Personas que saben de un tema, de más a menos respaldo."
-    }
-  ],
-  "chequeos": [
-    {
-      "id": "puerta-knowledge",
-      "regla": "AGENTS.md, regla 4: a la knowledge layer se entra solo por onboarding.knowledge",
-      "ok": true,
-      "detalle": [],
-      "excepciones": [
-        "src/onboarding/db/models.py: registra las tablas de la capa para Alembic"
-      ]
-    },
-    {
-      "id": "modelo-por-get-chat-model",
-      "regla": "AGENTS.md, regla 5: el modelo sale siempre de onboarding.llm.get_chat_model()",
-      "ok": true,
-      "detalle": []
-    },
-    {
-      "id": "pendientes",
-      "regla": "Funciones de la knowledge layer que todavía son un TODO",
-      "ok": null,
-      "detalle": [
-        "retrieve",
-        "who_knows_about"
-      ]
+      "modelo": null
     }
   ]
 }

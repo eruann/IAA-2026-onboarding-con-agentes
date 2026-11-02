@@ -5,6 +5,8 @@ def test_el_lineage_trae_lo_que_necesita_el_dibujo() -> None:
     lineage = load_lineage()
 
     assert {"nodos", "flechas", "knowledge_layer", "chequeos"} <= lineage.keys()
+    # La arquitectura sale de grafo.json; el estado de hoy se le suma al cargar
+    assert all("pendiente" in item for item in lineage["knowledge_layer"])
     ids = {node["id"] for node in lineage["nodos"]} | {"__start__", "__end__"}
     # Cada flecha une nodos que existen: si no, el dibujo queda con una línea suelta
     for edge in lineage["flechas"]:

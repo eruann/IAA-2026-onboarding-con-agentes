@@ -5,28 +5,35 @@
 
 """Lineage del grafo: qué nodos hay, cómo se conectan y qué usa cada uno.
 
-Genera `agents/grafo.json` leyendo el código, sin ejecutar los nodos:
+Lee el código sin ejecutar los nodos. Tiene dos partes:
 
-- el grafo tal como lo compila `build_graph()` (nodos y flechas);
-- para cada nodo, la cadena de llamadas hasta la knowledge layer (lo que exporta
-  `onboarding.knowledge`) y hasta el modelo, siguiendo las funciones hacia adentro;
-- qué funciones siguen en TODO, y los comentarios TODO de cada nodo;
-- chequeos de reglas de AGENTS.md que se pueden verificar mirando el código.
+- **La arquitectura** (`build_lineage`), que se guarda en `agents/grafo.json`: el
+  grafo tal como lo compila `build_graph()` (nodos y flechas), y para cada nodo la
+  cadena de llamadas hasta la knowledge layer (lo que exporta `onboarding.knowledge`)
+  y hasta el modelo. Cambia solo cuando cambia la arquitectura, y su diff en el PR
+  lo muestra. Un test verifica que esté al día:
+
+      docker compose run --rm app python -m onboarding.agents.lineage
+
+- **El estado actual** (`current_state`), que no se guarda: se calcula al abrir el
+  panel. Qué sigue en TODO, quién usa cada función de la capa fuera del grafo y los
+  chequeos de reglas de AGENTS.md. Cambia con el trabajo de cada rol (implementar
+  `retrieve`, por ejemplo), por eso no va al JSON: si fuera, el test frenaría a
+  quien no tocó la arquitectura.
 
 Es la base que dibuja la interfaz (`/ui`, botón Grafo) y la que puede leer un LLM
-para entender la arquitectura o compararla con la documentación. Un test verifica
-que el archivo esté al día con el código:
-
-    docker compose run --rm app python -m onboarding.agents.lineage
+para entender la arquitectura o compararla con la documentación.
 """
 
 import argparse
 import ast
+import copy
 import inspect
 import json
 import sys
 import textwrap
 import types
+from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
 
@@ -213,33 +220,35 @@ def _check_model_factory() -> dict:
     }
 
 
-def _callers_outside_graph(name: str, own_file: str) -> list[str]:
-    """Archivos que llaman a `name` sin ser parte del grafo (p. ej. la ingesta o el seed).
+def _callers() -> dict[str, set[str]]:
+    """Para cada nombre de función, los archivos que la llaman (fuera de `agents/`).
 
     Se cuentan llamadas, no menciones: pasar la función a un taller no es usarla.
     """
-    found = []
+    found: dict[str, set[str]] = defaultdict(set)
     for path in _code_files():
         relative = str(path.relative_to(ROOT))
-        if relative in (own_file,) or relative.startswith("src/onboarding/agents/"):
+        if relative.startswith("src/onboarding/agents/"):
             continue
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Call):
                 target = node.func
                 called = (
                     target.id if isinstance(target, ast.Name) else getattr(target, "attr", None)
                 )
-                if called == name:
-                    found.append(relative)
-                    break
+                if called:
+                    found[called].add(relative)
     return found
+
+
+def _graph():
+    return build_graph(FakeListChatModel(responses=[""])).get_graph()
 
 
 # recorrido: lineage
 def build_lineage() -> dict:
-    """El lineage completo, listo para guardar como JSON."""
-    graph = build_graph(FakeListChatModel(responses=[""])).get_graph()
+    """La arquitectura, lista para guardar como JSON: nodos, flechas y knowledge layer."""
+    graph = _graph()
     exports = _knowledge_exports()
 
     nodes = []
@@ -254,7 +263,6 @@ def build_lineage() -> dict:
                 "titulo": NODE_TITLES.get(key, key),
                 "archivo": _where(fn),
                 "funcion": fn.__qualname__,
-                "todos": _todos(fn),
                 "usa": [
                     {"funcion": name, "via": chain}
                     for name, chain in sorted(found["knowledge"].items())
@@ -263,7 +271,7 @@ def build_lineage() -> dict:
             }
         )
 
-    used = sorted({use["funcion"] for node in nodes for use in node["usa"]})
+    used = {use["funcion"] for node in nodes for use in node["usa"]}
     layer = []
     for name in sorted(exports):
         fn = exports[name]
@@ -272,15 +280,11 @@ def build_lineage() -> dict:
             {
                 "funcion": name,
                 "archivo": _where(fn),
-                "pendiente": is_pending(fn),
                 "usada_por_el_grafo": name in used,
-                "usada_fuera_del_grafo": _callers_outside_graph(name, _where(fn)),
                 "modelo": {"via": model} if model else None,
-                "doc": (inspect.getdoc(fn) or "").split("\n\n")[0],
             }
         )
 
-    pending = [item["funcion"] for item in layer if item["pendiente"]]
     return {
         "generado_por": "python -m onboarding.agents.lineage",
         "nodos": nodes,
@@ -289,17 +293,39 @@ def build_lineage() -> dict:
             for edge in graph.edges
         ],
         "knowledge_layer": layer,
-        "chequeos": [
-            _check_knowledge_door(),
-            _check_model_factory(),
-            {
-                "id": "pendientes",
-                "regla": "Funciones de la knowledge layer que todavía son un TODO",
-                "ok": None,
-                "detalle": pending,
-            },
-        ],
     }
+
+
+def current_state(lineage: dict) -> dict:
+    """El lineage con el estado de hoy: TODOs de cada nodo, funciones pendientes,
+    quién las usa fuera del grafo y chequeos de reglas. No modifica `lineage`."""
+    lineage = copy.deepcopy(lineage)
+    functions = {
+        key: node.data.func for key, node in _graph().nodes.items() if key not in (START, END)
+    }
+    exports = _knowledge_exports()
+    callers = _callers()
+
+    for node in lineage["nodos"]:
+        node["todos"] = _todos(functions[node["id"]]) if node["id"] in functions else []
+    for item in lineage["knowledge_layer"]:
+        fn = exports.get(item["funcion"])
+        item["pendiente"] = bool(fn) and is_pending(fn)
+        item["usada_fuera_del_grafo"] = sorted(callers[item["funcion"]] - {item["archivo"]})
+        item["doc"] = (inspect.getdoc(fn) or "").split("\n\n")[0] if fn else ""
+
+    pending = [item["funcion"] for item in lineage["knowledge_layer"] if item["pendiente"]]
+    lineage["chequeos"] = [
+        _check_knowledge_door(),
+        _check_model_factory(),
+        {
+            "id": "pendientes",
+            "regla": "Funciones de la knowledge layer que todavía son un TODO",
+            "ok": None,
+            "detalle": pending,
+        },
+    ]
+    return lineage
 
 
 def render(lineage: dict) -> str:
