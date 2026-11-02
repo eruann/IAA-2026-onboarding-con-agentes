@@ -11,3 +11,13 @@ Los viáticos por viaje a otra provincia se piden antes de salir, con el visto b
 ## Gastos no reembolsables
 
 No se reembolsan gastos sin comprobante, ni gastos personales mezclados con gastos de trabajo.
+
+## Topes de viáticos
+
+| Concepto                           | Tope                                                            |
+|------------------------------------|-----------------------------------------------------------------|
+| Comida, día completo fuera de sede | equivalente a 2 comidas, con comprobante                        |
+| Alojamiento                        | según tarifa acordada por Administración con hoteles convenidos |
+| Traslado                           | pasaje en clase económica o kilometraje según tabla vigente     |
+
+Los hoteles convenidos se reservan a través de Administración, no por cuenta propia.

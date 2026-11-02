@@ -2,11 +2,11 @@
 
 ## Consultas generales
 
-Romina Castro, Jefa de Recursos Humanos, atiende consultas sobre legajo, recibo de sueldo y beneficios. No se comparte información de sueldos de otras personas por ningún canal.
+Las consultas sobre legajo, recibo de sueldo y beneficios las atiende la Jefatura de Recursos Humanos. Quién ocupa ese puesto figura en el Organigrama. No se comparte información de sueldos de otras personas por ningún canal.
 
 ## Legajo
 
-El legajo se actualiza con cualquier cambio de domicilio, estado civil o datos de contacto. Se avisa directo a Romina Castro.
+El legajo se actualiza con cualquier cambio de domicilio, estado civil o datos de contacto. El cambio se avisa directo a la Jefatura de Recursos Humanos.
 
 ## Recibo de sueldo
 
