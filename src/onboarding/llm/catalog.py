@@ -30,6 +30,16 @@ CACHE_SECONDS = 300
 _cache: dict[str, tuple[float, list[dict] | None]] = {}
 
 
+# Cómo se muestra cada proveedor en el selector: así se ve dónde corre el modelo
+PROVIDER_NAMES = {"openrouter": "OpenRouter", "openai_compat": "Ollama local"}
+
+
+def _option(provider: LLMProvider, model: str) -> "ModelOption":
+    if provider == "fake":
+        return ModelOption("fake", "fake", "fake (respuestas fijas, sin red)")
+    return ModelOption(provider, model, f"{model} · {PROVIDER_NAMES[provider]}")
+
+
 @dataclass(frozen=True)
 class ModelOption:
     provider: LLMProvider
@@ -124,23 +134,17 @@ def _ollama(settings: Settings, exclude: str, notes: list[str]) -> list[str]:
 # recorrido: modelos-elegibles
 def model_catalog(settings: Settings | None = None) -> ModelCatalog:
     settings = settings or get_settings()
-    if settings.llm_provider == "fake":
-        default = ModelOption("fake", "fake", "fake (respuestas fijas, sin red)")
-    else:
-        default = ModelOption(
-            settings.llm_provider, settings.llm_model, f"{settings.llm_model} (del .env)"
-        )
+    # El del .env va primero: es el que aparece elegido al abrir la página
+    default = _option(settings.llm_provider, settings.llm_model)
 
     notes: list[str] = []
     # El del .env cuenta para el tope si también es de OpenRouter
     limit = MAX_OPENROUTER - (default.provider == "openrouter")
     options = [default]
     options += [
-        ModelOption("openrouter", model, f"{model} · OpenRouter")
-        for model in _openrouter(settings, default.model, limit, notes)
+        _option("openrouter", model) for model in _openrouter(settings, default.model, limit, notes)
     ]
     options += [
-        ModelOption("openai_compat", model, f"{model} · Ollama local")
-        for model in _ollama(settings, default.model, notes)
+        _option("openai_compat", model) for model in _ollama(settings, default.model, notes)
     ]
     return ModelCatalog(options, notes)

@@ -3,9 +3,16 @@
 Interfaz pública del módulo: lo que otros módulos pueden importar.
 """
 
+from onboarding.agents.diagram import load_lineage
 from onboarding.agents.graph import build_graph
 from onboarding.agents.run import TurnResult, run_turn
 from onboarding.agents.state import OnboardingState
 
 # recorrido: agentes-interfaz
-__all__ = ["OnboardingState", "TurnResult", "build_graph", "run_turn"]
+__all__ = [
+    "OnboardingState",
+    "TurnResult",
+    "build_graph",
+    "load_lineage",
+    "run_turn",
+]
