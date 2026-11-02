@@ -134,6 +134,33 @@ Detalle de ramas, tests, migraciones y secretos: [CONTRIBUTING.md](CONTRIBUTING.
 
 ### Trabajar con agentes de código
 
+#### Primero el plan
+
+Antes de pedirle a un agente que cambie código, pedile un **plan**: en modo plan
+lee el repo y propone qué va a hacer, pero no toca nada hasta que lo apruebes.
+Así entendés lo que se va a cambiar antes de que pase, y lo podés explicar en
+tu PR.
+
+| Herramienta | Cómo prender el modo plan |
+|---|---|
+| Claude Code (terminal) | `Shift+Tab` hasta que abajo diga *plan mode on* |
+| Claude Code (VS Code) | Selector de modo debajo de la caja del mensaje → *Plan mode* (o `Shift+Tab`) |
+| Codex (terminal) | Escribir `/plan` (o `Shift+Tab`) |
+| Codex (VS Code) | Escribir `/plan`, o el botón **+** de la caja del mensaje → *Plan mode* |
+
+El ciclo:
+
+1. Pedí el plan: "Armame un plan para … Explicame cada paso y qué archivos toca".
+2. Leelo y preguntá lo que no entiendas ("¿por qué esta tabla?", "¿qué pasa si…?").
+3. Si podés explicar con tus palabras qué va a cambiar, aprobalo. Si no, seguí
+   preguntando.
+4. Revisá el resultado y corré los tests antes de commitear.
+
+Si le pedís algo directo, sin plan, el agente igual frena y te cuenta qué va a
+hacer antes de tocar archivos (es una regla de `AGENTS.md`).
+
+#### AGENTS.md
+
 Este proyecto se desarrolla con agentes de código (Claude Code, Copilot, Cursor,
 etc.). Todos leen [AGENTS.md](AGENTS.md) antes de tocar el repo (Claude Code, vía
 `CLAUDE.md`). Lo que está ahí, el agente lo respeta; lo que no está, lo inventa.
