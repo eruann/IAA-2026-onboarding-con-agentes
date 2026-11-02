@@ -1,4 +1,4 @@
-from onboarding.ui.pages import next_model
+from onboarding.ui.chat import next_model
 
 
 def test_el_modelo_siguiente_vuelve_al_principio_al_final_de_la_lista() -> None:

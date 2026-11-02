@@ -38,11 +38,16 @@ class Settings(BaseSettings):
     slack_bot_token: SecretStr | None = None
     slack_signing_secret: SecretStr | None = None
 
+    # Clave para entrar a los talleres (/ui, botón Test) en producción. En dev no
+    # se pide; en prod, sin clave los talleres quedan desactivados.
+    admin_password: SecretStr | None = None
+
     @field_validator(
         "openrouter_api_key",
         "openai_compat_api_key",
         "slack_bot_token",
         "slack_signing_secret",
+        "admin_password",
         mode="before",
     )
     @classmethod

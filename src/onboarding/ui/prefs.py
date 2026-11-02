@@ -1,7 +1,6 @@
-# andamiaje
-# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
-# construya, pruebe o entienda el producto (talleres, diagramas, guías).
-# No es parte del producto.
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
 
 """Preferencias de quien usa la interfaz, guardadas en su navegador (localStorage).
 

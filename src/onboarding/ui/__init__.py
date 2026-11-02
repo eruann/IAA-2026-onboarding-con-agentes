@@ -1,9 +1,9 @@
-# andamiaje
-# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
-# construya, pruebe o entienda el producto (talleres, diagramas, guías).
-# No es parte del producto.
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
 
-"""Interfaz web (NiceGUI), montada en la misma app FastAPI bajo /ui.
+"""Interfaz web (NiceGUI), montada en la misma app FastAPI bajo /ui: la entrada,
+las pantallas de Empleado y Jefe, y los talleres del equipo.
 
 Un solo proceso y un solo servicio en Render: la API, el panel, Slack y esta
 interfaz. Titular: Tech Lead.
@@ -25,7 +25,8 @@ def mount(app: FastAPI) -> None:
         app.mount(MOUNT_PATH, core.app)
         return
 
-    from onboarding.ui import pages  # noqa: F401  (registra las páginas)
+    # Registran las páginas: la entrada, Empleado y Jefe (producto) y los talleres
+    from onboarding.ui import entry, pages, screens  # noqa: F401
 
     # Sin storage_secret: las preferencias (nombre, modelo, modo) viven en el
     # navegador (ui/prefs.py), no en sesiones del servidor.

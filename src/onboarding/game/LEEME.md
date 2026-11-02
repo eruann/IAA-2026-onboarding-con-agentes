@@ -42,6 +42,10 @@ premio, ajustalas (tienen su test en `workshop_test.py`).
 4. Aprobar o rechazar una misión desde el panel, con un clic.
 5. `/misiones` en Slack.
 6. El dial de tono y la pantalla de transparencia (qué captura el agente).
+7. Quién es jefe de quién: hoy la entrada de `/ui` deja tildar "Entrar como jefe"
+   (ver el `TODO(experiencia)` de `game/people.py`). Con PM, sumar el jefe de cada
+   persona a `data/people.yaml` y su columna en `people`, para que la entrada lo
+   sepa sola y el panel muestre solo su equipo.
 
 ## Qué probar en el taller
 

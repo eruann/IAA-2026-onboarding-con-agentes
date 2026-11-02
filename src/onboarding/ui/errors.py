@@ -1,7 +1,6 @@
-# andamiaje
-# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
-# construya, pruebe o entienda el producto (talleres, diagramas, guías).
-# No es parte del producto.
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
 
 """Errores explicados en castellano, para mostrar en pantalla.
 
@@ -10,6 +9,8 @@ la interfaz no sabe qué cliente hay detrás de `get_chat_model()`.
 """
 
 from pathlib import Path
+
+from nicegui import ui
 
 # Raíz del repo: las rutas se muestran como src/onboarding/...
 ROOT = Path(__file__).resolve().parents[3]
@@ -61,3 +62,10 @@ def explain(error: BaseException) -> tuple[str, str]:
             "No se pudo conectar con el proveedor del modelo. Si es Ollama, ¿está abierto?",
         )
     return "error", f"{name}: {detail[:300]}"
+
+
+def render_error(error: BaseException) -> None:
+    """El error explicado: en naranja si es algo pendiente (un TODO), en rojo si falló."""
+    kind, message = explain(error)
+    color = "text-orange-9" if kind == "pending" else "text-negative"
+    ui.label(message).classes(f"{color} whitespace-pre-wrap")

@@ -86,6 +86,7 @@ key. Ver [ADR 0006](../adr/0006-llm-via-openrouter.md).
    | `OPENROUTER_API_KEY` | la key `sk-or-...` (paso 2) |
    | `SLACK_BOT_TOKEN` | dejar vacío por ahora; se completa en el paso 4 |
    | `SLACK_SIGNING_SECRET` | dejar vacío por ahora |
+   | `ADMIN_PASSWORD` | opcional: la clave de los talleres de `/ui`. Vacía, los talleres quedan desactivados en la demo |
 
 4. **Apply**. El primer build tarda unos minutos: construye la imagen Docker,
    corre `alembic upgrade head` y arranca la aplicación.

@@ -1,7 +1,9 @@
 # Talleres: cómo armar el tuyo
 
-Cada rol tiene un **taller** en la interfaz web (`http://localhost:8000/ui/`):
-un chat con un agente del grafo, **pruebas** de sus propias funciones (sin pasar
+Cada rol tiene un **taller** en la interfaz web: entrá a
+`http://localhost:8000/ui/` y tocá **Talleres (Test)** (en tu compu entra
+directo; en la demo de Render pide `ADMIN_PASSWORD`). Cada taller tiene un chat
+con un agente del grafo, **pruebas** de sus propias funciones (sin pasar
 por el agente) y su **guía**. El porqué está en
 [ADR 0009](adr/0009-interfaz-nicegui-y-talleres.md); acá, cómo se arma.
 

@@ -43,3 +43,6 @@ services:
         sync: false
       - key: SLACK_SIGNING_SECRET
         sync: false
+      # Opcional: sin clave, los talleres de /ui quedan desactivados en la demo
+      - key: ADMIN_PASSWORD
+        sync: false
