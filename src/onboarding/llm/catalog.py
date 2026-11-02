@@ -1,24 +1,33 @@
 """Qué modelos se pueden elegir desde la interfaz.
 
-El del .env va primero. Después, los gratis de OpenRouter (cambian seguido, por
-eso se consultan en vivo y no se escriben en el código) y los que haya instalados
-en Ollama. Si una fuente no responde, se saltea: la lista nunca falla.
+Sale de dos listas del .env (OPENROUTER_MODELS y OLLAMA_MODELS), filtradas por lo
+que de verdad está disponible:
+
+- Primero el del .env (LLM_PROVIDER + LLM_MODEL).
+- OpenRouter: los de la lista que existen hoy. Si son menos de MAX_OPENROUTER, se
+  completa con gratis que razonan ("thinking") y no están en la lista; si la lista
+  tiene más, van todos los de la lista.
+- Ollama: los de la lista que estén instalados; sin lista, todos los instalados.
+
+Si una fuente no responde, se saltea: la lista nunca falla.
 """
 
 import json
 import logging
 import time
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from onboarding.config import LLMProvider, Settings, get_settings
 
 logger = logging.getLogger(__name__)
 
-# Las listas se guardan un rato: no hace falta preguntarle a OpenRouter cada vez
-# que alguien abre la página.
+# Tope de modelos de OpenRouter cuando hay que completar la lista del .env
+MAX_OPENROUTER = 6
+# Las respuestas se guardan un rato: no hace falta preguntarle a OpenRouter cada
+# vez que alguien abre la página.
 CACHE_SECONDS = 300
-_cache: dict[str, tuple[float, list[str]]] = {}
+_cache: dict[str, tuple[float, list[dict] | None]] = {}
 
 
 @dataclass(frozen=True)
@@ -33,62 +42,105 @@ def _get_json(url: str, timeout: float) -> dict:
         return json.load(response)
 
 
-def _cached(key: str, fetch) -> list[str]:
+def _models(source: str, url: str, timeout: float) -> list[dict] | None:
+    """Los modelos que publica `url` (formato OpenAI: {"data": [...]}), con caché.
+
+    None si no respondió (sin red, Ollama cerrado): eso se avisa en la interfaz.
+    """
     now = time.monotonic()
-    if key in _cache and now - _cache[key][0] < CACHE_SECONDS:
-        return _cache[key][1]
+    if source in _cache and now - _cache[source][0] < CACHE_SECONDS:
+        return _cache[source][1]
     try:
-        models = fetch()
-    except Exception as error:  # sin red, Ollama cerrado, respuesta rara
-        logger.info("No se pudo listar modelos de %s: %s", key, error)
-        models = []
-    _cache[key] = (now, models)
+        models = _get_json(url, timeout)["data"]
+    except Exception as error:  # cualquier falla de red o de formato: se avisa y se sigue
+        logger.info("No se pudo listar modelos de %s: %s", source, error)
+        models = None
+    _cache[source] = (now, models)
     return models
 
 
-def free_openrouter_models(settings: Settings) -> list[str]:
-    """Modelos gratis de OpenRouter que reciben y devuelven texto."""
+def _is_free_thinking(model: dict) -> bool:
+    return (
+        model["id"].endswith(":free")
+        and model.get("architecture", {}).get("output_modalities", ["text"]) == ["text"]
+        and "reasoning" in model.get("supported_parameters", [])
+    )
 
-    def fetch() -> list[str]:
-        data = _get_json(f"{settings.openrouter_base_url}/models", timeout=5)["data"]
-        return sorted(
-            item["id"]
-            for item in data
-            if item["id"].endswith(":free")
-            and item.get("architecture", {}).get("output_modalities", ["text"]) == ["text"]
+
+@dataclass(frozen=True)
+class ModelCatalog:
+    options: list[ModelOption]
+    # Problemas de configuración para mostrar en la interfaz, en castellano
+    notes: list[str] = field(default_factory=list)
+
+
+def _openrouter(settings: Settings, exclude: str, limit: int, notes: list[str]) -> list[str]:
+    if settings.openrouter_api_key is None:
+        if settings.openrouter_models or settings.llm_provider == "openrouter":
+            notes.append("Falta OPENROUTER_API_KEY en el .env: no se listan modelos de OpenRouter.")
+        return []
+    published = _models("openrouter", f"{settings.openrouter_base_url}/models", timeout=5)
+    if published is None:
+        notes.append("No se pudo consultar OpenRouter (¿hay internet?): sus modelos no aparecen.")
+        return []
+
+    available = {model["id"] for model in published}
+    missing = [model for model in settings.openrouter_models if model not in available]
+    if missing:
+        notes.append(
+            "Están en OPENROUTER_MODELS pero OpenRouter no los tiene hoy: " + ", ".join(missing)
         )
+    listed = [m for m in settings.openrouter_models if m in available and m != exclude]
+    extra = [
+        model["id"]
+        for model in published
+        if _is_free_thinking(model) and model["id"] not in listed and model["id"] != exclude
+    ]
+    return listed + extra[: max(0, limit - len(listed))]
 
-    return _cached("openrouter", fetch)
 
+def _ollama(settings: Settings, exclude: str, notes: list[str]) -> list[str]:
+    published = _models("ollama", f"{settings.openai_compat_base_url}/models", timeout=1)
+    if published is None:
+        if settings.ollama_models or settings.llm_provider == "openai_compat":
+            notes.append(
+                f"Ollama no responde en {settings.openai_compat_base_url}: "
+                "¿está corriendo `ollama serve`? (ver docs/setup.md)"
+            )
+        return []
 
-def ollama_models(settings: Settings) -> list[str]:
-    """Modelos instalados en el Ollama de OPENAI_COMPAT_BASE_URL."""
-
-    def fetch() -> list[str]:
-        data = _get_json(f"{settings.openai_compat_base_url}/models", timeout=1)["data"]
-        return sorted(item["id"] for item in data)
-
-    return _cached("ollama", fetch)
+    installed = [model["id"] for model in published]
+    missing = [model for model in settings.ollama_models if model not in installed]
+    if missing:
+        notes.append(
+            "Están en OLLAMA_MODELS pero no están instalados: "
+            + ", ".join(f"{model} (`ollama pull {model}`)" for model in missing)
+        )
+    if settings.ollama_models:
+        installed = [model for model in settings.ollama_models if model in installed]
+    return [model for model in installed if model != exclude]
 
 
 # recorrido: modelos-elegibles
-def available_models(settings: Settings | None = None) -> list[ModelOption]:
+def model_catalog(settings: Settings | None = None) -> ModelCatalog:
     settings = settings or get_settings()
-    default = ModelOption(
-        settings.llm_provider, settings.llm_model, f"{settings.llm_model} (del .env)"
-    )
     if settings.llm_provider == "fake":
         default = ModelOption("fake", "fake", "fake (respuestas fijas, sin red)")
+    else:
+        default = ModelOption(
+            settings.llm_provider, settings.llm_model, f"{settings.llm_model} (del .env)"
+        )
 
+    notes: list[str] = []
+    # El del .env cuenta para el tope si también es de OpenRouter
+    limit = MAX_OPENROUTER - (default.provider == "openrouter")
     options = [default]
-    if settings.openrouter_api_key is not None:
-        options += [
-            ModelOption("openrouter", model, f"{model} · OpenRouter")
-            for model in free_openrouter_models(settings)
-            if model != default.model
-        ]
+    options += [
+        ModelOption("openrouter", model, f"{model} · OpenRouter")
+        for model in _openrouter(settings, default.model, limit, notes)
+    ]
     options += [
         ModelOption("openai_compat", model, f"{model} · Ollama local")
-        for model in ollama_models(settings)
+        for model in _ollama(settings, default.model, notes)
     ]
-    return options
+    return ModelCatalog(options, notes)

@@ -241,8 +241,10 @@ OPENAI_COMPAT_BASE_URL=http://host.docker.internal:11434/v1
 ```
 
 y reiniciá la app (`docker compose up`). Con Ollama corriendo, sus modelos
-aparecen solos en el selector de modelo de la interfaz (`/ui`), al lado de los
-gratis de OpenRouter. Si además querés que sea el modelo por defecto:
+aparecen en el selector de modelo de la interfaz (`/ui`), al lado de los de
+OpenRouter. Qué modelos ofrece el selector se elige en el `.env` con dos listas
+JSON, `OPENROUTER_MODELS` y `OLLAMA_MODELS` (ver `.env.example`): se muestran los
+que estén disponibles, y OpenRouter se completa hasta 6 con gratis que razonan. Si además querés que sea el modelo por defecto:
 `LLM_PROVIDER=openai_compat` y `LLM_MODEL=gemma3:4b`.
 
 **Alternativa sin instalar nada** (sin GPU, más lento): el Ollama del compose.

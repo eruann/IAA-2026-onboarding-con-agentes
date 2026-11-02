@@ -71,7 +71,8 @@ def _field(param: Param):
         return ui.number(param.name, value=param.default)
     if param.kind == "bool":
         return ui.switch(param.name, value=bool(param.default))
-    return ui.select(list(param.choices), label=param.name, value=param.default)
+    options = {choice: str(choice) for choice in param.choices}
+    return ui.select(options, label=param.name, value=param.default)
 
 
 def _value(param: Param, field) -> Any:

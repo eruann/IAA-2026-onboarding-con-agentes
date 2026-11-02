@@ -21,7 +21,8 @@ FastAPI, y en Render necesitaría un segundo servicio.
 La interfaz es **NiceGUI montado en la misma app FastAPI**, en `/ui`
 (`src/onboarding/ui/`): un solo proceso y un solo servicio. Usa los agentes por
 `agents.run_turn` y los modelos por `llm.get_chat_model` y
-`llm.available_models` (el del `.env`, los gratis de OpenRouter y los de Ollama).
+`llm.model_catalog` (el del `.env` y las listas `OPENROUTER_MODELS` y
+`OLLAMA_MODELS`, filtradas por lo que está disponible, con avisos si algo falta).
 
 La interfaz se organiza en **talleres, uno por rol**. Cada rol declara el suyo en
 un `workshop.py` de su carpeta (`onboarding/workshop.py`): a qué nodo va el chat y
@@ -35,7 +36,9 @@ una prueba. El panel del jefe sigue en HTMX (`api/`).
   Ollama), y ve qué le falta: las funciones sin implementar aparecen como
   pendientes con su archivo.
 - Sumar una prueba es escribir una función con tipos y listarla.
-- Una dependencia nueva (`nicegui`) y una variable nueva (`UI_STORAGE_SECRET`).
+- Una dependencia nueva (`nicegui`). Las preferencias de cada persona (nombre,
+  modelo, modo oscuro) se guardan en su navegador (`localStorage`), no en el
+  servidor: sobreviven a reinicios y deploys sin base ni sesiones.
 - Dos tecnologías de interfaz: NiceGUI (`/ui`, la mantiene el Tech Lead) y HTMX
   (`/panel`, Experiencia).
 - Pendiente: talleres de los demás roles, el dibujo del grafo con el recorrido de

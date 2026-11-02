@@ -54,10 +54,12 @@ class Param:
     kind: ParamKind
     default: Any = None
     required: bool = True
-    choices: tuple[str, ...] = field(default_factory=tuple)
+    # Los valores tal cual (pueden no ser texto, p. ej. Literal[1, 2]): la interfaz
+    # los pasa a texto solo para mostrarlos.
+    choices: tuple[Any, ...] = field(default_factory=tuple)
 
 
-def _kind_of(annotation: Any) -> tuple[ParamKind, tuple[str, ...]]:
+def _kind_of(annotation: Any) -> tuple[ParamKind, tuple[Any, ...]]:
     origin = typing.get_origin(annotation)
     if origin in (typing.Union, types.UnionType):
         # `X | None`: se dibuja como X, sin obligar a completarlo
@@ -65,7 +67,7 @@ def _kind_of(annotation: Any) -> tuple[ParamKind, tuple[str, ...]]:
         if len(args) == 1:
             return _kind_of(args[0])
     if origin is Literal:
-        return "choice", tuple(str(arg) for arg in typing.get_args(annotation))
+        return "choice", typing.get_args(annotation)
     if annotation is bool:
         return "bool", ()
     if annotation is int:

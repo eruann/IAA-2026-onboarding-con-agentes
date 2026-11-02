@@ -5,18 +5,20 @@ nombre, barra lateral con selector de modelo y cerrar sesión, chat con el agent
 de onboarding y prueba de extracción de relaciones. Acá cada rol tiene su taller.
 """
 
-from nicegui import app, run, ui
+from nicegui import run, ui
 
 from onboarding.agents import run_turn
-from onboarding.llm import ModelOption, available_models, get_chat_model
+from onboarding.llm import ModelCatalog, ModelOption, get_chat_model, model_catalog
+from onboarding.ui import prefs as browser_prefs
 from onboarding.ui.tool_form import render_error, tool_card
 from onboarding.workshop import UPCOMING, Workshop, all_workshops
 
 
-def _login() -> None:
+def _login(prefs: dict) -> None:
     def comenzar() -> None:
         if name.value.strip():
-            app.storage.user["name"] = name.value.strip()
+            prefs["name"] = name.value.strip()
+            browser_prefs.save(prefs)
             ui.navigate.reload()
 
     with ui.card().classes("absolute-center w-80"):
@@ -25,8 +27,10 @@ def _login() -> None:
         ui.button("Comenzar", on_click=comenzar).classes("w-full")
 
 
-def _logout() -> None:
-    app.storage.user.clear()
+def _logout(prefs: dict) -> None:
+    # Solo el nombre: el modo oscuro y el modelo elegido quedan para la próxima vez
+    prefs.pop("name", None)
+    browser_prefs.save(prefs)
     ui.navigate.reload()
 
 
@@ -132,6 +136,8 @@ STYLE = """
   /* Clases propias y no las de Quasar (text-grey-*): Quasar va en una capa CSS
      con !important y no se puede pisar desde acá para el modo oscuro. */
   .texto-suave { color: #5c5f6b; }
+  .avisos .q-expansion-item__container > .q-item { color: #b26b00; }
+  .body--dark .avisos .q-expansion-item__container > .q-item { color: #ffbd45; }
   /* Globos del chat */
   .burbuja { padding: 0.75rem 1rem; border-radius: 1rem; line-height: 1.5; }
   .burbuja .nicegui-markdown > :first-child { margin-top: 0; }
@@ -151,8 +157,8 @@ STYLE = """
 
 def _style():
     """Estilo de la página. Devuelve el modo oscuro, que maneja la barra lateral."""
-    # None sigue al sistema; el interruptor de la barra lateral lo fija
-    dark = ui.dark_mode(app.storage.user.get("dark"))
+    # Arranca siguiendo al navegador (None); index() aplica lo que haya guardado
+    dark = ui.dark_mode(None)
     ui.add_head_html(STYLE)
     ui.colors(primary="#ff4b4b")
     for element in (ui.input, ui.textarea, ui.select, ui.number):
@@ -161,14 +167,26 @@ def _style():
     return dark
 
 
-def _sidebar(name: str, workshops: list[Workshop], current: int, models: list[ModelOption], dark):
-    """Barra lateral: sesión, taller, modelo y cerrar sesión. Devuelve el selector de modelo."""
+def _sidebar(prefs: dict, workshops: list[Workshop], current: int, catalog: ModelCatalog, dark):
+    """Barra lateral: sesión, taller, modelo, avisos de configuración, modo oscuro y
+    cerrar sesión. Devuelve el selector de modelo."""
+    models = catalog.options
     options = {index: item.role for index, item in enumerate(workshops)}
     options |= {f"proximo-{role}": f"{role} · próximamente" for role in UPCOMING}
 
     def cambiar_modo(event) -> None:
         dark.value = event.value
-        app.storage.user["dark"] = event.value
+        prefs["dark"] = event.value
+        browser_prefs.save(prefs)
+
+    def cambiar_modelo(event) -> None:
+        option = models[event.value]
+        prefs["model"] = f"{option.provider}:{option.model}"
+        browser_prefs.save(prefs)
+
+    # El modelo se guarda por nombre y no por posición: la lista cambia con el tiempo
+    keys = [f"{option.provider}:{option.model}" for option in models]
+    model_index = keys.index(prefs["model"]) if prefs.get("model") in keys else 0
 
     def cambiar_taller(event) -> None:
         if isinstance(event.value, int):
@@ -178,20 +196,28 @@ def _sidebar(name: str, workshops: list[Workshop], current: int, models: list[Mo
             event.sender.value = current
 
     with ui.left_drawer(value=True).props("width=336").classes("sidebar q-pa-lg"):
-        ui.label(f"Sesión de {name}").classes("text-subtitle1")
+        ui.label(f"Sesión de {prefs['name']}").classes("text-subtitle1")
         ui.select(options, label="Taller", value=current, on_change=cambiar_taller).classes(
             "w-full"
         )
         model_select = ui.select(
             {index: option.label for index, option in enumerate(models)},
             label="Modelo",
-            value=min(app.storage.user.get("model", 0), len(models) - 1),
-            on_change=lambda event: app.storage.user.update(model=event.value),
+            value=model_index,
+            on_change=cambiar_modelo,
         ).classes("w-full")
-        ui.switch("Modo oscuro", value=app.storage.user.get("dark") is True, on_change=cambiar_modo)
-        ui.button("Cerrar sesión", on_click=_logout, color=None).props("outline").classes(
-            "boton-borde q-mt-md"
-        )
+        if catalog.notes:
+            # Problemas del .env o de los proveedores (modelos que faltan, Ollama
+            # apagado...): a la vista, sin tener que leer los logs.
+            with ui.expansion(f"Avisos ({len(catalog.notes)})", icon="warning").classes(
+                "w-full seccion avisos"
+            ):
+                for note in catalog.notes:
+                    ui.markdown(note).classes("text-caption")
+        ui.switch("Modo oscuro", value=dark.value, on_change=cambiar_modo)
+        ui.button("Cerrar sesión", on_click=lambda: _logout(prefs), color=None).props(
+            "outline"
+        ).classes("boton-borde q-mt-md")
     return model_select
 
 
@@ -199,9 +225,12 @@ def _sidebar(name: str, workshops: list[Workshop], current: int, models: list[Mo
 @ui.page("/", response_timeout=20)
 async def index(taller: int = 0) -> None:
     dark = _style()
-    name = app.storage.user.get("name")
+    # Las preferencias viven en el navegador: hay que esperar a que se conecte
+    prefs = await browser_prefs.load()
+    dark.value = prefs.get("dark", prefs.get("prefers_dark", False))
+    name = prefs.get("name")
     if not name:
-        _login()
+        _login(prefs)
         return
 
     workshops = all_workshops()
@@ -209,8 +238,9 @@ async def index(taller: int = 0) -> None:
     workshop = workshops[current]
     # La lista de modelos sale de OpenRouter y de Ollama: se pide fuera del hilo
     # principal para no trabar la página.
-    models = await run.io_bound(available_models)
-    model_select = _sidebar(name, workshops, current, models, dark)
+    catalog = await run.io_bound(model_catalog)
+    models = catalog.options
+    model_select = _sidebar(prefs, workshops, current, catalog, dark)
 
     # Una sola pantalla: el chat abierto y el resto en secciones que se despliegan
     with ui.column().classes("w-full max-w-3xl mx-auto q-px-md q-py-xl gap-4"):

@@ -44,6 +44,13 @@ def test_cada_tipo_se_dibuja_con_su_campo() -> None:
     assert params[4].choices == ("rápido", "lento")
 
 
+def test_las_opciones_de_un_literal_mantienen_su_tipo() -> None:
+    def con_numeros(cantidad: Literal[1, 2, 3] = 2) -> int:
+        return cantidad
+
+    assert describe_params(con_numeros)[0].choices == (1, 2, 3)
+
+
 def test_un_parametro_sin_tipo_falla_con_mensaje_claro() -> None:
     def sin_tipo(texto) -> str:
         return texto
