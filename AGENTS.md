@@ -118,9 +118,12 @@ En `.js` va con `//` y en los `LEEME.md` como cita (`>`). Buscar:
 
 - **Producto:** el asistente en sí: `agents/` (grafo, nodos, estado, prompts),
   `knowledge/`, `llm/factory.py`, `game/`, `bot/`, `api/`, `db/`, `config.py`,
-  `seed.py`. Las migraciones (`db/migrations/versions/`) son producto y no
+  `seed.py`, y de `ui/` la entrada, las pantallas de Empleado y Jefe y lo que
+  usan (`entry.py`, `screens.py`, `chat.py`, `layout.py`, `errors.py`,
+  `prefs.py`). Las migraciones (`db/migrations/versions/`) son producto y no
   llevan marca: las genera Alembic.
-- **Andamiaje:** `ui/` (los talleres), `onboarding/workshop.py`, cada
+- **Andamiaje:** de `ui/`, los talleres (`pages.py`, `tool_form.py`,
+  `access.py`, `grafo.js`), `onboarding/workshop.py`, cada
   `*/workshop.py` y su `LEEME.md`, `agents/lineage.py` y `agents/diagram.py`,
   `llm/catalog.py`. Fuera de `src/` y sin marca porque el formato no admite
   comentarios: `agents/grafo.json` y `.tours/`.
@@ -129,7 +132,14 @@ Archivo nuevo: elegí la marca según para qué sirve. Si es para el asistente, 
 producto; si es para que el equipo trabaje o entienda, es andamiaje. Si una
 parte de un archivo es de cada cosa, conviene separarlo en dos archivos.
 
-## Talleres (interfaz `/ui`)
+## Talleres (interfaz `/ui/talleres`)
+
+La interfaz (`/ui/`) arranca en una **entrada**: se elige una persona de la tabla
+`people` y se va a la pantalla del Empleado o, con el tilde "Entrar como jefe", a
+la del Jefe (producto, [ADR 0010](docs/adr/0010-entrada-por-persona.md)). Aparte,
+el botón **Talleres (Test)**: directo en dev; en prod pide `ADMIN_PASSWORD`, y
+sin ella los talleres quedan desactivados.
+
 
 La interfaz web (`src/onboarding/ui/`, NiceGUI) tiene un **taller por rol**: un
 chat con su agente y pruebas directas de sus funciones, con selector de modelo

@@ -21,7 +21,7 @@ from typing import Any
 from nicegui import run, ui
 
 from onboarding.llm import ModelOption, get_chat_model
-from onboarding.ui.errors import ROOT, explain
+from onboarding.ui.errors import ROOT, render_error
 from onboarding.workshop import Param, Tool, describe_params, is_pending
 
 
@@ -30,12 +30,6 @@ def _source(fn: Callable) -> str:
     if path.is_relative_to(ROOT):
         path = path.relative_to(ROOT)
     return f"{path}:{inspect.getsourcelines(fn)[1]}"
-
-
-def render_error(error: BaseException) -> None:
-    kind, message = explain(error)
-    color = "text-orange-9" if kind == "pending" else "text-negative"
-    ui.label(message).classes(f"{color} whitespace-pre-wrap")
 
 
 def _rows(value: list) -> list[dict]:

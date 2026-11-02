@@ -20,5 +20,6 @@ Estados: `propuesta` → `aceptada` → `reemplazada por 000X`.
 | [0007](0007-knowledge-layer.md) | Knowledge layer: documentos y red informal detrás de una sola puerta | aceptada |
 | [0008](0008-migraciones-al-arrancar.md) | Migraciones al arrancar el contenedor, no como pre-deploy | aceptada |
 | [0009](0009-interfaz-nicegui-y-talleres.md) | Interfaz web con NiceGUI y un taller por rol | aceptada |
+| [0010](0010-entrada-por-persona.md) | Entrada por persona, pantallas de Empleado y Jefe, talleres aparte | aceptada |
 
 Plantilla: [_plantilla.md](_plantilla.md)

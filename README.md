@@ -48,9 +48,11 @@ Levantar todo:
 docker compose up --build
 ```
 
-Listo: la interfaz está en <http://localhost:8000/ui>. Ahí cada rol tiene su
-**taller**: un chat con su agente y pruebas de sus funciones, con selector de
-modelo. El panel del jefe está en <http://localhost:8000/panel> y
+Listo: la interfaz está en <http://localhost:8000/ui>. En la entrada elegís con
+qué persona de la empresa entrás (Empleado o Jefe), o vas a los **talleres**
+del equipo: uno por rol, con un chat con su agente y pruebas de sus funciones.
+Para tener personas para elegir, cargá la empresa ficticia con
+`docker compose run --rm app python -m onboarding.seed`. El panel del jefe está en <http://localhost:8000/panel> y
 <http://localhost:8000/health> responde `ok`.
 
 Sin tocar el `.env` el proyecto arranca con el proveedor de modelo `fake`: no
