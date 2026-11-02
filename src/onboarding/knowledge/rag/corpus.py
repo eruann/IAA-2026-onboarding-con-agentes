@@ -10,6 +10,11 @@ from pathlib import Path
 CORPUS = Path(__file__).resolve().parents[4] / "corpus"
 
 
+def document_names() -> tuple[str, ...]:
+    """Los documentos del corpus, sin el README que documenta la carpeta."""
+    return tuple(sorted(path.name for path in CORPUS.glob("*.md") if path.name != "README.md"))
+
+
 def read_documents(names: tuple[str, ...]) -> str:
     """Los documentos pedidos, cada uno entre etiquetas <documento nombre="...">."""
     return "\n".join(

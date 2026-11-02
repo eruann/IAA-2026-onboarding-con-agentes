@@ -124,7 +124,8 @@
       "pendiente": false,
       "usada_por_el_grafo": false,
       "usada_fuera_del_grafo": [
-        "src/onboarding/knowledge/rag/ingest.py"
+        "src/onboarding/knowledge/rag/ingest.py",
+        "src/onboarding/knowledge/rag/workshop.py"
       ],
       "modelo": null,
       "doc": ""
@@ -176,7 +177,9 @@
       "archivo": "src/onboarding/knowledge/rag/retriever.py",
       "pendiente": true,
       "usada_por_el_grafo": false,
-      "usada_fuera_del_grafo": [],
+      "usada_fuera_del_grafo": [
+        "src/onboarding/knowledge/rag/workshop.py"
+      ],
       "modelo": null,
       "doc": ""
     },

@@ -137,4 +137,4 @@ def all_workshops() -> list[Workshop]:
 
 
 # Roles que todavía no tienen taller: la interfaz los muestra como "próximamente"
-UPCOMING = ("RAG y evaluación", "Experiencia", "Agentes y orquestación", "Tech Lead")
+UPCOMING = ("Experiencia", "Agentes y orquestación", "Tech Lead")

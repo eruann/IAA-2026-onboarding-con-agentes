@@ -13,8 +13,9 @@ sale solo de la firma de la función.
 
 | Rol | Taller | Guía |
 |---|---|---|
+| RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
 | Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
-| RAG, Experiencia, Agentes, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
+| Experiencia, Agentes, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
 
 ## El archivo `workshop.py`
 
@@ -78,6 +79,7 @@ campo por parámetro y el botón **Probar**.
 | La función devuelve | Se ve |
 |---|---|
 | `str` | Texto (acepta Markdown) |
+| `bool` | ✅ Sí / ❌ No |
 | Lista de dataclasses o de dicts | Tabla, una fila por elemento |
 | Otra lista | Lista con viñetas |
 | Un dataclass o un dict | JSON |

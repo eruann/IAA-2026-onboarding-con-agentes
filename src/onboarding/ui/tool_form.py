@@ -38,9 +38,11 @@ def _rows(value: list) -> list[dict]:
 
 
 def render_result(value: Any) -> None:
-    """Muestra el resultado según su forma: texto, tabla o JSON."""
+    """Muestra el resultado según su forma: texto, sí/no, tabla o JSON."""
     if value is None or value == []:
         ui.label("Sin resultados.").classes("texto-suave italic")
+    elif isinstance(value, bool):
+        ui.label("✅ Sí" if value else "❌ No")
     elif isinstance(value, str):
         ui.markdown(value)
     elif isinstance(value, list) and all(
@@ -72,7 +74,7 @@ def _field(param: Param):
     if param.kind == "bool":
         return ui.switch(param.name, value=bool(param.default))
     options = {choice: str(choice) for choice in param.choices}
-    return ui.select(options, label=param.name, value=param.default)
+    return ui.select(options, label=param.name, value=param.default).classes("w-full")
 
 
 def _value(param: Param, field) -> Any:
