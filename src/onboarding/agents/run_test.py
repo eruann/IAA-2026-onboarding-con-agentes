@@ -1,7 +1,7 @@
 import pytest
 from langchain_core.language_models import FakeListChatModel
 
-from onboarding.agents import TurnError, run_turn
+from onboarding.agents import TurnError, path_text, run_turn
 
 
 class _ModeloQueAnota(FakeListChatModel):
@@ -53,3 +53,8 @@ def test_si_falla_dice_en_que_nodo_y_guarda_el_error_original() -> None:
     assert failure.value.path == []
     assert failure.value.failed_node == "answer_question"
     assert isinstance(failure.value.__cause__, RuntimeError)
+
+
+def test_el_recorrido_dice_hasta_donde_llego_si_fallo() -> None:
+    assert path_text(["answer_question"]) == "Recorrido: Inicio → answer_question → Fin"
+    assert path_text([], "answer_question") == "Recorrido: Inicio → answer_question ✗"

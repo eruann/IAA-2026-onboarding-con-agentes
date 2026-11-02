@@ -41,6 +41,12 @@ class TurnError(Exception):
         self.failed_node = failed_node
 
 
+def path_text(path: Sequence[str], failed: str | None = None) -> str:
+    """El recorrido de un mensaje en una línea, para mostrarlo con la respuesta."""
+    steps = ["Inicio", *path, f"{failed} ✗" if failed else "Fin"]
+    return "Recorrido: " + " → ".join(steps)
+
+
 def _messages(history: Sequence[Turn]) -> list[BaseMessage]:
     return [HumanMessage(text) if who == "user" else AIMessage(text) for who, text in history]
 

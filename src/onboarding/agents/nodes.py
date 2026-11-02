@@ -37,7 +37,7 @@ def _ask(model: BaseChatModel, prompt_name: str, state: OnboardingState, context
 
 def make_generate_quest(model: BaseChatModel) -> Node:
     def generate_quest(state: OnboardingState) -> dict:
-        # TODO(agentes): recuperar documentación del rol con knowledge.retrieve y
+        # TODO(misiones): recuperar documentación del rol con knowledge.retrieve y
         # consultar knowledge.who_knows_about para saber a quién involucrar.
         return {"output": _ask(model, "generate_quest", state)}
 
@@ -52,7 +52,7 @@ CONTEXT_DOCUMENTS = ("organigrama.md", "tesoreria.md")
 # recorrido: nodo-respuesta
 def make_answer_question(model: BaseChatModel) -> Node:
     def answer_question(state: OnboardingState) -> dict:
-        # TODO(agentes): 1) knowledge.retrieve en vez de CONTEXT_DOCUMENTS
+        # TODO(rag): 1) knowledge.retrieve en vez de CONTEXT_DOCUMENTS
         # 2) responder citando documento y sección 3) si no hay soporte, no
         # inventar: derivar con knowledge.who_knows_about ("preguntale a X").
         context = f"<documentos>\n{read_documents(CONTEXT_DOCUMENTS)}\n</documentos>"
@@ -67,7 +67,7 @@ def make_answer_question(model: BaseChatModel) -> Node:
 
 def make_validate_evidence(model: BaseChatModel) -> Node:
     def validate_evidence(state: OnboardingState) -> dict:
-        # TODO(agentes): decidir aprobada / rechazada / requiere revisión humana.
+        # TODO(experiencia): decidir aprobada / rechazada / requiere revisión humana.
         # La aprobación final del jefe siempre gana sobre el agente.
         return {"output": _ask(model, "validate_evidence", state)}
 
