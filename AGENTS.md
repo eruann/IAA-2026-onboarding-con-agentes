@@ -15,7 +15,13 @@ docker compose run --rm app pytest             # tests
 docker compose run --rm app ruff check .       # lint
 docker compose run --rm app ruff format .      # formato
 docker compose run --rm app alembic upgrade head
+docker compose run --rm app python -m onboarding.agents.lineage  # regenerar agents/grafo.json
 ```
+
+`agents/grafo.json` es el lineage del grafo (nodos, qué usa cada uno, TODOs y
+chequeos de reglas), generado desde el código. Si cambiás un nodo, lo que llama o
+la interfaz de la knowledge layer, regeneralo y commitealo: un test falla si está
+desactualizado, y su diff en el PR muestra qué cambió en la arquitectura.
 
 El repo tiene un hook de pre-commit (`.githooks/pre-commit`) que corre Ruff sobre
 los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses

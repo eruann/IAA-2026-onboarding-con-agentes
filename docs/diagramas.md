@@ -251,6 +251,14 @@ cuenta.
 
 ### Hoy (`agents/graph.py`)
 
+> En la interfaz (`/ui`, botón **Grafo**) este grafo se dibuja desde
+> `agents/grafo.json`, que genera `python -m onboarding.agents.lineage` leyendo
+> el código: nodos, flechas, la cadena de llamadas de cada nodo hasta la
+> knowledge layer y el modelo, lo que sigue en TODO, quién usa cada función de
+> la capa fuera del grafo y chequeos de reglas. La interfaz lo dibuja como
+> diagrama de flujo (`ui/grafo.js`: ELK ubica, rough.js dibuja con trazo a mano)
+> y marca el recorrido del último mensaje.
+
 Cableado completo con nodos de prueba: cada intención llega a su nodo, que llama
 al modelo con su prompt.
 
