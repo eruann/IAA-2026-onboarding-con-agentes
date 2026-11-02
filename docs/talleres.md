@@ -15,7 +15,8 @@ sale solo de la firma de la función.
 |---|---|---|
 | RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
 | Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
-| Experiencia, Agentes, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
+| Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
+| Agentes, Tech Lead | Todavía no: aparecen como "próximamente" en el selector de talleres | |
 
 ## El archivo `workshop.py`
 
@@ -47,6 +48,7 @@ WORKSHOP = Workshop(
 | `summary` | Una o dos líneas: qué construye el rol. Se muestra debajo del título. |
 | `tools` | Las pruebas: una línea `Tool(función, "Título", "Ayuda corta")` por función. |
 | `guide` | El `LEEME.md` de al lado, que se muestra en la sección **Guía**. |
+| `embeds` | Opcional. Páginas de la app que construye el rol y se ven dentro del taller, cada una en su sección con botón **Recargar**: `Embed("Panel del jefe", "/panel", "Ayuda corta")`. Un test revisa que la ruta exista. |
 
 ## Sumar una prueba
 

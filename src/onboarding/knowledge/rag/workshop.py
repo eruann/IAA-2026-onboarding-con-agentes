@@ -19,7 +19,7 @@ from onboarding.knowledge.rag.chunking import DEFAULT_MAX_CHARS, DEFAULT_OVERLAP
 from onboarding.knowledge.rag.citations import quote_is_supported
 from onboarding.knowledge.rag.corpus import CORPUS, document_names
 from onboarding.knowledge.rag.retriever import retrieve
-from onboarding.workshop import Tool, Workshop
+from onboarding.workshop import Tool, Workshop, markdown_row
 
 # Set fijo de preguntas del rol. Solo está en la imagen de desarrollo.
 QUESTIONS_FILE = CORPUS.parent / "eval" / "rag_questions.yaml"
@@ -58,11 +58,6 @@ def _expected(question: dict) -> list[str]:
     return [expected] if isinstance(expected, str) else list(expected)
 
 
-def _row(cells: tuple[str, ...]) -> str:
-    """Una fila de tabla Markdown. Un "|" dentro de una celda la partiría en dos."""
-    return "| " + " | ".join(str(cell).replace("|", "\\|") for cell in cells) + " |"
-
-
 def evaluate_retrieval(k: int = 5) -> str:
     """Corre las preguntas de eval/rag_questions.yaml contra `retrieve` y mide si
     trae el documento correcto. Solo el retrieval: no llama al modelo."""
@@ -94,7 +89,7 @@ def evaluate_retrieval(k: int = 5) -> str:
             ", ".join(dict.fromkeys(found)) or "—",
             result,
         )
-        rows.append(_row(cells))
+        rows.append(markdown_row(cells))
 
     answerable = len(precisions)
     recall = hits / answerable if answerable else 0.0

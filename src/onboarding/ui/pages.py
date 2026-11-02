@@ -19,7 +19,7 @@ from onboarding.agents import load_lineage, run_turn
 from onboarding.llm import ModelCatalog, ModelOption, get_chat_model, model_catalog
 from onboarding.ui import prefs as browser_prefs
 from onboarding.ui.tool_form import render_error, tool_card
-from onboarding.workshop import UPCOMING, Workshop, all_workshops
+from onboarding.workshop import UPCOMING, Embed, Workshop, all_workshops
 
 
 def _login(prefs: dict) -> None:
@@ -319,6 +319,30 @@ def _graph_panel():
     return mark
 
 
+def _embed(embed: Embed) -> None:
+    """Una página de la app dentro del taller (p. ej. el panel del jefe), con botón
+    para recargarla después de cambiar su código."""
+    with ui.expansion(embed.title, icon="web").classes("w-full seccion"):
+        if embed.help:
+            ui.label(embed.help).classes("texto-suave")
+        frame = (
+            ui.element("iframe")
+            .props(f'src="{embed.path}"')
+            .classes("w-full")
+            .style("height: 70vh; border: 1px solid rgba(49, 51, 63, 0.2); border-radius: 0.5rem")
+        )
+        with ui.row().classes("items-center gap-4"):
+            ui.button(
+                "Recargar",
+                icon="refresh",
+                color=None,
+                on_click=lambda: ui.run_javascript(
+                    f"const f = document.getElementById('c{frame.id}'); f.src = f.src"
+                ),
+            ).props("outline").classes("boton-borde")
+            ui.link("Abrir en otra pestaña", embed.path, new_tab=True)
+
+
 # recorrido: pagina-talleres
 @ui.page("/", response_timeout=20)
 async def index(taller: int = 0) -> None:
@@ -356,6 +380,8 @@ async def index(taller: int = 0) -> None:
         with ui.expansion("Pruebas", icon="science").classes("w-full seccion"):
             for tool in workshop.tools:
                 tool_card(tool, models, model_select.value)
+        for embed in workshop.embeds:
+            _embed(embed)
         if workshop.guide:
             with ui.expansion("Guía", icon="menu_book").classes("w-full seccion"):
                 ui.markdown(workshop.guide.read_text(encoding="utf-8"))
