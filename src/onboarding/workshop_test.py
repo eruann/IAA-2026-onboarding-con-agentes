@@ -197,3 +197,13 @@ def test_el_producto_no_importa_talleres_ni_pruebas_ad_hoc() -> None:
             ):
                 problems.append(f"{path.relative_to(package)}:{node.lineno} importa {node.module}")
     assert not problems, "\n".join(problems)
+
+
+def test_cada_agente_tiene_los_archivos_de_su_taller() -> None:
+    from onboarding.agents import graph
+
+    folder = Path(graph.__file__).parent
+    for node in graph.NODES:
+        files = {path.name for path in (folder / node.name).iterdir()}
+        expected = {"workshop.py", "checks.py", "LEEME.md"}
+        assert expected <= files, f"a {node.name} le falta {sorted(expected - files)}"

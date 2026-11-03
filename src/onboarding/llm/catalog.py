@@ -1,9 +1,9 @@
-# andamiaje
-# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
-# construya, pruebe o entienda el producto (talleres, diagramas, guías).
-# No es parte del producto.
+# producto
+# Este archivo es parte del producto: el asistente de onboarding que se
+# entrega y se evalúa.
 
-"""Qué modelos se pueden elegir desde la interfaz.
+"""Qué modelos se pueden elegir desde la interfaz (el selector de las pantallas de
+Empleado y Jefe, y de los talleres).
 
 Sale de dos listas del .env (OPENROUTER_MODELS y OLLAMA_MODELS), filtradas por lo
 que de verdad está disponible:

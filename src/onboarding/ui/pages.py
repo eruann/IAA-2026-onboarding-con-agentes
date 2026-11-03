@@ -13,15 +13,20 @@ from pathlib import Path
 
 from nicegui import run, ui
 
-from onboarding.agents import knowledge_used_by, load_lineage
+# El dibujo del grafo es andamiaje: el producto no lo exporta, se importa directo
+from onboarding.agents.diagram import knowledge_used_by, load_lineage
 from onboarding.config import get_settings
 from onboarding.llm import model_catalog
 from onboarding.ui import prefs as browser_prefs
-from onboarding.ui.access import has_test_access
+from onboarding.ui.access import has_test_access, workshops_button
 from onboarding.ui.chat import chat
+from onboarding.ui.entry import ENTRY_EXTRAS
 from onboarding.ui.layout import load_session, page_frame, setup_page, sidebar
 from onboarding.ui.tool_form import tool_card
 from onboarding.workshop import UPCOMING, Embed, Workshop, all_workshops
+
+# El botón "Talleres (Test)" de la entrada: lo suma el andamiaje, no la entrada
+ENTRY_EXTRAS.append(workshops_button)
 
 GRAPH_STYLE = """<style>
   /* El grafo va sobre una "pizarra" blanca también en modo oscuro */

@@ -56,8 +56,8 @@ def test_cada_agente_tiene_su_carpeta_con_la_misma_forma() -> None:
     folder = Path(graph_module.__file__).parent
     for node in NODES:
         files = {path.name for path in (folder / node.name).iterdir()}
+        # Lo de producto; los archivos del taller los revisa workshop_test.py
         expected = {"__init__.py", "node.py", "node_test.py", "prompt.md"}
-        expected |= {"workshop.py", "checks.py", "LEEME.md"}  # su taller (andamiaje)
         assert expected <= files, f"a {node.name} le falta {sorted(expected - files)}"
         # El prompt va al lado del código
         assert node.prompt == folder / node.name / "prompt.md"
