@@ -1,7 +1,7 @@
 import pytest
 
-from onboarding.agents.generate_quest.workshop import review_proposal
-from onboarding.game import workshop as game_workshop
+from onboarding import paths
+from onboarding.agents.generate_quest.checks import review_proposal
 
 QUEST = (
     "key: {key}\ntitle: Misión {key}\ndescription: Algo\npoints: 30\n"
@@ -18,7 +18,7 @@ def _item(key: str) -> str:
 def existing(tmp_path, monkeypatch):
     # Las misiones que ya existen en el juego
     (tmp_path / "quests.yaml").write_text(_item("ya-existe"), encoding="utf-8")
-    monkeypatch.setattr(game_workshop, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(paths, "DATA_DIR", tmp_path)
 
 
 def test_una_mision_bien_armada_queda_lista() -> None:

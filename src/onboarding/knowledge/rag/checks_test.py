@@ -1,8 +1,8 @@
 import pytest
 
-from onboarding.knowledge.rag import workshop
+from onboarding.knowledge.rag import checks
+from onboarding.knowledge.rag.checks import chunk_document, evaluate_retrieval
 from onboarding.knowledge.rag.retriever import RetrievedChunk
-from onboarding.knowledge.rag.workshop import chunk_document, evaluate_retrieval
 
 QUESTIONS = """
 - id: compras-001
@@ -32,12 +32,12 @@ FOUND = {
 def questions(tmp_path, monkeypatch):
     path = tmp_path / "rag_questions.yaml"
     path.write_text(QUESTIONS, encoding="utf-8")
-    monkeypatch.setattr(workshop, "QUESTIONS_FILE", path)
+    monkeypatch.setattr(checks, "QUESTIONS_FILE", path)
 
     def fake_retrieve(query: str, k: int = 5) -> list[RetrievedChunk]:
         return [RetrievedChunk("...", doc, "", 0.9) for doc in FOUND[query]][:k]
 
-    monkeypatch.setattr(workshop, "retrieve", fake_retrieve)
+    monkeypatch.setattr(checks, "retrieve", fake_retrieve)
 
 
 def test_cada_fragmento_dice_su_largo_y_los_titulos_que_tiene() -> None:
@@ -66,7 +66,7 @@ def test_mide_recall_y_precision_sin_contar_las_preguntas_sin_respuesta() -> Non
 
 
 def test_avisa_si_no_esta_el_set_de_preguntas(tmp_path, monkeypatch) -> None:
-    monkeypatch.setattr(workshop, "QUESTIONS_FILE", tmp_path / "no-existe.yaml")
+    monkeypatch.setattr(checks, "QUESTIONS_FILE", tmp_path / "no-existe.yaml")
 
     with pytest.raises(FileNotFoundError, match="imagen de desarrollo"):
         evaluate_retrieval()
@@ -74,7 +74,7 @@ def test_avisa_si_no_esta_el_set_de_preguntas(tmp_path, monkeypatch) -> None:
 
 @pytest.mark.usefixtures("questions")
 def test_un_pipe_en_la_pregunta_no_rompe_la_tabla(monkeypatch) -> None:
-    path = workshop.QUESTIONS_FILE
+    path = checks.QUESTIONS_FILE
     path.write_text(
         "- id: pipe-001\n  question: ¿Uso A | B?\n  expected_document: compras.md\n",
         encoding="utf-8",

@@ -33,28 +33,24 @@ import json
 import sys
 import textwrap
 import types
+import typing
 from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
 
-from langchain_core.language_models import FakeListChatModel
+from langchain_core.language_models import BaseChatModel, FakeListChatModel
 from langgraph.graph import END, START
 
 import onboarding.knowledge as knowledge
 from onboarding.agents.diagram import LINEAGE_FILE as OUTPUT
-from onboarding.agents.graph import build_graph
+from onboarding.agents.graph import NODES, build_graph
+from onboarding.paths import REPO_ROOT, repo_relative
 from onboarding.workshop import is_pending
 
-PACKAGE = Path(__file__).resolve().parents[1]  # src/onboarding
-ROOT = PACKAGE.parents[1]  # raíz del repo
+PACKAGE = REPO_ROOT / "src" / "onboarding"
 
-# Cómo se ve cada nodo en el dibujo. Un nodo sin entrada se muestra con su nombre.
-NODE_TITLES = {
-    "answer_question": "Responder pregunta",
-    "generate_quest": "Armar misión",
-    "validate_evidence": "Validar evidencia",
-    "extract_knowledge": "Extraer relaciones",
-}
+# Cómo se ve cada nodo en el dibujo: el título que declara cada agente
+NODE_TITLES = {node.name: node.title for node in NODES}
 # Métodos que, llamados sobre el modelo, son una llamada al LLM
 MODEL_METHODS = {"invoke", "ainvoke", "stream", "astream", "batch", "with_structured_output"}
 # Límite de profundidad al seguir llamadas: alcanza para este código y evita ciclos
@@ -71,21 +67,27 @@ def knowledge_exports() -> dict[str, Callable]:
 
 
 def _where(fn: Callable) -> str:
-    return str(Path(inspect.getsourcefile(fn)).resolve().relative_to(ROOT))
+    return repo_relative(inspect.getsourcefile(fn))
 
 
 def _tree(fn: Callable) -> ast.AST:
     return ast.parse(textwrap.dedent(inspect.getsource(fn)))
 
 
-def _resolve(fn: Callable, call: ast.Call) -> object | None:
-    """A qué objeto apunta una llamada `f(...)` o `modulo.f(...)` dentro de `fn`."""
+def _scope(fn: Callable) -> dict:
+    """Los nombres que ve `fn`: los del módulo y los que captura de afuera (closure)."""
     scope = dict(fn.__globals__)
     if fn.__closure__:
         scope |= {
             name: cell.cell_contents
             for name, cell in zip(fn.__code__.co_freevars, fn.__closure__, strict=True)
         }
+    return scope
+
+
+def _resolve(fn: Callable, call: ast.Call) -> object | None:
+    """A qué objeto apunta una llamada `f(...)` o `modulo.f(...)` dentro de `fn`."""
+    scope = _scope(fn)
     target = call.func
     if isinstance(target, ast.Name):
         return scope.get(target.id)
@@ -96,13 +98,31 @@ def _resolve(fn: Callable, call: ast.Call) -> object | None:
     return None
 
 
-def _calls_model(call: ast.Call) -> bool:
+def _is_chat_model_type(hint: object) -> bool:
+    if isinstance(hint, type) and issubclass(hint, BaseChatModel):
+        return True
+    return any(_is_chat_model_type(arg) for arg in typing.get_args(hint))
+
+
+def _is_model(fn: Callable, name: str) -> bool:
+    """Si `name` dentro de `fn` es un modelo: por el objeto que captura (el modelo que
+    recibe un nodo) o por el tipo del parámetro (`model: BaseChatModel`)."""
+    if isinstance(_scope(fn).get(name), BaseChatModel):
+        return True
+    try:
+        hints = typing.get_type_hints(fn)
+    except Exception:  # anotaciones que no se pueden resolver: no es un modelo conocido
+        return False
+    return name in hints and _is_chat_model_type(hints[name])
+
+
+def _calls_model(fn: Callable, call: ast.Call) -> bool:
     target = call.func
     return (
         isinstance(target, ast.Attribute)
         and target.attr in MODEL_METHODS
         and isinstance(target.value, ast.Name)
-        and target.value.id in {"model", "extractor"}
+        and _is_model(fn, target.value.id)
     ) or (isinstance(target, ast.Name) and target.id == "get_chat_model")
 
 
@@ -120,12 +140,15 @@ def follow(fn: Callable, exports: dict[str, Callable], depth: int = 0, seen=None
     seen.add(fn)
     by_object = {id(obj): name for name, obj in exports.items()}
     for call in (n for n in ast.walk(_tree(fn)) if isinstance(n, ast.Call)):
-        if _calls_model(call) and found["model"] is None:
+        if _calls_model(fn, call) and found["model"] is None:
             found["model"] = [fn.__name__]
         target = _resolve(fn, call)
         if id(target) in by_object:
             found["knowledge"].setdefault(by_object[id(target)], [fn.__name__])
-        elif _ours(target):
+            continue
+        # Una función con @lru_cache (u otro decorador con functools.wraps): la de adentro
+        target = inspect.unwrap(target) if callable(target) else target
+        if _ours(target):
             inner = follow(target, exports, depth + 1, seen)
             for name, chain in inner["knowledge"].items():
                 found["knowledge"].setdefault(name, [fn.__name__, *chain])
@@ -186,7 +209,7 @@ def _code_files() -> list[Path]:
 def _check_knowledge_door() -> dict:
     violations = []
     for path in _code_files():
-        relative = str(path.relative_to(ROOT))
+        relative = repo_relative(path)
         if relative.startswith("src/onboarding/knowledge/") or relative in KNOWLEDGE_EXCEPTIONS:
             continue
         for line, module in _imports(path):
@@ -206,7 +229,7 @@ def _check_knowledge_door() -> dict:
 def _check_model_factory() -> dict:
     violations = []
     for path in _code_files():
-        relative = str(path.relative_to(ROOT))
+        relative = repo_relative(path)
         if relative.startswith("src/onboarding/llm/"):
             continue
         for line, module in _imports(path):
@@ -227,7 +250,7 @@ def _callers() -> dict[str, set[str]]:
     """
     found: dict[str, set[str]] = defaultdict(set)
     for path in _code_files():
-        relative = str(path.relative_to(ROOT))
+        relative = repo_relative(path)
         if relative.startswith("src/onboarding/agents/"):
             continue
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
@@ -345,7 +368,7 @@ def main() -> None:
         print(f"{OUTPUT.name} al día")
         return
     OUTPUT.write_text(content, encoding="utf-8")
-    print(f"Escrito {OUTPUT.relative_to(ROOT)}")
+    print(f"Escrito {repo_relative(OUTPUT)}")
 
 
 if __name__ == "__main__":

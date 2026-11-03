@@ -5,23 +5,23 @@
 
 """Taller del rol Grafo cultural y datos.
 
-Lo mismo que tenía el primer prototipo de interfaz (PR #15): un chat con el
-agente de onboarding y la prueba de extracción de relaciones.
+Solo declara: el chat con `extract_knowledge`, su agente, y las funciones del rol
+que se prueban sueltas.
 """
 
 from pathlib import Path
 
-from onboarding.knowledge.informal_network.extraction import extract_triples
-from onboarding.knowledge.informal_network.queries import who_knows_about
+from onboarding.agents.extract_knowledge.node import extract_triples
+from onboarding.knowledge import who_knows_about
 from onboarding.workshop import Tool, Workshop
 
 # recorrido: taller-grafo
 WORKSHOP = Workshop(
     role="Grafo cultural y datos",
-    intent="answer_question",
+    intent="extract_knowledge",
     summary=(
-        "Lo no escrito: quién sabe qué, más allá del organigrama. Chateá con el "
-        "agente de onboarding y probá la extracción de relaciones sobre cualquier texto."
+        "Lo no escrito: quién sabe qué, más allá del organigrama. Escribile al agente "
+        "una conversación y te devuelve las relaciones que encontró, con su respaldo."
     ),
     tools=(
         Tool(

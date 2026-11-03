@@ -17,24 +17,26 @@ sale solo de la firma de la función.
 |---|---|---|
 | Agentes y orquestación | [`agents/workshop.py`](../src/onboarding/agents/workshop.py) | [`LEEME.md`](../src/onboarding/agents/LEEME.md) |
 | RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
-| Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
+| Grafo cultural y datos | [`agents/extract_knowledge/workshop.py`](../src/onboarding/agents/extract_knowledge/workshop.py) | [`LEEME.md`](../src/onboarding/agents/extract_knowledge/LEEME.md) |
 | Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
 | Diseñador de misiones | [`agents/generate_quest/workshop.py`](../src/onboarding/agents/generate_quest/workshop.py) | [`LEEME.md`](../src/onboarding/agents/generate_quest/LEEME.md) |
 
 ## El archivo `workshop.py`
 
-Es Python, pero solo declara cosas: no lleva lógica. El del Grafo:
+Es Python, pero solo declara cosas: no lleva lógica. Si una prueba necesita una
+ayuda que no es una función del rol (una revisión, una medición), va en un
+`checks.py` al lado, con su `checks_test.py`. El del Grafo:
 
 ```python
 from pathlib import Path
 
-from onboarding.knowledge.informal_network.extraction import extract_triples
-from onboarding.knowledge.informal_network.queries import who_knows_about
+from onboarding.agents.extract_knowledge.node import extract_triples
+from onboarding.knowledge import who_knows_about
 from onboarding.workshop import Tool, Workshop
 
 WORKSHOP = Workshop(
     role="Grafo cultural y datos",
-    intent="answer_question",
+    intent="extract_knowledge",
     summary="Lo no escrito: quién sabe qué, más allá del organigrama. ...",
     tools=(
         Tool(extract_triples, "Extraer relaciones", "Pegá una conversación. Ej.: ..."),
@@ -115,17 +117,20 @@ grafo). Nada de esto se configura por taller.
 
 ## Crear el taller de un rol nuevo
 
-1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`)
-   y `LEEME.md` (qué construye el rol, qué falta, cómo probar y pedidos de plan
-   de ejemplo). Los dos son andamiaje: empiezan con la marca `andamiaje` y su
-   leyenda ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
-2. Exportar `WORKSHOP` por la interfaz pública del módulo (su `__init__.py`).
-3. Sumarlo en `all_workshops()` de [`onboarding/workshop.py`](../src/onboarding/workshop.py)
-   y sacar el rol de `UPCOMING`.
-   - Los roles de la knowledge layer (RAG) entran por `WORKSHOPS` en
-     `knowledge/__init__.py`, que es un archivo compartido: avisalo en el PR.
+1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`,
+   solo la declaración), `checks.py` si hace falta alguna ayuda, y `LEEME.md` con
+   las mismas secciones que los demás: "Qué construís y qué trae el taller",
+   "Qué falta", "Qué probar en el taller" y "Pedidos de plan". Los tres son
+   andamiaje: empiezan con la marca `andamiaje` y su leyenda
+   ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
+2. Exportarlo en `WORKSHOPS` desde la interfaz pública del paquete (su
+   `__init__.py`): `agents`, `knowledge` y `game` lo hacen igual.
+   - `knowledge/__init__.py` es un archivo compartido: avisalo en el PR.
+3. Sumar el rol a `ROLE_ORDER` en [`onboarding/workshop.py`](../src/onboarding/workshop.py)
+   (el orden del selector) y sacarlo de `UPCOMING`.
 4. Correr los tests: `workshop_test.py` revisa que todas las pruebas de todos los
-   talleres se puedan dibujar y que la guía exista.
+   talleres se puedan dibujar, que la guía exista y que el orden sea el de
+   `ROLE_ORDER`.
 
 ## Pedírselo a Claude Code o Codex
 

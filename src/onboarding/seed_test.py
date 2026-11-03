@@ -30,7 +30,7 @@ def data_dir(tmp_path, monkeypatch: pytest.MonkeyPatch):
     (tmp_path / "people.yaml").write_text(_people_yaml("Ingresante seed test"), encoding="utf-8")
     (tmp_path / "quests.yaml").write_text(QUESTS_YAML, encoding="utf-8")
     (tmp_path / "rewards.yaml").write_text("[]\n", encoding="utf-8")
-    monkeypatch.setattr("onboarding.seed.DATA_DIR", tmp_path)
+    monkeypatch.setattr("onboarding.paths.DATA_DIR", tmp_path)
     return tmp_path
 
 
@@ -63,3 +63,27 @@ def test_seed_corrige_el_nombre_sin_crear_otra_persona(db_session: Session, data
     people = db_session.scalars(select(Person).where(Person.key == "seed-test-ingresante")).all()
     assert [person.name for person in people] == ["Nombre corregido"]
     assert _assignments(db_session, people[0]) == 1
+
+
+@pytest.mark.db
+def test_si_la_ingesta_esta_pendiente_el_seed_avisa_y_sigue(
+    db_session: Session, data_dir, caplog: pytest.LogCaptureFixture
+) -> None:
+    seed(with_corpus=True, session=db_session)
+
+    assert "Ingesta incompleta" in caplog.text
+    assert db_session.scalar(select(Person).where(Person.key == "seed-test-ingresante"))
+
+
+@pytest.mark.db
+def test_el_seed_avisa_las_misiones_mal_armadas_y_sigue(
+    db_session: Session, data_dir, caplog: pytest.LogCaptureFixture
+) -> None:
+    (data_dir / "quests.yaml").write_text(
+        QUESTS_YAML.replace("points: 10", "points: 0"), encoding="utf-8"
+    )
+
+    seed(with_corpus=False, session=db_session)
+
+    assert "Misión seed-test-quest: points tiene que ser un entero mayor que cero" in caplog.text
+    assert db_session.scalar(select(QuestRow).where(QuestRow.key == "seed-test-quest"))

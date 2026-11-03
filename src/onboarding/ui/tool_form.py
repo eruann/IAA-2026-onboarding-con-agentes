@@ -15,21 +15,18 @@ import dataclasses
 import inspect
 import json
 from collections.abc import Callable
-from pathlib import Path
 from typing import Any
 
 from nicegui import run, ui
 
 from onboarding.llm import ModelOption, get_chat_model
-from onboarding.ui.errors import ROOT, render_error
+from onboarding.paths import repo_relative
+from onboarding.ui.errors import render_error
 from onboarding.workshop import Param, Tool, describe_params, is_pending
 
 
 def _source(fn: Callable) -> str:
-    path = Path(inspect.getsourcefile(fn) or "").resolve()
-    if path.is_relative_to(ROOT):
-        path = path.relative_to(ROOT)
-    return f"{path}:{inspect.getsourcelines(fn)[1]}"
+    return f"{repo_relative(inspect.getsourcefile(fn) or '')}:{inspect.getsourcelines(fn)[1]}"
 
 
 def _rows(value: list) -> list[dict]:
@@ -119,7 +116,7 @@ def tool_card(
 
         results = ui.row().classes("w-full items-start no-wrap gap-4")
 
-        async def probar() -> None:
+        async def run_tool() -> None:
             missing = [
                 p.name
                 for p in params
@@ -146,7 +143,7 @@ def tool_card(
                         ui.spinner("dots", size="lg")
                     columns.append(column)
 
-            async def una(column, index) -> None:
+            async def run_one(column, index) -> None:
                 try:
                     call_kwargs = dict(kwargs)
                     if index is not None:
@@ -167,6 +164,6 @@ def tool_card(
                     else:
                         render_result(value)
 
-            await asyncio.gather(*(una(c, i) for c, i in zip(columns, chosen, strict=True)))
+            await asyncio.gather(*(run_one(c, i) for c, i in zip(columns, chosen, strict=True)))
 
-        ui.button("Probar", on_click=probar, color=None).props("outline").classes("boton-borde")
+        ui.button("Probar", on_click=run_tool, color=None).props("outline").classes("boton-borde")

@@ -100,15 +100,17 @@ Neon. Detalle en [DEVELOPMENT.md](DEVELOPMENT.md#entornos-dónde-corre-cada-cosa
 ```
 src/onboarding/
 ├── config.py     variables de entorno, un solo lugar
+├── paths.py      dónde está cada cosa del repo (data/, corpus/, eval/)
 ├── seed.py       carga la empresa ficticia
 ├── db/           sesión y migraciones
-├── llm/          elección de modelo (OpenRouter / fake / local) y costo
-├── agents/       grafo de LangGraph, prompts y tools
+├── llm/          elección de modelo (OpenRouter / fake / local), prompts y costo
+├── agents/       grafo de LangGraph: un agente por carpeta, con su prompt
 ├── knowledge/    knowledge layer: una sola puerta
 │   ├── rag/              lo escrito: ingesta, búsqueda, citas
 │   └── informal_network/ lo no escrito: quién es quién
 ├── game/         misiones, puntos, canje, tono
 ├── api/          rutas y panel web
+├── ui/           interfaz web: entrada, Empleado, Jefe y talleres
 └── bot/          Slack por Events API
 ```
 

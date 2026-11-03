@@ -16,83 +16,36 @@ arma la empresa ficticia, sin tocar este archivo.
 
 import argparse
 import logging
-from pathlib import Path
 
-import yaml
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from onboarding.db.session import get_engine
-from onboarding.game.models import Person, QuestAssignment, QuestRow
+from onboarding.db.session import session_scope
+from onboarding.game import check_quests, sync_game_data
 from onboarding.knowledge import ingest_directory
+from onboarding.paths import load_data_yaml
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path("data")
-CORPUS_DIR = Path("corpus")
-
-
-def load_yaml(name: str) -> list[dict]:
-    path = DATA_DIR / name
-    if not path.exists():
-        logger.warning("Falta %s: se saltea", path)
-        return []
-    return yaml.safe_load(path.read_text(encoding="utf-8")) or []
-
-
-def _load_game_data(session: Session, people: list[dict], quests: list[dict]) -> None:
-    people_by_key = {person.key: person for person in session.scalars(select(Person)).all()}
-    for data in people:
-        person = people_by_key.get(data["key"])
-        if person is None:
-            person = Person(key=data["key"])
-            session.add(person)
-            people_by_key[person.key] = person
-        person.name = data["name"]
-        person.role = data["role"]
-        person.area = data["area"]
-        person.is_newcomer = data["is_newcomer"]
-
-    quests_by_key = {quest.key: quest for quest in session.scalars(select(QuestRow)).all()}
-    for data in quests:
-        quest = quests_by_key.get(data["key"])
-        if quest is None:
-            quest_fields = {key: value for key, value in data.items() if key != "key"}
-            quest = QuestRow(key=data["key"], **quest_fields)
-            session.add(quest)
-            quests_by_key[quest.key] = quest
-        else:
-            for key, value in data.items():
-                if key != "key":
-                    setattr(quest, key, value)
-
-    session.flush()
-    newcomers = session.scalars(select(Person).where(Person.is_newcomer.is_(True))).all()
-    existing_assignments = set(
-        session.execute(select(QuestAssignment.person_id, QuestAssignment.quest_id)).all()
-    )
-    for person in newcomers:
-        for quest in quests_by_key.values():
-            pair = (person.id, quest.id)
-            if pair not in existing_assignments:
-                session.add(QuestAssignment(person_id=person.id, quest_id=quest.id))
-                existing_assignments.add(pair)
-
 
 def seed(with_corpus: bool = True, session: Session | None = None) -> None:
-    people = load_yaml("people.yaml")
-    quests = load_yaml("quests.yaml")
-    rewards = load_yaml("rewards.yaml")
+    people = load_data_yaml("people.yaml")
+    quests = load_data_yaml("quests.yaml")
+    rewards = load_data_yaml("rewards.yaml")
     logger.info("people=%s quests=%s rewards=%s", len(people), len(quests), len(rewards))
+    # Las mismas reglas que revisa el taller de Experiencia: se avisa, no se frena
+    for quest, problems in zip(quests, check_quests(quests), strict=True):
+        if problems:
+            logger.warning("Misión %s: %s", quest.get("key", "?"), "; ".join(problems))
 
-    if session is None:
-        with Session(get_engine()) as db_session, db_session.begin():
-            _load_game_data(db_session, people, quests)
-    else:
-        _load_game_data(session, people, quests)
+    with session_scope(session, commit=True) as db_session:
+        sync_game_data(db_session, people, quests)
 
     if with_corpus:
-        ingest_directory(CORPUS_DIR)
+        try:
+            ingest_directory()
+        except NotImplementedError as pending:
+            # La ingesta todavía no guarda: se avisa y el resto del seed sigue
+            logger.warning("Ingesta incompleta: %s", pending)
 
 
 def main() -> None:

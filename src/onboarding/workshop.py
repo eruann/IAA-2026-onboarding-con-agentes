@@ -26,7 +26,7 @@ import inspect
 import textwrap
 import types
 import typing
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -151,24 +151,41 @@ def is_pending(fn: Callable) -> bool:
     return False
 
 
-def markdown_row(cells: tuple[Any, ...]) -> str:
-    """Una fila de tabla Markdown, para las pruebas que devuelven un informe.
+def markdown_table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
+    """Una tabla Markdown, para las pruebas que devuelven un informe.
 
     Un "|" dentro de una celda la partiría en dos: se escapa.
     """
-    return "| " + " | ".join(str(cell).replace("|", "\\|") for cell in cells) + " |"
+
+    def row(cells: Sequence[Any]) -> str:
+        return "| " + " | ".join(str(cell).replace("|", "\\|") for cell in cells) + " |"
+
+    return "\n".join([row(headers), "|" + "---|" * len(headers), *(row(cells) for cells in rows)])
+
+
+# El orden de los talleres en el selector: el de docs/roles.md
+ROLE_ORDER = (
+    "Agentes y orquestación",
+    "RAG y evaluación",
+    "Grafo cultural y datos",
+    "Experiencia",
+    "Diseñador de misiones",
+)
 
 
 def all_workshops() -> list[Workshop]:
-    """Los talleres que ya existen, en el orden en que se muestran."""
+    """Los talleres que ya existen, en el orden de ROLE_ORDER.
+
+    Cada paquete exporta los talleres de sus roles como `WORKSHOPS`.
+    """
     # Import adentro: cada módulo importa este archivo para declarar su taller.
     from onboarding.agents import WORKSHOPS as agents_workshops
-    from onboarding.game import WORKSHOP as game_workshop
+    from onboarding.game import WORKSHOPS as game_workshops
     from onboarding.knowledge import WORKSHOPS as knowledge_workshops
 
-    agents, quest_design = agents_workshops
-    # En el orden de docs/roles.md
-    return [agents, *knowledge_workshops, game_workshop, quest_design]
+    workshops = [*agents_workshops, *knowledge_workshops, *game_workshops]
+    position = {role: index for index, role in enumerate(ROLE_ORDER)}
+    return sorted(workshops, key=lambda workshop: position.get(workshop.role, len(position)))
 
 
 # Roles que todavía no tienen taller: la interfaz los muestra como "próximamente"

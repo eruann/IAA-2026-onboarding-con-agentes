@@ -24,7 +24,7 @@ responden cada pregunta, y medir qué tan bien lo hace.
 - `citations.py` → `quote_is_supported`: verifica que una cita esté textual.
   **Ya funciona.**
 
-**Lo trae el taller** (`knowledge/rag/workshop.py`): la declaración de las
+**Lo trae el taller** (`knowledge/rag/workshop.py`, con las ayudas en `checks.py`): la declaración de las
 pruebas y dos ayudas para mirar y medir tu trabajo:
 
 - `chunk_document`: muestra cómo corta `chunk_text` un documento del corpus.
@@ -32,7 +32,7 @@ pruebas y dos ayudas para mirar y medir tu trabajo:
   `retrieve` y calcula recall y precisión.
 
 No hace falta tocarlas para avanzar. Si cambiás lo que devuelve `chunk_text` o
-`retrieve`, ajustalas (tienen su test en `workshop_test.py`).
+`retrieve`, ajustalas (tienen su test en `checks_test.py`).
 
 ## Qué falta
 

@@ -148,7 +148,7 @@ def chat(
         if on_turn:
             on_turn(result.path, None)
 
-    async def enviar() -> None:
+    async def send() -> None:
         text = box.value.strip()
         if not text:
             return
@@ -166,7 +166,7 @@ def chat(
         box = (
             ui.input(placeholder="Escribí tu pregunta acá...")
             .classes("flex-grow")
-            .on("keydown.enter", enviar)
+            .on("keydown.enter", send)
         )
-        ui.button(icon="send", on_click=enviar).props("flat round")
+        ui.button(icon="send", on_click=send).props("flat round")
     return history

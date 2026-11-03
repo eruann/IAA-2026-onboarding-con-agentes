@@ -13,6 +13,7 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 from langchain_core.language_models import FakeListChatModel
+from pydantic import Field
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -81,6 +82,60 @@ def client() -> TestClient:
 def fake_llm() -> FakeListChatModel:
     """Modelo con respuestas programadas: determinístico y gratis."""
     return FakeListChatModel(responses=["respuesta de prueba"])
+
+
+# --- Modelos falsos. Ninguno llama a un modelo real: sin red y sin costo. ---
+
+
+class RecordingChatModel(FakeListChatModel):
+    """Responde lo programado y guarda en `seen` los mensajes de cada llamada."""
+
+    seen: list = Field(default_factory=list)
+
+    def invoke(self, messages, *args, **kwargs):
+        self.seen.append(messages)
+        return super().invoke(messages, *args, **kwargs)
+
+
+class FailingChatModel(FakeListChatModel):
+    """Falla siempre, como un proveedor caído."""
+
+    def invoke(self, *args, **kwargs):
+        raise RuntimeError("el proveedor no responde")
+
+
+class StructuredChatModel:
+    """Devuelve siempre la misma salida estructurada y guarda los últimos mensajes.
+
+    FakeListChatModel no sirve para esto: no implementa with_structured_output.
+    """
+
+    def __init__(self, output: dict | None) -> None:
+        self.output = output
+        self.seen: list = []
+
+    def with_structured_output(self, schema: dict, method: str) -> "StructuredChatModel":
+        return self
+
+    def invoke(self, messages: list) -> dict | None:
+        self.seen = messages
+        return self.output
+
+
+@pytest.fixture
+def recording_llm() -> RecordingChatModel:
+    return RecordingChatModel(responses=["respuesta de prueba"])
+
+
+@pytest.fixture
+def failing_llm() -> FailingChatModel:
+    return FailingChatModel(responses=["nunca llega"])
+
+
+@pytest.fixture
+def structured_llm():
+    """Arma un modelo con salida estructurada fija: `structured_llm({"triples": [...]})`."""
+    return StructuredChatModel
 
 
 @pytest.fixture

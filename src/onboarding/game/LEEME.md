@@ -17,14 +17,21 @@ canje, el panel del jefe y el bot de Slack.
 - `game/points.py` → `level_for`: el nivel según los puntos. **Ya funciona.**
 - `api/routes/panel.py` y `api/templates/panel/`: el panel del jefe, con
   ingresantes y misiones pendientes. **Ya funciona.**
-- `game/quests.py`: cargar las misiones de `data/quests.yaml` como `Quest`.
-  Pendiente.
-- `game/rewards.py`: catálogo, canje (descuenta puntos) e historial. Pendiente.
+- `game/quests.py`: la forma de una misión (`Quest`), sus estados y sus reglas
+  (`check_quests`). **Ya funciona.** El seed avisa si una misión no cumple las
+  reglas.
+- `game/board.py`: los tableros del Empleado (`employee_board`) y del Jefe
+  (`manager_board`). **Ya funcionan**, solo leen.
+- `game/data.py` → `sync_game_data`: carga personas y misiones de `data/` en la
+  base (lo usa el seed). **Ya funciona.**
+- `game/rewards.py`: catálogo, canje (descuenta puntos) e historial. Pendiente:
+  las funciones ya están con su firma (`list_rewards`, `redeem`,
+  `redemption_history`) y el taller las muestra como pendientes.
 - `game/tone.py`: el dial de tono existe como opción; falta que cambie los textos.
 - `bot/`: `/misiones` en Slack y la aprobación de un clic. Pendiente.
 - `data/quests.yaml` y `data/rewards.yaml`, junto con PM.
 
-**Lo trae el taller** (`game/workshop.py`): la declaración de las pruebas, el
+**Lo trae el taller** (`game/workshop.py`, con las revisiones en `checks.py`): la declaración de las pruebas, el
 panel del jefe adentro del taller y dos revisiones de los datos del juego:
 
 - `review_quests`: muestra las misiones y marca lo que no cierra.
@@ -32,7 +39,7 @@ panel del jefe adentro del taller y dos revisiones de los datos del juego:
   con los puntos de todas las misiones.
 
 No hace falta tocarlas para avanzar. Si cambiás qué campos tiene una misión o un
-premio, ajustalas (tienen su test en `workshop_test.py`).
+premio, ajustalas (tienen su test en `checks_test.py`).
 
 ## Qué falta
 
@@ -59,6 +66,10 @@ premio, ajustalas (tienen su test en `workshop_test.py`).
 - **Revisar las misiones**: cada vez que cambies `data/quests.yaml`. Marca si
   faltan misiones para llegar a 6-8, campos vacíos, `key` repetidas, puntos que
   no son un número positivo o un `approver` que no existe.
+- **Ver el catálogo** y **Ver lo que canjeó una persona**: aparecen como
+  pendientes hasta que las implementes. Canjear escribe en la base, así que no
+  está como prueba del taller: se va a probar desde la pantalla del Empleado
+  cuando tenga el canje (punto 7 de "Qué falta").
 - **Revisar el catálogo de canje**: para ajustar el balance con PM. Si un premio
   cuesta más que todas las misiones juntas, nadie lo puede canjear.
 - **Calcular el nivel**: probá los bordes (99, 100, 250, 500).

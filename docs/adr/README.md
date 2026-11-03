@@ -21,5 +21,6 @@ Estados: `propuesta` → `aceptada` → `reemplazada por 000X`.
 | [0008](0008-migraciones-al-arrancar.md) | Migraciones al arrancar el contenedor, no como pre-deploy | aceptada |
 | [0009](0009-interfaz-nicegui-y-talleres.md) | Interfaz web con NiceGUI y un taller por rol | aceptada |
 | [0010](0010-entrada-por-persona.md) | Entrada por persona, pantallas de Empleado y Jefe, talleres aparte | aceptada |
+| [0011](0011-una-carpeta-por-agente.md) | Una carpeta por agente, prompts al lado del código y la misma estructura en cada rol | aceptada |
 
 Plantilla: [_plantilla.md](_plantilla.md)

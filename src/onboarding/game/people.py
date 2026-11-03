@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from onboarding.db.session import get_engine
+from onboarding.db.session import session_scope
 from onboarding.game.models import Person
 
 
@@ -28,14 +28,9 @@ class PersonCard:
 def list_people(session: Session | None = None) -> list[PersonCard]:
     """Todas las personas, primero los ingresantes y después por nombre."""
     query = select(Person).order_by(Person.is_newcomer.desc(), Person.name)
-    if session is None:
-        with Session(get_engine()) as own_session:
-            return _cards(own_session.scalars(query).all())
-    return _cards(session.scalars(query).all())
+    with session_scope(session) as db_session:
+        return [person_card(person) for person in db_session.scalars(query)]
 
 
-def _cards(people) -> list[PersonCard]:
-    return [
-        PersonCard(person.key, person.name, person.role, person.area, person.is_newcomer)
-        for person in people
-    ]
+def person_card(person: Person) -> PersonCard:
+    return PersonCard(person.key, person.name, person.role, person.area, person.is_newcomer)

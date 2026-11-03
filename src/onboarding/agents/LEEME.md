@@ -26,11 +26,11 @@ El taller tiene dos funciones:
 2. **Grafo y `run_turn`** (`graph.py`, `run.py`, `state.py`): cómo se conectan
    los nodos y la entrada única que usan la interfaz y Slack.
 3. **Tools** (`agents/tools.py`): funciones chicas que los agentes pueden
-   llamar, envolviendo la interfaz pública de otros módulos (por ejemplo
-   `buscar_documentacion`, `quien_sabe_de`, `misiones_pendientes`). Hoy está
-   vacío.
-4. **Prompts** (`agents/prompts/*.md`, cargados con `onboarding.llm.load_prompt`):
-   dónde viven, cómo se versionan y cómo se comparan dos versiones.
+   llamar, envolviendo la interfaz pública de otros módulos
+   (`search_documentation`, `who_knows`, `pending_missions`). Hoy son pendientes.
+4. **Prompts** (el `prompt.md` de cada agente, cargado con
+   `onboarding.llm.load_prompt`): cómo se versionan y cómo se comparan dos
+   versiones.
 5. **Comparación de modelos**: costo y latencia de cada modelo, con datos. La
    latencia ya se mide en el taller; el costo sale de `llm_calls` cuando se
    guarde.
@@ -44,11 +44,12 @@ El taller tiene dos funciones:
 | `extract_knowledge` | Grafo cultural y datos |
 | `generate_quest` | Diseñador de misiones |
 
-Cuando un rol empieza su nodo, lo pasa de `nodes.py` a `agents/<nodo>/` (como
-`agents/extract_knowledge/`).
+Cada agente vive en su carpeta `agents/<nodo>/` con la misma forma: `node.py`
+(con su `NODE`: nombre, título, rol y prompt), `node_test.py` y `prompt.md`. La
+lista de agentes está una sola vez, en `NODES` (`agents/graph.py`).
 
-**Lo trae el taller** (`agents/workshop.py`): el chat con el coordinador y estas
-pruebas:
+**Lo trae el taller** (`agents/workshop.py`, con las ayudas en `agents/checks.py`):
+el chat con el coordinador y estas pruebas:
 
 | Prueba | Para qué |
 |---|---|
@@ -57,6 +58,15 @@ pruebas:
 | Coordinador contra nodo directo (`ab_test`) | Prueba A/B: la misma pregunta por el coordinador y directo a un nodo. Dice si el coordinador eligió el mismo nodo y si las respuestas coinciden. Con la pregunta vacía repite tu último mensaje del chat, con la conversación de antes |
 | Preguntarle a un nodo (`ask_node`) | Una pregunta suelta a un nodo, con el recorrido y cuánto tardó. Con «Comparar con otro modelo», dos modelos lado a lado |
 | Ver el prompt de un nodo (`show_prompt`) | El `.md` tal como lo recibe el modelo |
+
+## Qué falta
+
+1. Que el coordinador decida el nodo a partir del mensaje (hoy manda todo a
+   `answer_question` si nadie pide otro).
+2. Las tools de `agents/tools.py`.
+3. Comparar modelos por costo: guardar `llm_calls` (hoy el taller mide solo la
+   latencia).
+4. Versionar los prompts y comparar dos versiones con las preguntas de `eval/`.
 
 ## Revisar el trabajo de otro rol
 

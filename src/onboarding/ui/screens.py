@@ -13,17 +13,17 @@ marcado lo que falta.
 
 from nicegui import run, ui
 
-from onboarding.game import EmployeeBoard, employee_board
+from onboarding.game import STATUS_LABELS, EmployeeBoard, employee_board
 from onboarding.llm import model_catalog
 from onboarding.ui.chat import chat
-from onboarding.ui.layout import load_session, setup_page, sidebar
+from onboarding.ui.layout import load_session, page_frame, setup_page, sidebar
 
-# Cómo ve el ingresante el estado de cada misión
-STATUS_LABELS = {
-    "pending": ("Pendiente", "grey-7"),
-    "submitted": ("Esperando aprobación", "orange-8"),
-    "approved": ("Aprobada", "positive"),
-    "rejected": ("Rechazada: revisala y volvé a entregar", "negative"),
+# El color de cada estado (el nombre sale de game.STATUS_LABELS, el mismo del panel)
+STATUS_COLORS = {
+    "pending": "grey-7",
+    "submitted": "orange-8",
+    "approved": "positive",
+    "rejected": "negative",
 }
 
 
@@ -37,7 +37,10 @@ def _employee_board(board: EmployeeBoard) -> None:
     if not board.missions:
         ui.label("Todavía no tenés misiones asignadas.").classes("texto-suave")
     for mission in board.missions:
-        label, color = STATUS_LABELS.get(mission.status, (mission.status, "grey-7"))
+        label = STATUS_LABELS.get(mission.status, mission.status)
+        if mission.status == "rejected":
+            label += ": revisala y volvé a entregar"
+        color = STATUS_COLORS.get(mission.status, "grey-7")
         with ui.card().classes("w-full seccion shadow-none"):
             with ui.row().classes("w-full items-center no-wrap"):
                 ui.label(mission.title).classes("text-subtitle1 text-weight-medium")
@@ -83,9 +86,7 @@ async def manager_screen() -> None:
             ui.label("Misiones de tus ingresantes").classes("text-h6")
             # TODO(experiencia): mostrar solo el equipo de este jefe y aprobar con un
             # clic. Hoy el panel muestra las misiones de todos los ingresantes.
-            ui.element("iframe").props('src="/panel"').classes("w-full").style(
-                "height: 80vh; border: 1px solid rgba(49, 51, 63, 0.2); border-radius: 0.5rem"
-            )
+            page_frame("/panel", height="80vh")
 
 
 # recorrido: pantalla-empleado

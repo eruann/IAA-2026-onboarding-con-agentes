@@ -8,12 +8,9 @@ Se reconocen por el nombre de la clase y no importando el SDK del proveedor:
 la interfaz no sabe qué cliente hay detrás de `get_chat_model()`.
 """
 
-from pathlib import Path
-
 from nicegui import ui
 
-# Raíz del repo: las rutas se muestran como src/onboarding/...
-ROOT = Path(__file__).resolve().parents[3]
+from onboarding.paths import repo_relative
 
 
 def _where(error: BaseException) -> str:
@@ -24,10 +21,7 @@ def _where(error: BaseException) -> str:
     while tb.tb_next:
         tb = tb.tb_next
     code = tb.tb_frame.f_code
-    path = Path(code.co_filename).resolve()
-    if path.is_relative_to(ROOT):
-        path = path.relative_to(ROOT)
-    return f"{path}:{tb.tb_lineno} ({code.co_name})"
+    return f"{repo_relative(code.co_filename)}:{tb.tb_lineno} ({code.co_name})"
 
 
 # recorrido: errores-en-castellano
