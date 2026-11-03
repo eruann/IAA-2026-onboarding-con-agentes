@@ -3,16 +3,21 @@
 # construya, pruebe o entienda el producto (talleres, diagramas, guías).
 # No es parte del producto.
 
-"""Pruebas del taller de RAG: mirar cómo se corta un documento y medir la búsqueda
-contra el set fijo de preguntas. No cambian nada."""
+"""Pruebas ad hoc del taller de RAG: mirar cómo se corta un documento y medir la
+búsqueda contra el set fijo de preguntas. Usan la knowledge layer por su interfaz
+pública y no cambian nada."""
 
 from typing import Literal
 
 import yaml
 
-from onboarding.knowledge.rag.chunking import DEFAULT_MAX_CHARS, DEFAULT_OVERLAP, chunk_text
-from onboarding.knowledge.rag.corpus import document_names
-from onboarding.knowledge.rag.retriever import retrieve
+from onboarding.knowledge import (
+    DEFAULT_MAX_CHARS,
+    DEFAULT_OVERLAP,
+    chunk_text,
+    document_names,
+    retrieve,
+)
 from onboarding.paths import CORPUS_DIR, EVAL_DIR
 from onboarding.workshop import markdown_table
 

@@ -108,25 +108,37 @@ src/onboarding/
   agents/
     common.py              # Node, ask_model y NodeSpec (lo compartido por los agentes)
     graph.py               # NODES (la lista de agentes) y el coordinador (route)
+    workshop.py, checks.py, LEEME.md   # el taller del coordinador (rol Agentes)
     <nodo>/                # un agente: answer_question, validate_evidence, …
       node.py              # make_<nodo>(model) y su NODE (nombre, título, rol, prompt)
       node_test.py
       prompt.md            # su prompt, al lado del código
-  knowledge/rag/, knowledge/informal_network/, game/   # el módulo de cada rol
+      workshop.py          # su taller: solo declara (andamiaje)
+      checks.py            # las pruebas ad hoc del taller (+ checks_test.py si hay)
+      LEEME.md             # la guía del rol: mismas secciones en todos
+  knowledge/rag/, knowledge/informal_network/, game/   # producto de cada rol
     __init__.py            # su interfaz pública (lo único que importan los demás)
     <pieza>.py + <pieza>_test.py
-  <carpeta del rol>/       # su taller (andamiaje)
-    workshop.py            # solo declara el taller
-    checks.py              # las ayudas del taller que no son funciones del rol
-    LEEME.md               # mismas secciones en todos
 ```
 
-- **Un agente nuevo:** su carpeta `agents/<nodo>/` con esos tres archivos, su
-  valor en `Intent` (`agents/state.py`) y su `NODE` en `NODES` (`agents/graph.py`).
-  La llamada al modelo va en su carpeta, aunque use datos de la knowledge layer.
-- **El taller** va en la carpeta del rol; si prueba funciones de su agente, al
-  lado del agente (Grafo en `agents/extract_knowledge/`, Diseñador en
-  `agents/generate_quest/`), porque la knowledge layer no importa de `agents`.
+- **Un agente nuevo:** su carpeta `agents/<nodo>/` con esos archivos (un test
+  falla si falta alguno), su valor en `Intent` (`agents/state.py`) y su `NODE` en
+  `NODES` (`agents/graph.py`). La llamada al modelo va en su carpeta, aunque use
+  datos de la knowledge layer.
+- **Una carpeta de agente nunca importa de otra carpeta de agente**, ni en los
+  tests: solo de lo común (`agents/common.py`, `agents/state.py`,
+  `onboarding.knowledge`, `onboarding.game`, `onboarding.llm`, `onboarding.paths`,
+  `onboarding.workshop`). Un test lo controla.
+- **El taller vive en la carpeta del agente** ([ADR 0012](docs/adr/0012-taller-en-la-carpeta-del-agente.md)).
+  Lo que es producto o compartido (knowledge layer, `game`) no se muda: el
+  `workshop.py` lo importa por su interfaz pública. Sus imports van en tres
+  secciones, siempre iguales y en este orden (un test lo controla):
+  `# 1. Pruebas ad hoc` (de su `checks.py`), `# 2. Del agente` (de su `node.py`) y
+  `# 3. Del código común`. Una sección vacía lleva `# (ninguna)`. Cada tarjeta del
+  taller muestra de cuál de las tres sale la prueba.
+- **`checks.py` está siempre**, aunque no tenga pruebas ad hoc: son funciones
+  armadas solo para probar o medir en el taller, que no son parte del producto.
+  El producto nunca importa un `workshop.py` ni un `checks.py` (otro test).
 - **Lo pendiente:** una función pública que todavía no hace lo que promete tira
   `NotImplementedError("TODO(<rol>): …")` (el taller y el grafo la muestran como
   pendiente). Algo que ya funciona pero le falta una parte lleva un comentario
@@ -183,9 +195,9 @@ sin ella los talleres quedan desactivados.
 La interfaz web (`src/onboarding/ui/`, NiceGUI) tiene un **taller por rol**: un
 chat con su agente y pruebas directas de sus funciones, con selector de modelo
 ([ADR 0009](docs/adr/0009-interfaz-nicegui-y-talleres.md)). Cada taller se
-declara en un `workshop.py` de la carpeta del rol (hoy: Agentes, RAG, Grafo,
-Experiencia y Diseñador de misiones; la lista está en `docs/talleres.md`); su guía es el `LEEME.md` de
-al lado. Una página de la app que el rol construye (como el panel del jefe) se
+declara en el `workshop.py` de la carpeta de su agente (hoy: Agentes, RAG, Grafo,
+Experiencia y Diseñador de misiones; la lista está en `docs/talleres.md`); su guía
+es el `LEEME.md` de al lado. Una página de la app que el rol construye (como el panel del jefe) se
 muestra dentro del taller con `embeds`.
 
 **Guía completa para el equipo: [docs/talleres.md](docs/talleres.md)** (campos
@@ -197,11 +209,13 @@ mismo PR. Si cambiás cómo funcionan los talleres, actualizá la guía.
 
 Para sumar una prueba a un taller:
 
-1. Escribí la función en el módulo del rol, con tipo en **todos** los parámetros:
+1. Escribí la función con tipo en **todos** los parámetros: en el producto si es
+   parte del rol, o en el `checks.py` del agente si es una prueba ad hoc. Los tipos:
    `str`, `int`, `float`, `bool`, `Literal[...]`, `BaseChatModel | None` (se
    dibuja como selector de modelo, con opción de comparar dos) o `ChatHistory`
    (no se dibuja: recibe la conversación del chat del taller).
-2. Sumala a `tools` del `WORKSHOP` con `Tool(funcion, "Título", "Ayuda corta")`.
+2. Importala en la sección que le toca del `workshop.py` y sumala a `tools` con
+   `Tool(funcion, "Título", "Ayuda corta")`.
 3. Test de la función al lado, como siempre. `workshop_test.py` falla si un
    parámetro no tiene tipo o es uno que la interfaz no sabe dibujar.
 
@@ -213,10 +227,10 @@ Los pedidos de ejemplo del `LEEME.md` de cada taller se escriben como pedidos de
 plan ("Armame un plan para…, explicame…"), nunca como órdenes para copiar y
 pegar ("Implementá…").
 
-Un taller nuevo (otro rol): crear su `workshop.py` (solo la declaración; las
-ayudas van en `checks.py`) + `LEEME.md`, exportarlo en `WORKSHOPS` desde la
-interfaz pública del paquete y sumar el rol a `ROLE_ORDER` en
-`onboarding/workshop.py`.
+Un taller nuevo (otro rol): en la carpeta de su agente, `workshop.py` (solo la
+declaración, con las tres secciones), `checks.py` y `LEEME.md`, y sumar el rol a
+`ROLE_ORDER` en `onboarding/workshop.py`. La interfaz lo encuentra sola
+(`workshop_modules`): no hay que exportarlo.
 
 ## Recorridos guiados (`.tours/`)
 

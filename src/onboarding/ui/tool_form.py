@@ -22,7 +22,14 @@ from nicegui import run, ui
 from onboarding.llm import ModelOption, get_chat_model
 from onboarding.paths import repo_relative
 from onboarding.ui.errors import render_error
-from onboarding.workshop import Param, Tool, describe_params, is_pending
+from onboarding.workshop import (
+    ORIGIN_LABELS,
+    Param,
+    Tool,
+    describe_params,
+    is_pending,
+    tool_origin,
+)
 
 
 def _source(fn: Callable) -> str:
@@ -97,7 +104,9 @@ def tool_card(
     model_param = next((param.name for param in params if param.kind == "model"), None)
     options = {index: option.label for index, option in enumerate(models)}
 
-    with ui.expansion(tool.title, icon="play_circle").classes("w-full seccion"):
+    # Debajo del título, de dónde sale la prueba (la sección de workshop.py)
+    origin = ORIGIN_LABELS[tool_origin(tool.fn)]
+    with ui.expansion(tool.title, caption=origin, icon="play_circle").classes("w-full seccion"):
         with ui.row().classes("items-center gap-2"):
             if is_pending(tool.fn):
                 ui.badge("pendiente", color="orange")

@@ -2,9 +2,11 @@
 # Este archivo es parte del producto: el asistente de onboarding que se
 # entrega y se evalúa.
 
-"""Misiones, puntos, canje y tono. Titular: rol Experiencia."""
+"""Misiones, puntos, canje y tono. Titular: rol Experiencia.
 
-# Del taller de Experiencia: el del Diseñador de misiones muestra lo mismo
+El taller de este rol está con su agente, en agents/validate_evidence/.
+"""
+
 from onboarding.game.board import (
     EmployeeBoard,
     ManagerBoard,
@@ -13,27 +15,31 @@ from onboarding.game.board import (
     employee_board,
     manager_board,
 )
-from onboarding.game.checks import quest_rows, review_quests  # también en el taller del Diseñador
 from onboarding.game.data import sync_game_data
 from onboarding.game.people import PersonCard, list_people
+from onboarding.game.points import level_for
 from onboarding.game.quests import (
+    MAX_QUESTS,
+    MIN_QUESTS,
+    REVIEW_COLUMNS,
     STATUS_LABELS,
     Quest,
     QuestStatus,
     check_quests,
+    field_problems,
+    is_positive_int,
     quests_in_data,
+    review_rows,
 )
 from onboarding.game.rewards import list_rewards, redeem, redemption_history
 from onboarding.game.tone import Tone
-from onboarding.game.workshop import WORKSHOP
-
-# Talleres de los roles de este paquete, para la interfaz (ver onboarding/workshop.py)
-WORKSHOPS = (WORKSHOP,)
 
 # recorrido: juego-interfaz
 __all__ = [
+    "MAX_QUESTS",
+    "MIN_QUESTS",
+    "REVIEW_COLUMNS",
     "STATUS_LABELS",
-    "WORKSHOPS",
     "EmployeeBoard",
     "ManagerBoard",
     "MissionCard",
@@ -44,13 +50,15 @@ __all__ = [
     "Tone",
     "check_quests",
     "employee_board",
+    "field_problems",
+    "is_positive_int",
+    "level_for",
     "list_people",
     "list_rewards",
     "manager_board",
-    "quest_rows",
     "quests_in_data",
     "redeem",
     "redemption_history",
-    "review_quests",
+    "review_rows",
     "sync_game_data",
 ]

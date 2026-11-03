@@ -21,8 +21,9 @@ Reglas:
 """
 
 from onboarding.knowledge.informal_network import KnowledgeTriple, Relation, who_knows_about
-from onboarding.knowledge.rag import WORKSHOP as RAG_WORKSHOP
 from onboarding.knowledge.rag import (
+    DEFAULT_MAX_CHARS,
+    DEFAULT_OVERLAP,
     chunk_text,
     document_names,
     ingest_directory,
@@ -31,14 +32,11 @@ from onboarding.knowledge.rag import (
     retrieve,
 )
 
-# Talleres de los roles de la capa, para la interfaz (ver onboarding/workshop.py). El
-# de Grafo está con su agente, en agents/extract_knowledge.
-WORKSHOPS = (RAG_WORKSHOP,)
-
 # recorrido: knowledge-interfaz
 __all__ = [
-    "WORKSHOPS",
     # Lo escrito
+    "DEFAULT_MAX_CHARS",
+    "DEFAULT_OVERLAP",
     "chunk_text",
     "document_names",
     "ingest_directory",

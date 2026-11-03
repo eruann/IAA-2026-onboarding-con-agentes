@@ -12,7 +12,12 @@ demás roles y cómo encajan con el coordinador.
 
 from pathlib import Path
 
+# 1. Pruebas ad hoc (andamiaje): checks.py de este agente
 from onboarding.agents.checks import ab_test, ask_node, check_nodes, route_message, show_prompt
+
+# 2. Del agente (producto): node.py de este agente
+# (ninguna: el coordinador es route, en graph.py, y se prueba con el chat)
+# 3. Del código común (producto): knowledge layer, game y demás interfaces
 from onboarding.workshop import Tool, Workshop
 
 # recorrido: taller-agentes

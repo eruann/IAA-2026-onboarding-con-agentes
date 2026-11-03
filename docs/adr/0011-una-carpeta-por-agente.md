@@ -1,7 +1,7 @@
 # 0011 — Una carpeta por agente, prompts al lado del código y la misma estructura en cada rol
 
 - Fecha: 2026-11-02
-- Estado: aceptada
+- Estado: aceptada; la parte de talleres, reemplazada por [0012](0012-taller-en-la-carpeta-del-agente.md)
 - Decide: Tech Lead
 
 ## Contexto
@@ -30,8 +30,8 @@ armado cada rol"):
 - **Un taller que usa funciones de un agente se declara al lado del agente**
   (como el de Grafo y el del Diseñador): la knowledge layer no importa de `agents`.
 - **Rutas y datos en `paths.py`**; la sesión propia, en `db.session.session_scope`.
-- **El taller solo declara** (`workshop.py`); sus ayudas van en `checks.py`. Cada
-  paquete los exporta en `WORKSHOPS` y el orden sale de `ROLE_ORDER`.
+- **El taller solo declara** (`workshop.py`); sus ayudas van en `checks.py`. Dónde
+  vive cada taller y cómo se junta: ver [0012](0012-taller-en-la-carpeta-del-agente.md).
 - **La lógica de producto vive en el producto:** las reglas de una misión, en
   `game/quests.py`; los tableros del Empleado y del Jefe, en `game/board.py`.
 - **Lo pendiente** se marca igual en todos lados: `NotImplementedError` si la

@@ -11,7 +11,8 @@ canje, el panel del jefe y el bot de Slack.
 
 ## Qué construís y qué trae el taller
 
-**Lo construís vos** (`game/`, `api/`, `bot/` y los datos en `data/`):
+**Lo construís vos:** tu agente (`node.py` y `prompt.md`, en esta carpeta) y el
+juego, en `game/`, `api/`, `bot/` y los datos en `data/` (producto):
 
 - `game/models.py`: tablas del juego. **Ya están.**
 - `game/points.py` → `level_for`: el nivel según los puntos. **Ya funciona.**
@@ -31,8 +32,10 @@ canje, el panel del jefe y el bot de Slack.
 - `bot/`: `/misiones` en Slack y la aprobación de un clic. Pendiente.
 - `data/quests.yaml` y `data/rewards.yaml`, junto con PM.
 
-**Lo trae el taller** (`game/workshop.py`, con las revisiones en `checks.py`): la declaración de las pruebas, el
-panel del jefe adentro del taller y dos revisiones de los datos del juego:
+**Lo trae el taller** (`workshop.py`, en esta carpeta): el chat con tu agente, las
+pruebas en las tres secciones de siempre (las del juego, como `level_for` y el
+canje, se llaman desde `game/`), el panel del jefe adentro del taller y dos
+pruebas ad hoc de los datos del juego, en `checks.py`:
 
 - `review_quests`: muestra las misiones y marca lo que no cierra.
 - `review_rewards`: muestra el catálogo y cuánto cuesta cada premio comparado

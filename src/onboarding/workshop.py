@@ -5,23 +5,28 @@
 
 """Talleres: dónde cada rol prueba sus cosas desde la interfaz web.
 
-Cada rol declara su taller en un `workshop.py` de su carpeta: a qué agente le
-habla el chat y qué funciones propias se prueban sueltas, sin pasar por el agente.
-No hace falta saber nada de la interfaz: el formulario de cada prueba se arma
-solo con la firma de la función (`describe_params`).
+Cada rol declara su taller en el `workshop.py` de la carpeta de su agente
+(`agents/<nodo>/`; el del coordinador, en `agents/`): a qué agente le habla el chat
+y qué funciones se prueban sueltas, sin pasar por el agente. No hace falta saber
+nada de la interfaz: el formulario de cada prueba se arma solo con la firma de la
+función (`describe_params`).
 
-    WORKSHOP = Workshop(
-        role="Grafo cultural y datos",
-        intent="answer_question",
-        summary="...",
-        tools=(Tool(extract_triples, "Extraer relaciones", "Pegá una conversación"),),
-    )
+Los imports de cada `workshop.py` van en tres secciones, siempre las mismas y en
+este orden (`SECTIONS`; un test lo revisa):
+
+    # 1. Pruebas ad hoc (andamiaje): checks.py de este agente
+    from onboarding.agents.extract_knowledge.checks import ...   # o "# (ninguna)"
+    # 2. Del agente (producto): node.py de este agente
+    from onboarding.agents.extract_knowledge.node import extract_triples
+    # 3. Del código común (producto): knowledge layer, game y demás interfaces
+    from onboarding.knowledge import who_knows_about
 
 Para sumar una prueba: escribir la función con tipos, sumarla a `tools` y
 agregarle su test. Ver la sección "Talleres" de AGENTS.md.
 """
 
 import ast
+import importlib
 import inspect
 import textwrap
 import types
@@ -180,17 +185,47 @@ ROLE_ORDER = (
 )
 
 
+# De dónde sale una prueba: de las pruebas ad hoc del taller (checks.py), del agente
+# (node.py) o del código común (knowledge layer, game…). Es también la sección de
+# workshop.py donde se importa, y la interfaz lo muestra en cada tarjeta.
+ToolOrigin = Literal["adhoc", "agent", "common"]
+SECTIONS: dict[ToolOrigin, str] = {
+    "adhoc": "# 1. Pruebas ad hoc",
+    "agent": "# 2. Del agente",
+    "common": "# 3. Del código común",
+}
+ORIGIN_LABELS: dict[ToolOrigin, str] = {
+    "adhoc": "prueba ad hoc",
+    "agent": "de tu agente",
+    "common": "código común",
+}
+
+
+def tool_origin(fn: Callable) -> ToolOrigin:
+    """De dónde sale una prueba, según el módulo de la función."""
+    module = fn.__module__
+    if module.endswith(".checks"):
+        return "adhoc"
+    if module.startswith("onboarding.agents.") and module.endswith(".node"):
+        return "agent"
+    return "common"
+
+
+def workshop_modules() -> list[str]:
+    """Dónde se declara cada taller: el del coordinador y el de cada agente."""
+    # Import adentro: los workshop.py importan este archivo para declarar su taller
+    from onboarding.agents.graph import NODES
+
+    return ["onboarding.agents.workshop"] + [f"onboarding.agents.{n.name}.workshop" for n in NODES]
+
+
 def all_workshops() -> list[Workshop]:
     """Los talleres que ya existen, en el orden de ROLE_ORDER.
 
-    Cada paquete exporta los talleres de sus roles como `WORKSHOPS`.
+    Se buscan por convención (`workshop_modules`): así ningún módulo del producto
+    tiene que importar un taller, que es andamiaje.
     """
-    # Import adentro: cada módulo importa este archivo para declarar su taller.
-    from onboarding.agents import WORKSHOPS as agents_workshops
-    from onboarding.game import WORKSHOPS as game_workshops
-    from onboarding.knowledge import WORKSHOPS as knowledge_workshops
-
-    workshops = [*agents_workshops, *knowledge_workshops, *game_workshops]
+    workshops = [importlib.import_module(name).WORKSHOP for name in workshop_modules()]
     position = {role: index for index, role in enumerate(ROLE_ORDER)}
     return sorted(workshops, key=lambda workshop: position.get(workshop.role, len(position)))
 

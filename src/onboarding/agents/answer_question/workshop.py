@@ -5,15 +5,20 @@
 
 """Taller del rol RAG y evaluación.
 
-Solo declara: el chat con `answer_question`, las funciones del rol que se prueban
-sueltas y dos ayudas para mirar y medir (en `checks.py`).
+Solo declara: el chat con `answer_question`, su agente, y las pruebas. Las funciones
+de la knowledge layer (`retrieve`, `quote_is_supported`) son producto y quedan en
+knowledge/rag/: acá solo se llaman.
 """
 
 from pathlib import Path
 
-from onboarding.knowledge.rag.checks import chunk_document, evaluate_retrieval
-from onboarding.knowledge.rag.citations import quote_is_supported
-from onboarding.knowledge.rag.retriever import retrieve
+# 1. Pruebas ad hoc (andamiaje): checks.py de este agente
+from onboarding.agents.answer_question.checks import chunk_document, evaluate_retrieval
+
+# 2. Del agente (producto): node.py de este agente
+# (ninguna)
+# 3. Del código común (producto): knowledge layer, game y demás interfaces
+from onboarding.knowledge import quote_is_supported, retrieve
 from onboarding.workshop import Tool, Workshop
 
 # recorrido: taller-rag

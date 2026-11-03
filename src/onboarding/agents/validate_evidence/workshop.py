@@ -5,15 +5,20 @@
 
 """Taller del rol Experiencia: interfaz y game design.
 
-Solo declara: el chat con `validate_evidence`, las pruebas (las revisiones están en
-`checks.py`) y el panel del jefe adentro del taller.
+Solo declara: el chat con `validate_evidence`, su agente, las pruebas y el panel del
+jefe adentro del taller. El juego (misiones, puntos, canje) es producto y queda en
+game/: acá solo se llama.
 """
 
 from pathlib import Path
 
-from onboarding.game.checks import review_quests, review_rewards
-from onboarding.game.points import level_for
-from onboarding.game.rewards import list_rewards, redemption_history
+# 1. Pruebas ad hoc (andamiaje): checks.py de este agente
+from onboarding.agents.validate_evidence.checks import review_quests, review_rewards
+
+# 2. Del agente (producto): node.py de este agente
+# (ninguna)
+# 3. Del código común (producto): knowledge layer, game y demás interfaces
+from onboarding.game import level_for, list_rewards, redemption_history
 from onboarding.workshop import Embed, Tool, Workshop
 
 # recorrido: taller-experiencia

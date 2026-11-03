@@ -5,10 +5,12 @@ import pytest
 from onboarding import paths
 from onboarding.game.quests import (
     QUEST_FIELDS,
+    REVIEW_COLUMNS,
     check_quests,
     field_problems,
     is_positive_int,
     quests_in_data,
+    review_rows,
 )
 
 QUEST = {
@@ -52,3 +54,17 @@ def test_lee_las_misiones_de_data(tmp_path: Path, monkeypatch) -> None:
         quests_in_data()
     (tmp_path / "quests.yaml").write_text("- key: a\n", encoding="utf-8")
     assert quests_in_data() == [{"key": "a"}]
+
+
+def test_la_revision_da_una_fila_por_mision_con_lo_que_no_cierra() -> None:
+    quests = [
+        {"key": "a", "title": "A", "points": 10, "approver": "manager"},
+        {"key": "b", "title": "B", "points": 0, "approver": "manager"},
+    ]
+
+    rows = review_rows(quests)
+
+    assert len(rows[0]) == len(REVIEW_COLUMNS)
+    assert rows[0][:4] == ("a", "A", 10, "manager")
+    assert "falta description" in rows[0][4]
+    assert "points tiene que ser un entero mayor que cero" in rows[1][4]

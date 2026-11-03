@@ -1,8 +1,9 @@
+from types import SimpleNamespace
+
 import pytest
 
-from onboarding.knowledge.rag import checks
-from onboarding.knowledge.rag.checks import chunk_document, evaluate_retrieval
-from onboarding.knowledge.rag.retriever import RetrievedChunk
+from onboarding.agents.answer_question import checks
+from onboarding.agents.answer_question.checks import chunk_document, evaluate_retrieval
 
 QUESTIONS = """
 - id: compras-001
@@ -34,8 +35,8 @@ def questions(tmp_path, monkeypatch):
     path.write_text(QUESTIONS, encoding="utf-8")
     monkeypatch.setattr(checks, "QUESTIONS_FILE", path)
 
-    def fake_retrieve(query: str, k: int = 5) -> list[RetrievedChunk]:
-        return [RetrievedChunk("...", doc, "", 0.9) for doc in FOUND[query]][:k]
+    def fake_retrieve(query: str, k: int = 5) -> list[SimpleNamespace]:
+        return [SimpleNamespace(document=doc) for doc in FOUND[query]][:k]
 
     monkeypatch.setattr(checks, "retrieve", fake_retrieve)
 
