@@ -68,7 +68,8 @@ premio, ajustalas (tienen su test en `checks_test.py`).
   no son un número positivo o un `approver` que no existe.
 - **Ver el catálogo** y **Ver lo que canjeó una persona**: aparecen como
   pendientes hasta que las implementes. Canjear escribe en la base, así que no
-  está como prueba del taller: se prueba desde la pantalla del Empleado.
+  está como prueba del taller: se va a probar desde la pantalla del Empleado
+  cuando tenga el canje (punto 7 de "Qué falta").
 - **Revisar el catálogo de canje**: para ajustar el balance con PM. Si un premio
   cuesta más que todas las misiones juntas, nadie lo puede canjear.
 - **Calcular el nivel**: probá los bordes (99, 100, 250, 500).

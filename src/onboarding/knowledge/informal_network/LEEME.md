@@ -36,6 +36,7 @@ todo lo que prueba es tuyo.
 - **Chat**: escribile a tu agente una conversación ("Para Excel avanzado,
   preguntale a Diego Fernández") y te devuelve las relaciones que encontró, con
   su respaldo. El panel **Grafo** marca el recorrido por `extract_knowledge`.
+  Elegí un modelo con salida estructurada: con el `fake` falla.
 - **Extraer relaciones**: lo mismo, llamando a `extract_triples` directo. Podés
   comparar dos modelos lado a lado. Necesita un modelo con salida estructurada.
 - **¿Quién sabe de?**: aparece como pendiente hasta que lo implementes.

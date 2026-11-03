@@ -38,8 +38,7 @@ def load_data_yaml(name: str, required: bool = False) -> list[dict]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or []
 
 
-def markdown_documents(directory: Path | None = None) -> list[Path]:
+def markdown_documents(directory: Path = CORPUS_DIR) -> list[Path]:
     """Los documentos `.md` de una carpeta (por defecto el corpus), sin su README,
     que explica la carpeta y no es un documento de la empresa."""
-    directory = directory or CORPUS_DIR
     return sorted(path for path in directory.glob("**/*.md") if path.name != "README.md")

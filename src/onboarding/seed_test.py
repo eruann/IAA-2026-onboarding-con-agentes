@@ -73,3 +73,17 @@ def test_si_la_ingesta_esta_pendiente_el_seed_avisa_y_sigue(
 
     assert "Ingesta incompleta" in caplog.text
     assert db_session.scalar(select(Person).where(Person.key == "seed-test-ingresante"))
+
+
+@pytest.mark.db
+def test_el_seed_avisa_las_misiones_mal_armadas_y_sigue(
+    db_session: Session, data_dir, caplog: pytest.LogCaptureFixture
+) -> None:
+    (data_dir / "quests.yaml").write_text(
+        QUESTS_YAML.replace("points: 10", "points: 0"), encoding="utf-8"
+    )
+
+    seed(with_corpus=False, session=db_session)
+
+    assert "Misión seed-test-quest: points tiene que ser un entero mayor que cero" in caplog.text
+    assert db_session.scalar(select(QuestRow).where(QuestRow.key == "seed-test-quest"))
