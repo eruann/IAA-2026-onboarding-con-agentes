@@ -16,6 +16,7 @@ from nicegui import run, ui
 from onboarding.agents import knowledge_used_by, load_lineage
 from onboarding.config import get_settings
 from onboarding.llm import model_catalog
+from onboarding.ui import prefs as browser_prefs
 from onboarding.ui.access import has_test_access
 from onboarding.ui.chat import chat
 from onboarding.ui.layout import load_session, page_frame, setup_page, sidebar
@@ -34,7 +35,53 @@ GRAPH_STYLE = """<style>
     stroke: #e11d48; stroke-width: 4; stroke-dasharray: 8 5;
   }
   .pizarra [data-id].en-uso > g > path:last-of-type { stroke: #7c3aed; stroke-width: 3; }
+  /* El borde izquierdo del panel del grafo: se arrastra para cambiar el ancho */
+  .tirador-grafo {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 8px; z-index: 10;
+    cursor: col-resize; touch-action: none;
+  }
+  .tirador-grafo:hover, .tirador-grafo.arrastrando { background: rgba(225, 29, 72, 0.35); }
 </style>"""
+
+# Ancho del panel del grafo, en píxeles. Al arrastrar, el navegador además lo limita
+# al 80 % de la pantalla.
+GRAPH_WIDTH, GRAPH_MIN_WIDTH, GRAPH_MAX_WIDTH = 620, 360, 2000
+
+# Arrastrar el borde: mientras se mueve, cambia el ancho en la página; al soltar,
+# avisa al servidor (evento grafo_ancho), que lo fija en el panel y lo guarda.
+GRAPH_RESIZE_JS = """<script>
+window.tiradorGrafo = (idTirador, minimo) => {
+  const tirador = document.getElementById(idTirador);
+  const panel = tirador.closest(".q-drawer");
+  const pagina = document.querySelector(".q-page-container");
+  let ancho = null;
+  tirador.addEventListener("pointerdown", (evento) => {
+    evento.preventDefault();
+    tirador.setPointerCapture(evento.pointerId);
+    tirador.classList.add("arrastrando");
+    const mover = (e) => {
+      ancho = Math.round(Math.min(Math.max(innerWidth - e.clientX, minimo), innerWidth * 0.8));
+      panel.style.width = `${ancho}px`;
+      pagina.style.paddingRight = `${ancho}px`;
+    };
+    const soltar = () => {
+      tirador.removeEventListener("pointermove", mover);
+      tirador.classList.remove("arrastrando");
+      if (ancho !== null) emitEvent("grafo_ancho", ancho);
+    };
+    tirador.addEventListener("pointermove", mover);
+    tirador.addEventListener("pointerup", soltar, { once: true });
+  });
+};
+</script>"""
+
+
+def graph_width(value: object) -> int:
+    """El ancho guardado del panel del grafo, dentro de los límites; si no hay uno
+    válido, el de siempre."""
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        return GRAPH_WIDTH
+    return int(min(max(value, GRAPH_MIN_WIDTH), GRAPH_MAX_WIDTH))
 
 
 def _workshop_select(workshops: list[Workshop], current: int) -> None:
@@ -81,10 +128,11 @@ def _checks(lineage: dict) -> None:
 
 
 # recorrido: panel-grafo
-def _graph_panel():
+def _graph_panel(prefs: dict):
     """Panel a la derecha con el grafo completo (sale de agents/grafo.json), con
-    botón para ampliarlo. Devuelve dos funciones: una marca el recorrido de un mensaje
-    y la otra lo que usó una prueba."""
+    botón para ampliarlo. Su borde izquierdo se arrastra para cambiar el ancho, y el
+    navegador lo recuerda. Devuelve dos funciones: una marca el recorrido de un
+    mensaje y la otra lo que usó una prueba."""
     lineage = load_lineage()
     # Lo último marcado, para repetirlo al ampliar
     last = {"path": [], "failed": None, "uses": []}
@@ -95,14 +143,24 @@ def _graph_panel():
         ui.markdown(GRAPH_LEGEND).classes("texto-suave text-caption")
         return area
 
-    with ui.dialog().props("maximized") as big, ui.card().classes("w-full h-full q-pa-md"):
+    # Ampliado: casi toda la pantalla, pero con margen (se cierra con Esc o la cruz)
+    with (
+        ui.dialog() as big,
+        ui.card()
+        .classes("q-pa-md")
+        .style("width: 90vw; max-width: 90vw; height: 90vh; overflow-y: auto"),
+    ):
         with ui.row().classes("w-full items-center"):
             ui.label("Grafo de agentes").classes("text-h6")
             ui.space()
             ui.button(icon="close", on_click=big.close).props("flat round")
-        big_drawing = drawing_area().props('data-alto="75vh"')
+        big_drawing = drawing_area().props('data-alto="65vh"')
 
-    with ui.right_drawer(value=False).props("width=620").classes("sidebar q-pa-md") as panel:
+    width = graph_width(prefs.get("graph_width"))
+    with ui.right_drawer(value=False).props(f"width={width}").classes("sidebar q-pa-md") as panel:
+        handle = (
+            ui.element("div").classes("tirador-grafo").tooltip("Arrastrá para cambiar el ancho")
+        )
         with ui.row().classes("w-full items-center"):
             ui.label("Grafo de agentes").classes("text-h6")
             ui.space()
@@ -118,6 +176,14 @@ def _graph_panel():
             _checks(lineage)
     with ui.page_sticky(position="top-right", x_offset=16, y_offset=16):
         ui.button("Grafo", icon="account_tree", on_click=panel.toggle).props("outline")
+    ui.run_javascript(f"tiradorGrafo('c{handle.id}', {GRAPH_MIN_WIDTH})")
+
+    async def on_resize(event) -> None:
+        prefs["graph_width"] = graph_width(event.args)
+        panel.props(f"width={prefs['graph_width']}")
+        await browser_prefs.save(prefs)
+
+    ui.on("grafo_ancho", on_resize)
 
     def draw(target) -> None:
         args = [lineage, last["path"], last["failed"], last["uses"]]
@@ -168,6 +234,7 @@ async def talleres(taller: int = 0) -> None:
     dark = setup_page()
     ui.add_head_html(GRAPH_STYLE)
     ui.add_head_html(f'<script type="module">{GRAPH_JS}</script>')
+    ui.add_head_html(GRAPH_RESIZE_JS)
     # Las preferencias viven en el navegador: hay que esperar a que se conecte
     prefs = await load_session(dark)
     if not has_test_access(get_settings(), prefs):
@@ -189,7 +256,7 @@ async def talleres(taller: int = 0) -> None:
         title=f"Talleres · {name}",
         extra=lambda: _workshop_select(workshops, current),
     )
-    mark_path, mark_uses = _graph_panel()
+    mark_path, mark_uses = _graph_panel(prefs)
 
     # Una sola pantalla: el chat abierto y el resto en secciones que se despliegan
     with ui.column().classes("w-full max-w-3xl mx-auto q-px-md q-py-xl gap-4"):
