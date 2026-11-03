@@ -45,4 +45,5 @@ WORKSHOP = Workshop(
         ),
     ),
     guide=Path(__file__).parent / "LEEME.md",
+    greeting="Decime un puesto o un área y te propongo misiones para quien recién entra.",
 )

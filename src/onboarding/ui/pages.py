@@ -196,7 +196,14 @@ async def talleres(taller: int = 0) -> None:
         ui.label(workshop.role).classes("titulo")
         ui.label(workshop.summary).classes("texto-suave")
         with ui.expansion("Chat", icon="chat", value=True).classes("w-full seccion"):
-            history = chat(models, model_select, name, intent=workshop.intent, on_turn=mark_path)
+            history = chat(
+                models,
+                model_select,
+                name,
+                intent=workshop.intent,
+                on_turn=mark_path,
+                greeting=workshop.greeting,
+            )
         with ui.expansion("Pruebas", icon="science").classes("w-full seccion"):
             for tool in workshop.tools:
                 tool_card(

@@ -53,6 +53,7 @@ WORKSHOP = Workshop(
 | `summary` | Una o dos líneas: qué construye el rol. Se muestra debajo del título. |
 | `tools` | Las pruebas: una línea `Tool(función, "Título", "Ayuda corta")` por función. |
 | `guide` | El `LEEME.md` de al lado, que se muestra en la sección **Guía**. |
+| `greeting` | Opcional. Lo primero que dice el chat: qué escribirle a tu agente (p. ej. «Pegame una conversación…»). Sin él, el chat usa el saludo general, pensado para preguntas sobre la empresa. |
 | `embeds` | Opcional. Páginas de la app que construye el rol y se ven dentro del taller, cada una en su sección con botón **Recargar**: `Embed("Panel del jefe", "/panel", "Ayuda corta")`. Un test revisa que la ruta exista. |
 
 ## Sumar una prueba
@@ -73,7 +74,7 @@ campo por parámetro y el botón **Probar**.
 | `int` | Número entero |
 | `float` | Número con decimales |
 | `bool` | Interruptor |
-| `Literal["a", "b"]` | Selector con esas opciones |
+| `Literal["a", "b"]` | Selector con esas opciones (sin valor por defecto, arranca en la primera) |
 | `BaseChatModel \| None` | Selector de modelo, con la opción **Comparar con otro modelo** (dos resultados lado a lado) |
 | `ChatHistory` | No se dibuja: recibe la conversación del chat del taller, como tupla de `(quién, texto)` |
 
