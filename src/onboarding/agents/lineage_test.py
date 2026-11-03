@@ -1,4 +1,5 @@
 import json
+from functools import lru_cache
 
 from langchain_core.language_models import BaseChatModel
 
@@ -14,6 +15,15 @@ def knowledge_function() -> str:
 
 def _ask(model: BaseChatModel) -> str:
     return model.invoke("hola")
+
+
+@lru_cache
+def _cached() -> str:
+    return knowledge_function()
+
+
+def cached_node_example() -> str:
+    return _cached()
 
 
 def node_example(model: BaseChatModel) -> str:
@@ -49,6 +59,12 @@ def test_sigue_las_llamadas_hasta_la_capa_y_el_modelo() -> None:
     assert found["knowledge"] == {"knowledge_function": ["node_example"]}
     # node_example no llama al modelo directo: lo hace _ask
     assert found["model"] == ["node_example", "_ask"]
+
+
+def test_sigue_las_llamadas_a_funciones_con_cache() -> None:
+    found = follow(cached_node_example, {"knowledge_function": knowledge_function})
+
+    assert found["knowledge"] == {"knowledge_function": ["cached_node_example", "_cached"]}
 
 
 def test_junta_cada_todo_con_sus_lineas_de_continuacion() -> None:

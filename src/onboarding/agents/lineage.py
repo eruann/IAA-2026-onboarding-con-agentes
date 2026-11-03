@@ -145,7 +145,10 @@ def follow(fn: Callable, exports: dict[str, Callable], depth: int = 0, seen=None
         target = _resolve(fn, call)
         if id(target) in by_object:
             found["knowledge"].setdefault(by_object[id(target)], [fn.__name__])
-        elif _ours(target):
+            continue
+        # Una función con @lru_cache (u otro decorador con functools.wraps): la de adentro
+        target = inspect.unwrap(target) if callable(target) else target
+        if _ours(target):
             inner = follow(target, exports, depth + 1, seen)
             for name, chain in inner["knowledge"].items():
                 found["knowledge"].setdefault(name, [fn.__name__, *chain])

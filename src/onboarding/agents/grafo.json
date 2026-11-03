@@ -54,13 +54,28 @@
       "funcion": "make_extract_knowledge.<locals>.extract_knowledge",
       "usa": [
         {
-          "funcion": "extract_triples",
+          "funcion": "document_names",
           "via": [
-            "extract_knowledge"
+            "extract_knowledge",
+            "extract_triples",
+            "_procedures"
+          ]
+        },
+        {
+          "funcion": "read_documents",
+          "via": [
+            "extract_knowledge",
+            "extract_triples",
+            "_procedures"
           ]
         }
       ],
-      "modelo": null
+      "modelo": {
+        "via": [
+          "extract_knowledge",
+          "extract_triples"
+        ]
+      }
     }
   ],
   "flechas": [
@@ -113,14 +128,10 @@
       "modelo": null
     },
     {
-      "funcion": "extract_triples",
-      "archivo": "src/onboarding/knowledge/informal_network/extraction.py",
+      "funcion": "document_names",
+      "archivo": "src/onboarding/knowledge/rag/corpus.py",
       "usada_por_el_grafo": true,
-      "modelo": {
-        "via": [
-          "extract_triples"
-        ]
-      }
+      "modelo": null
     },
     {
       "funcion": "ingest_directory",

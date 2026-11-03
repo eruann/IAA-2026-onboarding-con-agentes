@@ -24,6 +24,11 @@ armado cada rol"):
   en `agents/common.py`. La lista de agentes está una sola vez, en `NODES`
   (`agents/graph.py`), y de ahí salen el grafo, el dibujo y el taller de Agentes.
 - **El prompt va al lado del código que lo usa**, y `load_prompt` recibe su ruta.
+  La llamada al modelo de un agente está en su carpeta, aunque use funciones de la
+  knowledge layer: `extract_triples` vive en `agents/extract_knowledge/` y la capa
+  guarda la forma de una relación (`KnowledgeTriple`) y las consultas.
+- **Un taller que usa funciones de un agente se declara al lado del agente**
+  (como el de Grafo y el del Diseñador): la knowledge layer no importa de `agents`.
 - **Rutas y datos en `paths.py`**; la sesión propia, en `db.session.session_scope`.
 - **El taller solo declara** (`workshop.py`); sus ayudas van en `checks.py`. Cada
   paquete los exporta en `WORKSHOPS` y el orden sale de `ROLE_ORDER`.
@@ -37,7 +42,8 @@ armado cada rol"):
 
 - Leer un rol enseña a leer los demás, y copiar uno para empezar otro copia la
   forma correcta.
-- Se movieron archivos de varios roles (RAG, Experiencia, Grafo, Diseñador): quien
+- Se movieron archivos de varios roles (RAG, Experiencia, Grafo, Diseñador; el
+  taller y la guía de Grafo están ahora en `agents/extract_knowledge/`): quien
   tenga una rama abierta tiene que actualizarla con `main`.
 - `ingest_directory` ahora avisa que está pendiente (corta, pero no guarda): el
   seed y su comando lo informan y siguen.

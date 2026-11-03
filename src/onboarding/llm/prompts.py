@@ -5,7 +5,7 @@
 """Carga de prompts.
 
 Cada prompt vive en un `.md` al lado del código que lo usa (el `prompt.md` de
-cada agente, el `extraction_prompt.md` de la extracción de relaciones), así los
+cada agente), así los
 cambios se revisan en el PR igual que el código y quien entiende un agente sabe
 dónde está su prompt. Se cargan siempre con `load_prompt`.
 """

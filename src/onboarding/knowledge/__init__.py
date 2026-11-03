@@ -20,35 +20,33 @@ Reglas:
     maneja). Se relacionan por clave, sin foreign keys entre sus tablas.
 """
 
-from onboarding.knowledge.informal_network import WORKSHOP as INFORMAL_NETWORK_WORKSHOP
-from onboarding.knowledge.informal_network import (
-    KnowledgeTriple,
-    extract_triples,
-    who_knows_about,
-)
+from onboarding.knowledge.informal_network import KnowledgeTriple, Relation, who_knows_about
 from onboarding.knowledge.rag import WORKSHOP as RAG_WORKSHOP
 from onboarding.knowledge.rag import (
     chunk_text,
+    document_names,
     ingest_directory,
     quote_is_supported,
     read_documents,
     retrieve,
 )
 
-# Talleres de los roles de la capa, para la interfaz (ver onboarding/workshop.py)
-WORKSHOPS = (RAG_WORKSHOP, INFORMAL_NETWORK_WORKSHOP)
+# Talleres de los roles de la capa, para la interfaz (ver onboarding/workshop.py). El
+# de Grafo está con su agente, en agents/extract_knowledge.
+WORKSHOPS = (RAG_WORKSHOP,)
 
 # recorrido: knowledge-interfaz
 __all__ = [
     "WORKSHOPS",
     # Lo escrito
     "chunk_text",
+    "document_names",
     "ingest_directory",
     "quote_is_supported",
     "read_documents",
     "retrieve",
     # Lo no escrito
     "KnowledgeTriple",
-    "extract_triples",
+    "Relation",
     "who_knows_about",
 ]

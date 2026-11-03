@@ -137,8 +137,6 @@ def show_prompt(node: Intent) -> str:
     """El prompt del nodo tal como lo recibe el modelo, antes del contexto y la
     conversación."""
     spec = next(spec for spec in NODES if spec.name == node)
-    if spec.prompt is None:
-        return f"`{node}` no tiene prompt propio: usa funciones de la knowledge layer con el suyo."
     return f"`{repo_relative(spec.prompt)}`\n\n```markdown\n{load_prompt(spec.prompt)}\n```"
 
 

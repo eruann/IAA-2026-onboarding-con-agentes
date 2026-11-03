@@ -98,13 +98,15 @@ respuesta, y estimación de tokens y costo por ingresante.
 
 ## 5. Grafo cultural y datos
 
-**Carpetas:** `src/onboarding/knowledge/informal_network/`,
-`eval/informal_network_ground_truth.yaml`
+**Carpetas:** `src/onboarding/knowledge/informal_network/` (las relaciones y las
+consultas), `src/onboarding/agents/extract_knowledge/` (su agente, su prompt y su
+taller), `eval/informal_network_ground_truth.yaml`
 
 Parte de la knowledge layer: **lo no escrito**, la red informal que el
 organigrama no muestra (quién sabe de qué, a quién se consulta de verdad).
 
-**Su agente:** `extract_knowledge` (`agents/extract_knowledge/`).
+**Su agente:** `extract_knowledge` (`agents/extract_knowledge/`), que saca las
+relaciones de un texto con `extract_triples`.
 
 **Primer PR:** tablas `nodes` y `edges` con su migración, y el esquema de
 extracción (sujeto, relación, objeto, frase textual de respaldo).

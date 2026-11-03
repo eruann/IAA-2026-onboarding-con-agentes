@@ -12,14 +12,16 @@
 
 **Lo construís vos:**
 
-- `knowledge/informal_network/extraction.py` → `extract_triples`: saca relaciones
-  de un texto, con la frase que las respalda. **Ya funciona.** Su prompt está al
-  lado: `extraction_prompt.md`.
-- `agents/extract_knowledge/` → tu agente (`node.py`), que usa `extract_triples`.
+- `agents/extract_knowledge/` → tu agente, igual que los demás: `node.py` (el nodo
+  y `extract_triples`, que saca relaciones de un texto con la frase que las
+  respalda; **ya funciona**) y su prompt al lado, `prompt.md`.
+- `knowledge/informal_network/triples.py` → `KnowledgeTriple`: la forma de una
+  relación, lo que el resto del sistema usa de tu parte.
 - `knowledge/informal_network/queries.py` → `who_knows_about`: pendiente.
 - `knowledge/informal_network/models.py`: las tablas `nodes` y `edges`. Pendiente.
 
-**Lo trae el taller** (`knowledge/informal_network/workshop.py`): el chat con tu
+**Lo trae el taller** (`agents/extract_knowledge/workshop.py`, al lado de tu
+agente porque prueba sus funciones): el chat con tu
 agente y tus funciones para probar sueltas. No tiene ayudas propias (`checks.py`):
 todo lo que prueba es tuyo.
 

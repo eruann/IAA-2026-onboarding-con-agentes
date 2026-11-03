@@ -56,7 +56,6 @@ def test_cada_agente_tiene_su_carpeta_con_la_misma_forma() -> None:
     for node in NODES:
         files = {path.name for path in (folder / node.name).iterdir()}
         assert {"__init__.py", "node.py", "node_test.py"} <= files, node.name
-        # El prompt va al lado del código; extract_knowledge usa el de extract_triples
-        if node.prompt is not None:
-            assert node.prompt == folder / node.name / "prompt.md"
-            assert node.prompt.exists()
+        # El prompt va al lado del código
+        assert node.prompt == folder / node.name / "prompt.md"
+        assert node.prompt.exists()

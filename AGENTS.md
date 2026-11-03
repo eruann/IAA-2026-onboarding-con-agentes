@@ -123,6 +123,10 @@ src/onboarding/
 
 - **Un agente nuevo:** su carpeta `agents/<nodo>/` con esos tres archivos, su
   valor en `Intent` (`agents/state.py`) y su `NODE` en `NODES` (`agents/graph.py`).
+  La llamada al modelo va en su carpeta, aunque use datos de la knowledge layer.
+- **El taller** va en la carpeta del rol; si prueba funciones de su agente, al
+  lado del agente (Grafo en `agents/extract_knowledge/`, Diseñador en
+  `agents/generate_quest/`), porque la knowledge layer no importa de `agents`.
 - **Lo pendiente:** una función pública que todavía no hace lo que promete tira
   `NotImplementedError("TODO(<rol>): …")` (el taller y el grafo la muestran como
   pendiente). Algo que ya funciona pero le falta una parte lleva un comentario

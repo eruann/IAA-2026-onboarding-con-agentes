@@ -11,8 +11,8 @@ que se prueban sueltas.
 
 from pathlib import Path
 
-from onboarding.knowledge.informal_network.extraction import extract_triples
-from onboarding.knowledge.informal_network.queries import who_knows_about
+from onboarding.agents.extract_knowledge.node import extract_triples
+from onboarding.knowledge import who_knows_about
 from onboarding.workshop import Tool, Workshop
 
 # recorrido: taller-grafo

@@ -51,7 +51,7 @@ las que empiezan en la raíz del repo.
 | **Tech Lead / Plataforma** | `config.py`, `db/`, `llm/callbacks.py`, `llm/models.py`, `conftest.py`; en la raíz: `Dockerfile`, `docker-compose.yml`, `pyproject.toml`, `alembic.ini`, `render.yaml`, `.github/` | `api/main.py`, `docs/runbooks/` |
 | **Agentes y orquestación** · el coordinador | `agents/` (`graph.py`, `common.py`, `run.py`, `state.py`, `tools.py`), `llm/factory.py`, `llm/prompts.py` | los nodos de cada rol, `knowledge/__init__.py` (la puerta de la knowledge layer) |
 | **RAG y evaluación** · lo escrito | `knowledge/rag/`, su agente `agents/answer_question/`; en la raíz: `corpus/`, `eval/rag_questions.yaml` | `knowledge/__init__.py`, `docs/adr/0005-embeddings.md` |
-| **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`, su agente `agents/extract_knowledge/`; en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `data/people.yaml` |
+| **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`, `agents/extract_knowledge/` (agente, prompt y taller); en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `data/people.yaml` |
 | **Experiencia: interfaz y game design** | `game/`, `api/`, `bot/`, su agente `agents/validate_evidence/`; en la raíz: `data/quests.yaml`, `data/rewards.yaml` | `agents/__init__.py`, `bot/manifest.yaml` |
 | **Diseñador de misiones** | `agents/generate_quest/` (agente, prompt y taller) | `game/quests.py`, `data/quests.yaml`, `knowledge/__init__.py` |
 | **Comms y entregables** | `docs/minutas/`, `docs/README.md` | `docs/adr/` |

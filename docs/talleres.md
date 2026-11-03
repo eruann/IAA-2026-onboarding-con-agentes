@@ -17,7 +17,7 @@ sale solo de la firma de la función.
 |---|---|---|
 | Agentes y orquestación | [`agents/workshop.py`](../src/onboarding/agents/workshop.py) | [`LEEME.md`](../src/onboarding/agents/LEEME.md) |
 | RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
-| Grafo cultural y datos | [`knowledge/informal_network/workshop.py`](../src/onboarding/knowledge/informal_network/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/informal_network/LEEME.md) |
+| Grafo cultural y datos | [`agents/extract_knowledge/workshop.py`](../src/onboarding/agents/extract_knowledge/workshop.py) | [`LEEME.md`](../src/onboarding/agents/extract_knowledge/LEEME.md) |
 | Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
 | Diseñador de misiones | [`agents/generate_quest/workshop.py`](../src/onboarding/agents/generate_quest/workshop.py) | [`LEEME.md`](../src/onboarding/agents/generate_quest/LEEME.md) |
 
@@ -30,8 +30,8 @@ ayuda que no es una función del rol (una revisión, una medición), va en un
 ```python
 from pathlib import Path
 
-from onboarding.knowledge.informal_network.extraction import extract_triples
-from onboarding.knowledge.informal_network.queries import who_knows_about
+from onboarding.agents.extract_knowledge.node import extract_triples
+from onboarding.knowledge import who_knows_about
 from onboarding.workshop import Tool, Workshop
 
 WORKSHOP = Workshop(

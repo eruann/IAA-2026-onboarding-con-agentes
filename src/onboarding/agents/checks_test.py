@@ -66,9 +66,8 @@ def test_ab_sin_pregunta_repite_el_ultimo_mensaje_del_chat(fake_llm: FakeListCha
 
 def test_muestra_el_prompt_de_cada_nodo() -> None:
     for node in NODES:
-        if node.prompt is not None:
-            assert f"src/onboarding/agents/{node.name}/prompt.md" in show_prompt(node.name)
-    assert "no tiene prompt propio" in show_prompt("extract_knowledge")
+        assert f"src/onboarding/agents/{node.name}/prompt.md" in show_prompt(node.name)
+    assert "Reglas:" in show_prompt("extract_knowledge")
 
 
 def test_preguntarle_a_un_nodo_dice_por_donde_paso_y_cuanto_tardo(

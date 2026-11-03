@@ -31,7 +31,7 @@ class NodeSpec:
     title: str  # cómo se llama en el dibujo del grafo
     role: str  # el rol dueño, como en docs/roles.md
     make: Callable[[BaseChatModel], Node]  # arma el nodo con el modelo
-    prompt: Path | None = None  # su prompt.md, si tiene uno propio
+    prompt: Path  # su prompt.md, al lado de node.py
 
 
 def ask_model(model: BaseChatModel, prompt: Path, state: OnboardingState, context: str = "") -> str:
