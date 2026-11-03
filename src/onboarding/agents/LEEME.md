@@ -48,7 +48,7 @@ Cada agente vive en su carpeta `agents/<nodo>/` con la misma forma: `node.py`
 (con su `NODE`: nombre, título, rol y prompt), `node_test.py` y `prompt.md`. La
 lista de agentes está una sola vez, en `NODES` (`agents/graph.py`).
 
-**Lo trae el taller** (`agents/workshop.py`, con las ayudas en `agents/checks.py`):
+**Lo trae el taller** (`agents/workshop.py`, con las pruebas ad hoc en `agents/checks.py`):
 el chat con el coordinador y estas pruebas:
 
 | Prueba | Para qué |

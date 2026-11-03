@@ -17,21 +17,21 @@ def test_el_lineage_trae_lo_que_necesita_el_dibujo() -> None:
 
 
 def test_dice_que_usa_de_la_knowledge_layer_cada_prueba() -> None:
-    from onboarding.knowledge import WORKSHOPS, retrieve
-
-    # Las pruebas del taller de RAG, por el nombre de su función
-    tools = {tool.fn.__name__: tool.fn for workshop in WORKSHOPS for tool in workshop.tools}
-    evaluate_retrieval, chunk_document = tools["evaluate_retrieval"], tools["chunk_document"]
+    from onboarding.agents.answer_question.checks import chunk_document, evaluate_retrieval
+    from onboarding.agents.extract_knowledge.node import extract_triples
+    from onboarding.knowledge import retrieve
 
     # La función misma, si es de la capa
     assert knowledge_used_by(retrieve) == ["retrieve"]
     # Una ayuda del taller que la llama por dentro
     assert knowledge_used_by(evaluate_retrieval) == ["retrieve"]
     assert knowledge_used_by(chunk_document) == ["chunk_text"]
+    # Una función de un agente que se prueba suelta en su taller
+    assert knowledge_used_by(extract_triples) == ["document_names", "read_documents"]
     # Algo que no toca la capa no marca nada
     assert knowledge_used_by(lambda texto: texto.upper()) == []
     assert knowledge_used_by(len) == []
     # Una prueba que pasa por el grafo se ve en el recorrido, no en violeta
-    from onboarding.agents.workshop import ask_node
+    from onboarding.agents.checks import ask_node
 
     assert knowledge_used_by(ask_node) == []

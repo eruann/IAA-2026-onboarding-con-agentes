@@ -7,30 +7,47 @@ con un agente del grafo, **pruebas** de sus propias funciones (sin pasar
 por el agente) y su **guía**. El porqué está en
 [ADR 0009](adr/0009-interfaz-nicegui-y-talleres.md); acá, cómo se arma.
 
-No hace falta saber nada de la interfaz (NiceGUI): el taller se declara en un
-archivo `workshop.py` de la carpeta de tu rol, y el formulario de cada prueba
-sale solo de la firma de la función.
+No hace falta saber nada de la interfaz (NiceGUI): el taller se declara en el
+`workshop.py` de la carpeta de tu agente (`agents/<nodo>/`), y el formulario de
+cada prueba sale solo de la firma de la función. Todos los talleres tienen la
+misma forma ([ADR 0012](adr/0012-taller-en-la-carpeta-del-agente.md)): si sabés
+usar uno, sabés usar los demás.
 
 ## Lo que ya existe
 
 | Rol | Taller | Guía |
 |---|---|---|
 | Agentes y orquestación | [`agents/workshop.py`](../src/onboarding/agents/workshop.py) | [`LEEME.md`](../src/onboarding/agents/LEEME.md) |
-| RAG y evaluación | [`knowledge/rag/workshop.py`](../src/onboarding/knowledge/rag/workshop.py) | [`LEEME.md`](../src/onboarding/knowledge/rag/LEEME.md) |
+| RAG y evaluación | [`agents/answer_question/workshop.py`](../src/onboarding/agents/answer_question/workshop.py) | [`LEEME.md`](../src/onboarding/agents/answer_question/LEEME.md) |
 | Grafo cultural y datos | [`agents/extract_knowledge/workshop.py`](../src/onboarding/agents/extract_knowledge/workshop.py) | [`LEEME.md`](../src/onboarding/agents/extract_knowledge/LEEME.md) |
-| Experiencia | [`game/workshop.py`](../src/onboarding/game/workshop.py) | [`LEEME.md`](../src/onboarding/game/LEEME.md) |
+| Experiencia | [`agents/validate_evidence/workshop.py`](../src/onboarding/agents/validate_evidence/workshop.py) | [`LEEME.md`](../src/onboarding/agents/validate_evidence/LEEME.md) |
 | Diseñador de misiones | [`agents/generate_quest/workshop.py`](../src/onboarding/agents/generate_quest/workshop.py) | [`LEEME.md`](../src/onboarding/agents/generate_quest/LEEME.md) |
 
 ## El archivo `workshop.py`
 
-Es Python, pero solo declara cosas: no lleva lógica. Si una prueba necesita una
-ayuda que no es una función del rol (una revisión, una medición), va en un
-`checks.py` al lado, con su `checks_test.py`. El del Grafo:
+Es Python, pero solo declara cosas: no lleva lógica. Las pruebas salen de tres
+lugares, y se importan siempre en tres secciones, con estos encabezados y en este
+orden (un test lo revisa; una sección vacía lleva `# (ninguna)`):
+
+| Sección | De dónde sale la prueba | En la tarjeta |
+|---|---|---|
+| `# 1. Pruebas ad hoc` | el `checks.py` de tu agente: funciones armadas solo para probar o medir en el taller (andamiaje) | «prueba ad hoc» |
+| `# 2. Del agente` | el `node.py` de tu agente (producto) | «de tu agente» |
+| `# 3. Del código común` | la knowledge layer, `game` y demás interfaces (producto: no se mudan, se llaman) | «código común» |
+
+`checks.py` está siempre, aunque esté vacío, y una prueba ad hoc nueva lleva su
+test en `checks_test.py`. El taller no importa nunca de la carpeta de otro agente.
+El del Grafo:
 
 ```python
 from pathlib import Path
 
+# 1. Pruebas ad hoc (andamiaje): checks.py de este agente
+# (ninguna)
+# 2. Del agente (producto): node.py de este agente
 from onboarding.agents.extract_knowledge.node import extract_triples
+
+# 3. Del código común (producto): knowledge layer, game y demás interfaces
 from onboarding.knowledge import who_knows_about
 from onboarding.workshop import Tool, Workshop
 
@@ -118,20 +135,19 @@ grafo). Nada de esto se configura por taller.
 
 ## Crear el taller de un rol nuevo
 
-1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`,
-   solo la declaración), `checks.py` si hace falta alguna ayuda, y `LEEME.md` con
-   las mismas secciones que los demás: "Qué construís y qué trae el taller",
-   "Qué falta", "Qué probar en el taller" y "Pedidos de plan". Los tres son
-   andamiaje: empiezan con la marca `andamiaje` y su leyenda
-   ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
-2. Exportarlo en `WORKSHOPS` desde la interfaz pública del paquete (su
-   `__init__.py`): `agents`, `knowledge` y `game` lo hacen igual.
-   - `knowledge/__init__.py` es un archivo compartido: avisalo en el PR.
-3. Sumar el rol a `ROLE_ORDER` en [`onboarding/workshop.py`](../src/onboarding/workshop.py)
-   (el orden del selector) y sacarlo de `UPCOMING`.
-4. Correr los tests: `workshop_test.py` revisa que todas las pruebas de todos los
-   talleres se puedan dibujar, que la guía exista y que el orden sea el de
-   `ROLE_ORDER`.
+1. En la carpeta de su agente (`agents/<nodo>/`), crear `workshop.py` (con
+   `WORKSHOP = Workshop(...)`, solo la declaración y las tres secciones),
+   `checks.py` (aunque esté vacío) y `LEEME.md` con las mismas secciones que los
+   demás: "Qué construís y qué trae el taller", "Qué falta", "Qué probar en el
+   taller" y "Pedidos de plan". Los tres son andamiaje: empiezan con la marca
+   `andamiaje` y su leyenda ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
+2. Sumar el rol a `ROLE_ORDER` en [`onboarding/workshop.py`](../src/onboarding/workshop.py)
+   (el orden del selector) y sacarlo de `UPCOMING`. No hay que exportarlo: la
+   interfaz busca el `workshop.py` de cada agente de `NODES` (`workshop_modules`).
+3. Correr los tests: `workshop_test.py` revisa que todas las pruebas se puedan
+   dibujar, que la guía exista, que el orden sea el de `ROLE_ORDER` y que los
+   imports estén en sus tres secciones; `agents/graph_test.py`, que la carpeta del
+   agente tenga todos sus archivos y no importe de otro agente.
 
 ## Pedírselo a Claude Code o Codex
 

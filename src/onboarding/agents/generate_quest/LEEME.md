@@ -24,13 +24,16 @@ entran al juego lo deciden Experiencia y PM.
 - `retrieve` (RAG): la documentación del puesto. Pendiente.
 - `who_knows_about` (Grafo): a quién involucrar en la misión. Pendiente.
 
-**Lo trae el taller** (`workshop.py`, con la revisión de propuestas en `checks.py`):
+**Lo trae el taller** (`workshop.py`, en esta carpeta): el chat con tu agente y
+las pruebas, en las tres secciones de siempre. La prueba ad hoc está en
+`checks.py`:
 
 - `review_proposal`: revisa misiones propuestas con las mismas reglas que las
   misiones del juego (campos, puntos, quién aprueba) y marca si la `key` ya
   existe.
-- La revisión de las misiones actuales, la búsqueda de documentación y "¿Quién
-  sabe de?", para probar desde acá lo que usa tu agente.
+- Del código común: las misiones actuales (`quests_in_data`, de Experiencia), la
+  búsqueda de documentación (`retrieve`, de RAG) y "¿Quién sabe de?"
+  (`who_knows_about`, de Grafo), para probar desde acá lo que usa tu agente.
 
 ## Qué falta
 

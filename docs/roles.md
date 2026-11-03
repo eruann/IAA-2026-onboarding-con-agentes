@@ -62,7 +62,8 @@ Slack), persistir `llm_calls` (costo por corrida), secretos.
 ## 3. Agentes y orquestación
 
 **Carpetas:** `src/onboarding/agents/` (`graph.py`, `common.py`, `run.py`, `state.py`,
-`tools.py`), `llm/factory.py`, `llm/prompts.py`. Los nodos son de cada rol (ver
+`tools.py`, y el taller del coordinador: `workshop.py`, `checks.py`, `LEEME.md`),
+`llm/factory.py`, `llm/prompts.py`. Los nodos son de cada rol (ver
 la tabla de arriba).
 
 Lo que une a los agentes de todos los roles:
@@ -82,7 +83,9 @@ con el modelo fake.
 
 ## 4. RAG y evaluación
 
-**Carpetas:** `src/onboarding/knowledge/rag/`, `eval/rag_questions.yaml`
+**Carpetas:** `src/onboarding/knowledge/rag/` (lo escrito, producto),
+`src/onboarding/agents/answer_question/` (su agente, su prompt y su taller),
+`eval/rag_questions.yaml`
 
 Parte de la knowledge layer: **lo escrito**.
 
@@ -117,7 +120,8 @@ alimentan las próximas misiones.
 
 ## 6. Experiencia: interfaz y game design
 
-**Carpetas:** `src/onboarding/game/`, `api/`, `bot/`
+**Carpetas:** `src/onboarding/game/`, `api/`, `bot/` (producto),
+`src/onboarding/agents/validate_evidence/` (su agente, su prompt y su taller)
 
 Dueño del **ciclo de vida de una misión**: qué es una misión (`Quest` y sus
 tablas), las 6-8 misiones del TP en `data/quests.yaml` (con PM), asignarlas al

@@ -1,7 +1,7 @@
 import pytest
 
 from onboarding import paths
-from onboarding.game.checks import review_quests, review_rewards
+from onboarding.agents.validate_evidence.checks import review_quests, review_rewards
 
 QUEST = (
     "- key: {key}\n  title: Misión {key}\n  description: Algo\n  points: {points}\n"

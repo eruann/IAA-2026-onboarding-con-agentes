@@ -35,8 +35,9 @@ def knowledge_used_by(fn: Callable) -> list[str]:
 
     exports = knowledge_exports()
     used = {name for name, export in exports.items() if export is fn}
-    # Solo se puede leer el código de una función Python. Las de agents pasan por el
-    # grafo: lo que usan se ve en el recorrido, no se marca aparte.
-    if inspect.isfunction(fn) and not fn.__module__.startswith("onboarding.agents."):
+    # Solo se puede leer el código de una función Python. Las pruebas del taller de
+    # Agentes (agents/checks.py) corren nodos por el grafo: lo que usan se ve en el
+    # recorrido, no se marca aparte.
+    if inspect.isfunction(fn) and fn.__module__ != "onboarding.agents.checks":
         used |= set(follow(fn, exports)["knowledge"])
     return sorted(used)

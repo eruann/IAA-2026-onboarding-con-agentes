@@ -12,8 +12,13 @@ Solo declara: el chat con `generate_quest`, la revisión de propuestas (en
 
 from pathlib import Path
 
+# 1. Pruebas ad hoc (andamiaje): checks.py de este agente
 from onboarding.agents.generate_quest.checks import review_proposal
-from onboarding.game import review_quests
+
+# 2. Del agente (producto): node.py de este agente
+# (ninguna)
+# 3. Del código común (producto): knowledge layer, game y demás interfaces
+from onboarding.game import quests_in_data
 from onboarding.knowledge import retrieve, who_knows_about
 from onboarding.workshop import Tool, Workshop
 
@@ -32,7 +37,11 @@ WORKSHOP = Workshop(
             "Revisar una misión propuesta",
             "Pegá lo que propuso el agente, en el formato de data/quests.yaml.",
         ),
-        Tool(review_quests, "Ver las misiones actuales", "Para no proponer algo que ya existe."),
+        Tool(
+            quests_in_data,
+            "Ver las misiones actuales",
+            "Las de data/quests.yaml, para no proponer algo que ya existe (es de Experiencia).",
+        ),
         Tool(
             retrieve,
             "Buscar documentación del puesto",

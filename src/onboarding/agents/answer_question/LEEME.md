@@ -11,7 +11,8 @@ responden cada pregunta, y medir qué tan bien lo hace.
 
 ## Qué construís y qué trae el taller
 
-**Lo construís vos** (todo en `knowledge/rag/`):
+**Lo construís vos:** tu agente (`node.py` y `prompt.md`, en esta carpeta) y lo
+escrito, en `knowledge/rag/` (producto):
 
 - `chunking.py` → `chunk_text`: corta un documento en fragmentos. **Ya
   funciona**, pero por párrafos y sin mirar los títulos `##` (ver más abajo).
@@ -24,8 +25,10 @@ responden cada pregunta, y medir qué tan bien lo hace.
 - `citations.py` → `quote_is_supported`: verifica que una cita esté textual.
   **Ya funciona.**
 
-**Lo trae el taller** (`knowledge/rag/workshop.py`, con las ayudas en `checks.py`): la declaración de las
-pruebas y dos ayudas para mirar y medir tu trabajo:
+**Lo trae el taller** (`workshop.py`, en esta carpeta): el chat con tu agente y las
+pruebas, en las tres secciones de siempre. Las de la knowledge layer
+(`retrieve`, `quote_is_supported`) se llaman desde ahí; las pruebas ad hoc para
+mirar y medir tu trabajo están en `checks.py`:
 
 - `chunk_document`: muestra cómo corta `chunk_text` un documento del corpus.
 - `evaluate_retrieval`: corre las preguntas de `eval/rag_questions.yaml` contra

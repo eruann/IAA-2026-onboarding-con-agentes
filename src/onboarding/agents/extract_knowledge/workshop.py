@@ -5,13 +5,19 @@
 
 """Taller del rol Grafo cultural y datos.
 
-Solo declara: el chat con `extract_knowledge`, su agente, y las funciones del rol
-que se prueban sueltas.
+Solo declara: el chat con `extract_knowledge`, su agente, y las pruebas. La forma de
+una relación y las consultas al grafo son producto y quedan en
+knowledge/informal_network/: acá solo se llaman.
 """
 
 from pathlib import Path
 
+# 1. Pruebas ad hoc (andamiaje): checks.py de este agente
+# (ninguna)
+# 2. Del agente (producto): node.py de este agente
 from onboarding.agents.extract_knowledge.node import extract_triples
+
+# 3. Del código común (producto): knowledge layer, game y demás interfaces
 from onboarding.knowledge import who_knows_about
 from onboarding.workshop import Tool, Workshop
 

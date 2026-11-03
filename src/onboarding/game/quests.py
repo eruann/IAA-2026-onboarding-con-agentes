@@ -72,3 +72,24 @@ def check_quests(quests: list[dict], existing_keys: set | None = None) -> list[l
             problems.append(f"approver tiene que ser {', '.join(APPROVERS)}")
         result.append(problems)
     return result
+
+
+# Las columnas de la revisión de misiones (la muestran los talleres de Experiencia y
+# del Diseñador de misiones)
+REVIEW_COLUMNS = ("key", "título", "puntos", "aprueba", "revisión")
+
+
+def review_rows(quests: list[dict], existing_keys: set | None = None) -> list[tuple]:
+    """Una fila por misión, en el orden de REVIEW_COLUMNS, con lo que no cierra de
+    cada una (o ✅ si está bien)."""
+    problems = check_quests(quests, existing_keys)
+    return [
+        (
+            quest.get("key", "—"),
+            quest.get("title", "—"),
+            quest.get("points", "—"),
+            quest.get("approver", "—"),
+            "; ".join(found) or "✅",
+        )
+        for quest, found in zip(quests, problems, strict=True)
+    ]

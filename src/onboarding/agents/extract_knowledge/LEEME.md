@@ -20,10 +20,10 @@
 - `knowledge/informal_network/queries.py` → `who_knows_about`: pendiente.
 - `knowledge/informal_network/models.py`: las tablas `nodes` y `edges`. Pendiente.
 
-**Lo trae el taller** (`agents/extract_knowledge/workshop.py`, al lado de tu
-agente porque prueba sus funciones): el chat con tu
-agente y tus funciones para probar sueltas. No tiene ayudas propias (`checks.py`):
-todo lo que prueba es tuyo.
+**Lo trae el taller** (`workshop.py`, en esta carpeta): el chat con tu agente y
+las pruebas, en las tres secciones de siempre: `extract_triples` sale de tu
+agente y `who_knows_about`, de la knowledge layer. Todavía no tenés pruebas ad
+hoc: cuando hagan falta (por ejemplo, medir la cobertura), van en `checks.py`.
 
 ## Qué falta
 

@@ -3,41 +3,22 @@
 # construya, pruebe o entienda el producto (talleres, diagramas, guías).
 # No es parte del producto.
 
-"""Revisiones del taller de Experiencia: leen los YAML del juego y muestran lo que
-no cierra, con las reglas de `game/quests.py`. No cambian nada."""
+"""Pruebas ad hoc del taller de Experiencia: leen los YAML del juego y muestran lo
+que no cierra, con las reglas de `game/quests.py` (producto). No cambian nada."""
 
-from onboarding.game.quests import (
+from onboarding.game import (
     MAX_QUESTS,
     MIN_QUESTS,
-    check_quests,
+    REVIEW_COLUMNS,
     field_problems,
     is_positive_int,
     quests_in_data,
+    review_rows,
 )
 from onboarding.paths import load_data_yaml
 from onboarding.workshop import markdown_table
 
 REWARD_FIELDS = ("key", "title", "cost")
-
-
-def quest_rows(quests: list[dict], existing_keys: set | None = None) -> tuple[str, int]:
-    """Las misiones en una tabla, con lo que no cierra de cada una, y cuántas tienen
-    algo para revisar. La usan este taller y el del Diseñador de misiones."""
-    problems = check_quests(quests, existing_keys)
-    table = markdown_table(
-        ("key", "título", "puntos", "aprueba", "revisión"),
-        (
-            (
-                quest.get("key", "—"),
-                quest.get("title", "—"),
-                quest.get("points", "—"),
-                quest.get("approver", "—"),
-                "; ".join(found) or "✅",
-            )
-            for quest, found in zip(quests, problems, strict=True)
-        ),
-    )
-    return table, sum(bool(found) for found in problems)
 
 
 def _total_points(quests: list[dict]) -> int:
@@ -47,7 +28,8 @@ def _total_points(quests: list[dict]) -> int:
 def review_quests() -> str:
     """Las misiones de data/quests.yaml en una tabla, con lo que no cierra."""
     quests = quests_in_data()
-    table, with_problems = quest_rows(quests)
+    rows = review_rows(quests)
+    with_problems = sum(row[-1] != "✅" for row in rows)
     if MIN_QUESTS <= len(quests) <= MAX_QUESTS:
         count = f"✅ {len(quests)} misiones (el alcance pide de {MIN_QUESTS} a {MAX_QUESTS})."
     else:
@@ -55,7 +37,7 @@ def review_quests() -> str:
     summary = (
         f"**{with_problems}** con algo para revisar · **{_total_points(quests)}** puntos en total."
     )
-    return "\n\n".join([count, summary, table])
+    return "\n\n".join([count, summary, markdown_table(REVIEW_COLUMNS, rows)])
 
 
 def review_rewards() -> str:
