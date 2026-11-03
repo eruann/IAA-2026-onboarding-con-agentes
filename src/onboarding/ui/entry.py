@@ -32,12 +32,12 @@ def _test_button(prefs: dict) -> None:
         ).props("outline").classes("boton-borde w-full")
         return
 
-    def enter() -> None:
+    async def enter() -> None:
         if not check_password(settings, password.value):
             ui.notify("Clave incorrecta.", type="negative")
             return
         prefs["test_key"] = workshops_key(password.value)
-        browser_prefs.save(prefs)
+        await browser_prefs.save(prefs)
         ui.navigate.to("talleres")
 
     with ui.dialog() as dialog, ui.card().classes("w-80"):
@@ -86,13 +86,13 @@ async def entry() -> None:
             # Provisorio: hasta que se sepa quién es jefe de quién (ver game/people.py)
             as_manager = ui.checkbox("Entrar como jefe", value=bool(prefs.get("as_manager")))
 
-            def enter() -> None:
+            async def enter() -> None:
                 person = by_key.get(person_select.value)
                 if person is None:
                     ui.notify("Elegí una persona.", type="warning")
                     return
                 prefs.update(person=person.key, name=person.name, as_manager=as_manager.value)
-                browser_prefs.save(prefs)
+                await browser_prefs.save(prefs)
                 ui.navigate.to("jefe" if as_manager.value else "empleado")
 
             ui.button("Entrar", on_click=enter).classes("w-full")

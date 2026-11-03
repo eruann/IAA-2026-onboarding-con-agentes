@@ -88,10 +88,10 @@ async def load_session(dark) -> dict:
 SESSION_KEYS = ("person", "name", "as_manager", "test_key")
 
 
-def logout(prefs: dict) -> None:
+async def logout(prefs: dict) -> None:
     for key in SESSION_KEYS:
         prefs.pop(key, None)
-    browser_prefs.save(prefs)
+    await browser_prefs.save(prefs)
     ui.navigate.to("./")  # a la entrada (todas las páginas cuelgan de /ui/)
 
 
@@ -103,15 +103,15 @@ def sidebar(
     modelo."""
     models = catalog.options
 
-    def on_dark_change(event) -> None:
+    async def on_dark_change(event) -> None:
         dark.value = event.value
         prefs["dark"] = event.value
-        browser_prefs.save(prefs)
+        await browser_prefs.save(prefs)
 
-    def on_model_change(event) -> None:
+    async def on_model_change(event) -> None:
         option = models[event.value]
         prefs["model"] = f"{option.provider}:{option.model}"
-        browser_prefs.save(prefs)
+        await browser_prefs.save(prefs)
 
     # El modelo se guarda por nombre y no por posición: la lista cambia con el tiempo
     keys = [f"{option.provider}:{option.model}" for option in models]

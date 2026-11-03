@@ -29,6 +29,13 @@ async def load() -> dict:
     return prefs or {}
 
 
-def save(prefs: dict) -> None:
+async def save(prefs: dict) -> None:
+    """Guarda en el navegador y espera a que confirme. Hay que esperarlo antes de
+    navegar: si no, algunos navegadores (Firefox y los basados en él) cambian de
+    página antes de guardar y la siguiente no encuentra quién entró."""
     stored = {key: value for key, value in prefs.items() if key != "prefers_dark"}
-    ui.run_javascript(f"localStorage.setItem({json.dumps(KEY)}, {json.dumps(json.dumps(stored))})")
+    code = f"localStorage.setItem({json.dumps(KEY)}, {json.dumps(json.dumps(stored))}); true"
+    try:
+        await ui.run_javascript(code, timeout=5)
+    except TimeoutError:  # el navegador no respondió: se sigue, como antes del arreglo
+        pass
