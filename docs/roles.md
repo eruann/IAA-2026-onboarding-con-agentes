@@ -32,8 +32,9 @@ mensaje.
 | `generate_quest` | Propone misiones nuevas a partir de la documentación del puesto | Diseñador de misiones |
 | Coordinador | Decide a qué nodo va cada mensaje | Agentes y orquestación |
 
-Un nodo arranca en `agents/nodes.py`; cuando su rol empieza a trabajarlo, lo pasa
-a `agents/<nodo>/` con su test (como `agents/extract_knowledge/`).
+Cada agente vive en su carpeta `agents/<nodo>/`, siempre con la misma forma:
+`node.py`, `node_test.py` y su `prompt.md`. Si entendés uno, entendés los demás
+(ver "Cómo está armado cada rol" en `AGENTS.md`).
 
 ## 1. PM / Producto
 
@@ -60,8 +61,8 @@ Slack), persistir `llm_calls` (costo por corrida), secretos.
 
 ## 3. Agentes y orquestación
 
-**Carpetas:** `src/onboarding/agents/` (grafo, `run.py`, `state.py`, `tools.py`,
-`prompts/`), `llm/factory.py`, `llm/prompts.py`. Los nodos son de cada rol (ver
+**Carpetas:** `src/onboarding/agents/` (`graph.py`, `common.py`, `run.py`, `state.py`,
+`tools.py`), `llm/factory.py`, `llm/prompts.py`. Los nodos son de cada rol (ver
 la tabla de arriba).
 
 Lo que une a los agentes de todos los roles:
@@ -134,8 +135,7 @@ le muestra al ingresante qué captura el agente.
 
 ## 7. Diseñador de misiones
 
-**Carpetas:** `agents/generate_quest/` (su nodo y su taller) y su prompt
-`agents/prompts/generate_quest.md`.
+**Carpetas:** `agents/generate_quest/` (su agente, su prompt y su taller).
 
 **Su agente:** `generate_quest`, que propone misiones nuevas para un puesto a
 partir de su documentación (`retrieve`, de RAG) y de quién sabe qué

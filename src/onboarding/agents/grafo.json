@@ -17,7 +17,7 @@
     {
       "id": "answer_question",
       "titulo": "Responder pregunta",
-      "archivo": "src/onboarding/agents/nodes.py",
+      "archivo": "src/onboarding/agents/answer_question/node.py",
       "funcion": "make_answer_question.<locals>.answer_question",
       "usa": [
         {
@@ -37,7 +37,7 @@
     {
       "id": "validate_evidence",
       "titulo": "Validar evidencia",
-      "archivo": "src/onboarding/agents/nodes.py",
+      "archivo": "src/onboarding/agents/validate_evidence/node.py",
       "funcion": "make_validate_evidence.<locals>.validate_evidence",
       "usa": [],
       "modelo": {

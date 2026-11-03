@@ -18,7 +18,7 @@ from onboarding.config import get_settings
 from onboarding.llm import model_catalog
 from onboarding.ui.access import has_test_access
 from onboarding.ui.chat import chat
-from onboarding.ui.layout import load_session, setup_page, sidebar
+from onboarding.ui.layout import load_session, page_frame, setup_page, sidebar
 from onboarding.ui.tool_form import tool_card
 from onboarding.workshop import UPCOMING, Embed, Workshop, all_workshops
 
@@ -41,14 +41,16 @@ def _workshop_select(workshops: list[Workshop], current: int) -> None:
     options = {index: item.role for index, item in enumerate(workshops)}
     options |= {f"proximo-{role}": f"{role} · próximamente" for role in UPCOMING}
 
-    def cambiar_taller(event) -> None:
+    def on_workshop_change(event) -> None:
         if isinstance(event.value, int):
             ui.navigate.to(f"?taller={event.value}")
         else:
             ui.notify("Ese taller todavía no existe: se suma en los próximos PRs.")
             event.sender.value = current
 
-    ui.select(options, label="Taller", value=current, on_change=cambiar_taller).classes("w-full")
+    ui.select(options, label="Taller", value=current, on_change=on_workshop_change).classes(
+        "w-full"
+    )
 
 
 # Dibuja el grafo como diagrama de flujo con trazo a mano (ELK + rough.js, ver ui/grafo.js)
@@ -147,12 +149,7 @@ def _embed(embed: Embed) -> None:
     with ui.expansion(embed.title, icon="web").classes("w-full seccion"):
         if embed.help:
             ui.label(embed.help).classes("texto-suave")
-        frame = (
-            ui.element("iframe")
-            .props(f'src="{embed.path}"')
-            .classes("w-full")
-            .style("height: 70vh; border: 1px solid rgba(49, 51, 63, 0.2); border-radius: 0.5rem")
-        )
+        frame = page_frame(embed.path)
         with ui.row().classes("items-center gap-4"):
             ui.button(
                 "Recargar",

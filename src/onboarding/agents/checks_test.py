@@ -1,9 +1,7 @@
 import pytest
 from langchain_core.language_models import FakeListChatModel
 
-from onboarding.agents.workshop import (
-    NODES,
-    WORKSHOP,
+from onboarding.agents.checks import (
     _contract_problems,
     ab_test,
     ask_node,
@@ -11,11 +9,8 @@ from onboarding.agents.workshop import (
     route_message,
     show_prompt,
 )
-
-
-class _ModeloQueFalla(FakeListChatModel):
-    def invoke(self, *args, **kwargs):
-        raise RuntimeError("el proveedor no responde")
+from onboarding.agents.graph import NODES
+from onboarding.agents.workshop import WORKSHOP
 
 
 def test_el_chat_del_taller_habla_con_el_coordinador() -> None:
@@ -30,7 +25,7 @@ def test_revisa_que_cada_nodo_devuelva_lo_que_espera_el_coordinador(
     report = check_nodes(model=fake_llm)
 
     for node in NODES:
-        assert f"| {node} |" in report
+        assert f"| {node.name} |" in report
     assert "| answer_question | RAG y evaluación | ✅ |" in report
     # extract_triples necesita salida estructurada: con el fake no se puede probar
     assert "el modelo fake no sabe salida estructurada" in report
@@ -71,7 +66,9 @@ def test_ab_sin_pregunta_repite_el_ultimo_mensaje_del_chat(fake_llm: FakeListCha
 
 def test_muestra_el_prompt_de_cada_nodo() -> None:
     for node in NODES:
-        assert f"agents/prompts/{node}.md" in show_prompt(node)
+        if node.prompt is not None:
+            assert f"src/onboarding/agents/{node.name}/prompt.md" in show_prompt(node.name)
+    assert "no tiene prompt propio" in show_prompt("extract_knowledge")
 
 
 def test_preguntarle_a_un_nodo_dice_por_donde_paso_y_cuanto_tardo(
@@ -84,6 +81,6 @@ def test_preguntarle_a_un_nodo_dice_por_donde_paso_y_cuanto_tardo(
     assert report.endswith(" s**")
 
 
-def test_si_falla_el_modelo_muestra_su_error_y_no_el_del_turno() -> None:
+def test_si_falla_el_modelo_muestra_su_error_y_no_el_del_turno(failing_llm) -> None:
     with pytest.raises(RuntimeError, match="el proveedor no responde"):
-        ask_node("generate_quest", "hola", _ModeloQueFalla(responses=["x"]))
+        ask_node("generate_quest", "hola", failing_llm)

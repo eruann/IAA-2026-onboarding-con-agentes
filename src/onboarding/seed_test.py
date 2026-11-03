@@ -30,7 +30,7 @@ def data_dir(tmp_path, monkeypatch: pytest.MonkeyPatch):
     (tmp_path / "people.yaml").write_text(_people_yaml("Ingresante seed test"), encoding="utf-8")
     (tmp_path / "quests.yaml").write_text(QUESTS_YAML, encoding="utf-8")
     (tmp_path / "rewards.yaml").write_text("[]\n", encoding="utf-8")
-    monkeypatch.setattr("onboarding.seed.DATA_DIR", tmp_path)
+    monkeypatch.setattr("onboarding.paths.DATA_DIR", tmp_path)
     return tmp_path
 
 

@@ -32,7 +32,7 @@ def _test_button(prefs: dict) -> None:
         ).props("outline").classes("boton-borde w-full")
         return
 
-    def entrar() -> None:
+    def enter() -> None:
         if not check_password(settings, password.value):
             ui.notify("Clave incorrecta.", type="negative")
             return
@@ -45,9 +45,9 @@ def _test_button(prefs: dict) -> None:
         password = (
             ui.input("Clave", password=True, password_toggle_button=True)
             .classes("w-full")
-            .on("keydown.enter", entrar)
+            .on("keydown.enter", enter)
         )
-        ui.button("Entrar", on_click=entrar).classes("w-full")
+        ui.button("Entrar", on_click=enter).classes("w-full")
     ui.button("Talleres (Test)", icon="lock", color=None, on_click=dialog.open).props(
         "outline"
     ).classes("boton-borde w-full")
@@ -86,7 +86,7 @@ async def entry() -> None:
             # Provisorio: hasta que se sepa quién es jefe de quién (ver game/people.py)
             as_manager = ui.checkbox("Entrar como jefe", value=bool(prefs.get("as_manager")))
 
-            def entrar() -> None:
+            def enter() -> None:
                 person = by_key.get(person_select.value)
                 if person is None:
                     ui.notify("Elegí una persona.", type="warning")
@@ -95,5 +95,5 @@ async def entry() -> None:
                 browser_prefs.save(prefs)
                 ui.navigate.to("jefe" if as_manager.value else "empleado")
 
-            ui.button("Entrar", on_click=entrar).classes("w-full")
+            ui.button("Entrar", on_click=enter).classes("w-full")
         _test_button(prefs)

@@ -103,12 +103,12 @@ def sidebar(
     modelo."""
     models = catalog.options
 
-    def cambiar_modo(event) -> None:
+    def on_dark_change(event) -> None:
         dark.value = event.value
         prefs["dark"] = event.value
         browser_prefs.save(prefs)
 
-    def cambiar_modelo(event) -> None:
+    def on_model_change(event) -> None:
         option = models[event.value]
         prefs["model"] = f"{option.provider}:{option.model}"
         browser_prefs.save(prefs)
@@ -125,7 +125,7 @@ def sidebar(
             {index: option.label for index, option in enumerate(models)},
             label="Modelo",
             value=model_index,
-            on_change=cambiar_modelo,
+            on_change=on_model_change,
             with_input=True,  # filtra mientras escribís
         ).classes("w-full")
         if catalog.notes:
@@ -136,8 +136,18 @@ def sidebar(
             ):
                 for note in catalog.notes:
                     ui.markdown(note).classes("text-caption")
-        ui.switch("Modo oscuro", value=dark.value, on_change=cambiar_modo)
+        ui.switch("Modo oscuro", value=dark.value, on_change=on_dark_change)
         ui.button("Cerrar sesión", on_click=lambda: logout(prefs), color=None).props(
             "outline"
         ).classes("boton-borde q-mt-md")
     return model_select
+
+
+def page_frame(path: str, height: str = "70vh"):
+    """Una página de la app adentro de otra (el panel del jefe, por ejemplo)."""
+    return (
+        ui.element("iframe")
+        .props(f'src="{path}"')
+        .classes("w-full")
+        .style(f"height: {height}; border: 1px solid rgba(49, 51, 63, 0.2); border-radius: 0.5rem")
+    )

@@ -1,7 +1,7 @@
 import pytest
 
-from onboarding.game import workshop
-from onboarding.game.workshop import review_quests, review_rewards
+from onboarding import paths
+from onboarding.game.checks import review_quests, review_rewards
 
 QUEST = (
     "- key: {key}\n  title: Misión {key}\n  description: Algo\n  points: {points}\n"
@@ -11,7 +11,7 @@ QUEST = (
 
 @pytest.fixture
 def data(tmp_path, monkeypatch):
-    monkeypatch.setattr(workshop, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(paths, "DATA_DIR", tmp_path)
     return tmp_path
 
 

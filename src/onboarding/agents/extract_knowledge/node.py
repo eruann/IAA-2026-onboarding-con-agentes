@@ -10,7 +10,7 @@ de la knowledge layer que hace la extracción.
 
 from langchain_core.language_models import BaseChatModel
 
-from onboarding.agents.nodes import Node
+from onboarding.agents.common import Node, NodeSpec
 from onboarding.agents.state import OnboardingState
 from onboarding.knowledge import extract_triples
 
@@ -42,3 +42,10 @@ def make_extract_knowledge(model: BaseChatModel) -> Node:
         }
 
     return extract_knowledge
+
+
+# Sin prompt propio: el suyo es el de extract_triples, en la knowledge layer
+# (knowledge/informal_network/extraction_prompt.md)
+NODE = NodeSpec(
+    "extract_knowledge", "Extraer relaciones", "Grafo cultural y datos", make_extract_knowledge
+)

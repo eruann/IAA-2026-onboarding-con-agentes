@@ -62,8 +62,9 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
    usan directo únicamente desde adentro de la capa.
 5. El modelo se obtiene **siempre** de `onboarding.llm.get_chat_model()`. Ningún
    módulo nombra un proveedor ni instancia un cliente.
-6. Los prompts viven en `src/onboarding/agents/prompts/*.md`, no embebidos en el
-   código, y se cargan con `onboarding.llm.load_prompt()`.
+6. Los prompts viven en un `.md` **al lado del código que los usa** (el
+   `prompt.md` de cada agente), no embebidos en el código, y se cargan con
+   `onboarding.llm.load_prompt(ruta)`.
 7. Función pública nueva, test nuevo. El test va al lado del módulo como
    `<modulo>_test.py` (pytest no reconoce otro nombre). Las fixtures están en
    `src/onboarding/conftest.py`. Los tests no llaman a modelos reales: está el
@@ -95,6 +96,40 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
     Codex: `/plan`) y esperá su OK. La idea es que quien pide entienda el
     cambio antes de que pase ([DEVELOPMENT.md](DEVELOPMENT.md#primero-el-plan)).
 
+## Cómo está armado cada rol
+
+Todos los roles tienen la misma estructura: si entendiste uno, podés leer los
+demás.
+
+```
+src/onboarding/
+  paths.py                 # raíz del repo, data/, corpus/, eval/ y load_data_yaml()
+  db/session.py            # session_scope(): la sesión que te pasan o una propia
+  agents/
+    common.py              # Node, ask_model y NodeSpec (lo compartido por los agentes)
+    graph.py               # NODES (la lista de agentes) y el coordinador (route)
+    <nodo>/                # un agente: answer_question, validate_evidence, …
+      node.py              # make_<nodo>(model) y su NODE (nombre, título, rol, prompt)
+      node_test.py
+      prompt.md            # su prompt, al lado del código
+  knowledge/rag/, knowledge/informal_network/, game/   # el módulo de cada rol
+    __init__.py            # su interfaz pública (lo único que importan los demás)
+    <pieza>.py + <pieza>_test.py
+  <carpeta del rol>/       # su taller (andamiaje)
+    workshop.py            # solo declara el taller
+    checks.py              # las ayudas del taller que no son funciones del rol
+    LEEME.md               # mismas secciones en todos
+```
+
+- **Un agente nuevo:** su carpeta `agents/<nodo>/` con esos tres archivos, su
+  valor en `Intent` (`agents/state.py`) y su `NODE` en `NODES` (`agents/graph.py`).
+- **Lo pendiente:** una función pública que todavía no hace lo que promete tira
+  `NotImplementedError("TODO(<rol>): …")` (el taller y el grafo la muestran como
+  pendiente). Algo que ya funciona pero le falta una parte lleva un comentario
+  `# TODO(<rol>): …`.
+- **Rutas y datos:** siempre desde `onboarding.paths` (nunca `Path("data")` ni
+  `parents[3]`).
+
 ## Producto y andamiaje
 
 Cada archivo de `src/` empieza con una marca y su leyenda (`file_tags_test.py`
@@ -124,7 +159,7 @@ En `.js` va con `//` y en los `LEEME.md` como cita (`>`). Buscar:
   llevan marca: las genera Alembic.
 - **Andamiaje:** de `ui/`, los talleres (`pages.py`, `tool_form.py`,
   `access.py`, `grafo.js`), `onboarding/workshop.py`, cada
-  `*/workshop.py` y su `LEEME.md`, `agents/lineage.py` y `agents/diagram.py`,
+  `*/workshop.py`, `*/checks.py` y `LEEME.md`, `agents/lineage.py` y `agents/diagram.py`,
   `llm/catalog.py`. Fuera de `src/` y sin marca porque el formato no admite
   comentarios: `agents/grafo.json` y `.tours/`.
 
@@ -174,9 +209,10 @@ Los pedidos de ejemplo del `LEEME.md` de cada taller se escriben como pedidos de
 plan ("Armame un plan para…, explicame…"), nunca como órdenes para copiar y
 pegar ("Implementá…").
 
-Un taller nuevo (otro rol): crear su `workshop.py` + `LEEME.md`, exportar
-`WORKSHOP` por la interfaz pública del módulo y sumarlo en
-`onboarding/workshop.py` (`all_workshops`).
+Un taller nuevo (otro rol): crear su `workshop.py` (solo la declaración; las
+ayudas van en `checks.py`) + `LEEME.md`, exportarlo en `WORKSHOPS` desde la
+interfaz pública del paquete y sumar el rol a `ROLE_ORDER` en
+`onboarding/workshop.py`.
 
 ## Recorridos guiados (`.tours/`)
 

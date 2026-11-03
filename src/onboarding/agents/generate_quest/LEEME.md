@@ -16,7 +16,7 @@ entran al juego lo deciden Experiencia y PM.
 
 - `node.py` → el nodo `generate_quest`. Hoy le pasa el pedido al modelo con su
   prompt y devuelve texto libre.
-- `agents/prompts/generate_quest.md`: el prompt, con lo que hace buena a una
+- `prompt.md` (al lado de `node.py`): el prompt, con lo que hace buena a una
   misión.
 
 **Lo usás de otros roles** (por `onboarding.knowledge`):
@@ -24,7 +24,7 @@ entran al juego lo deciden Experiencia y PM.
 - `retrieve` (RAG): la documentación del puesto. Pendiente.
 - `who_knows_about` (Grafo): a quién involucrar en la misión. Pendiente.
 
-**Lo trae el taller** (`agents/generate_quest/workshop.py`):
+**Lo trae el taller** (`workshop.py`, con la revisión de propuestas en `checks.py`):
 
 - `review_proposal`: revisa misiones propuestas con las mismas reglas que las
   misiones del juego (campos, puntos, quién aprueba) y marca si la `key` ya

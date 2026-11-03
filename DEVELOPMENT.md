@@ -49,11 +49,11 @@ las que empiezan en la raíz del repo.
 |---|---|---|
 | **PM / Producto** | `docs/`, `corpus/`, `data/`, `eval/baseline/` | `eval/rag_questions.yaml`, `data/quests.yaml` |
 | **Tech Lead / Plataforma** | `config.py`, `db/`, `llm/callbacks.py`, `llm/models.py`, `conftest.py`; en la raíz: `Dockerfile`, `docker-compose.yml`, `pyproject.toml`, `alembic.ini`, `render.yaml`, `.github/` | `api/main.py`, `docs/runbooks/` |
-| **Agentes y orquestación** · el coordinador | `agents/` (grafo, `run.py`, `state.py`, `tools.py`, `prompts/`), `llm/factory.py`, `llm/prompts.py` | los nodos de cada rol, `knowledge/__init__.py` (la puerta de la knowledge layer) |
-| **RAG y evaluación** · lo escrito | `knowledge/rag/`, su nodo `answer_question`; en la raíz: `corpus/`, `eval/rag_questions.yaml` | `knowledge/__init__.py`, `docs/adr/0005-embeddings.md` |
-| **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`, su nodo `agents/extract_knowledge/`; en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `agents/prompts/extract_knowledge.md`, `data/people.yaml` |
-| **Experiencia: interfaz y game design** | `game/`, `api/`, `bot/`, su nodo `validate_evidence`; en la raíz: `data/quests.yaml`, `data/rewards.yaml` | `agents/__init__.py`, `bot/manifest.yaml` |
-| **Diseñador de misiones** | `agents/generate_quest/` y `agents/prompts/generate_quest.md` | `game/quests.py`, `data/quests.yaml`, `knowledge/__init__.py` |
+| **Agentes y orquestación** · el coordinador | `agents/` (`graph.py`, `common.py`, `run.py`, `state.py`, `tools.py`), `llm/factory.py`, `llm/prompts.py` | los nodos de cada rol, `knowledge/__init__.py` (la puerta de la knowledge layer) |
+| **RAG y evaluación** · lo escrito | `knowledge/rag/`, su agente `agents/answer_question/`; en la raíz: `corpus/`, `eval/rag_questions.yaml` | `knowledge/__init__.py`, `docs/adr/0005-embeddings.md` |
+| **Grafo cultural y datos** · lo no escrito | `knowledge/informal_network/`, su agente `agents/extract_knowledge/`; en la raíz: `eval/informal_network_ground_truth.yaml` | `knowledge/__init__.py`, `data/people.yaml` |
+| **Experiencia: interfaz y game design** | `game/`, `api/`, `bot/`, su agente `agents/validate_evidence/`; en la raíz: `data/quests.yaml`, `data/rewards.yaml` | `agents/__init__.py`, `bot/manifest.yaml` |
+| **Diseñador de misiones** | `agents/generate_quest/` (agente, prompt y taller) | `game/quests.py`, `data/quests.yaml`, `knowledge/__init__.py` |
 | **Comms y entregables** | `docs/minutas/`, `docs/README.md` | `docs/adr/` |
 
 El detalle de cada rol, con su primer PR, está en [docs/roles.md](docs/roles.md).
@@ -130,7 +130,8 @@ Detalle de ramas, tests, migraciones y secretos: [CONTRIBUTING.md](CONTRIBUTING.
 - A la knowledge layer se entra solo por `onboarding.knowledge`.
 - El modelo se obtiene siempre de `onboarding.llm.get_chat_model()`; los tests
   usan el proveedor `fake` y nunca gastan tokens.
-- Los prompts van en `agents/prompts/*.md`, no dentro del código.
+- Los prompts van en un `.md` al lado del código que los usa (el `prompt.md` de
+  cada agente), no dentro del código.
 - Una migración por PR, con `downgrade()` que funcione.
 - Una decisión de arquitectura nueva se escribe como ADR en
   [docs/adr/](docs/adr/).

@@ -13,24 +13,6 @@ from onboarding.knowledge.informal_network.extraction import KnowledgeTriple, ex
 TEXTO = "Para Excel avanzado, preguntale a Diego. Es un genio."
 
 
-class _ModeloFijo:
-    """Devuelve siempre la misma salida estructurada y guarda los mensajes que recibió.
-
-    FakeListChatModel no sirve acá: no implementa with_structured_output.
-    """
-
-    def __init__(self, salida: dict | None) -> None:
-        self.salida = salida
-        self.mensajes: list = []
-
-    def with_structured_output(self, schema: dict, method: str) -> "_ModeloFijo":
-        return self
-
-    def invoke(self, mensajes: list) -> dict | None:
-        self.mensajes = mensajes
-        return self.salida
-
-
 def _triple(evidence: str) -> dict:
     return {
         "subject": "Diego",
@@ -40,8 +22,8 @@ def _triple(evidence: str) -> dict:
     }
 
 
-def test_relacion_con_evidencia_textual_se_devuelve() -> None:
-    modelo = _ModeloFijo({"triples": [_triple("Para Excel avanzado, preguntale a Diego.")]})
+def test_relacion_con_evidencia_textual_se_devuelve(structured_llm) -> None:
+    modelo = structured_llm({"triples": [_triple("Para Excel avanzado, preguntale a Diego.")]})
 
     triples = extract_triples(TEXTO, modelo)
 
@@ -55,23 +37,23 @@ def test_relacion_con_evidencia_textual_se_devuelve() -> None:
     ]
 
 
-def test_relacion_con_evidencia_inventada_se_descarta() -> None:
-    modelo = _ModeloFijo({"triples": [_triple("Diego sabe mucho de Excel.")]})
+def test_relacion_con_evidencia_inventada_se_descarta(structured_llm) -> None:
+    modelo = structured_llm({"triples": [_triple("Diego sabe mucho de Excel.")]})
 
     assert extract_triples(TEXTO, modelo) == []
 
 
-def test_salida_vacia_del_modelo_devuelve_lista_vacia() -> None:
-    assert extract_triples(TEXTO, _ModeloFijo(None)) == []
-    assert extract_triples(TEXTO, _ModeloFijo({"triples": []})) == []
+def test_salida_vacia_del_modelo_devuelve_lista_vacia(structured_llm) -> None:
+    assert extract_triples(TEXTO, structured_llm(None)) == []
+    assert extract_triples(TEXTO, structured_llm({"triples": []})) == []
 
 
-def test_el_prompt_lleva_organigrama_y_procedimientos() -> None:
-    modelo = _ModeloFijo(None)
+def test_el_prompt_lleva_organigrama_y_procedimientos(structured_llm) -> None:
+    modelo = structured_llm(None)
 
     extract_triples(TEXTO, modelo)
 
-    system = modelo.mensajes[0]
+    system = modelo.seen[0]
     assert isinstance(system, SystemMessage)
     assert "<organigrama>" in system.content
     assert "<procedimientos>" in system.content
@@ -80,8 +62,8 @@ def test_el_prompt_lleva_organigrama_y_procedimientos() -> None:
     assert '<documento nombre="organigrama.md">' not in system.content
 
 
-def test_sin_modelo_usa_el_del_proyecto(monkeypatch: pytest.MonkeyPatch) -> None:
-    modelo = _ModeloFijo({"triples": [_triple("Para Excel avanzado, preguntale a Diego.")]})
+def test_sin_modelo_usa_el_del_proyecto(monkeypatch: pytest.MonkeyPatch, structured_llm) -> None:
+    modelo = structured_llm({"triples": [_triple("Para Excel avanzado, preguntale a Diego.")]})
     monkeypatch.setattr(
         "onboarding.knowledge.informal_network.extraction.get_chat_model", lambda: modelo
     )

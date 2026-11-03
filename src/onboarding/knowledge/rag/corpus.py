@@ -8,20 +8,20 @@ Solución transitoria hasta que exista `retrieve`: así respondía el primer cha
 del proyecto (PR #15). Con documentos largos gasta muchos tokens por pregunta.
 """
 
-from pathlib import Path
-
-# corpus/ está en la raíz del repo, tanto local como en Docker (/app/corpus)
-CORPUS = Path(__file__).resolve().parents[4] / "corpus"
+from onboarding.paths import CORPUS_DIR, markdown_documents
 
 
 def document_names() -> tuple[str, ...]:
     """Los documentos del corpus, sin el README que documenta la carpeta."""
-    return tuple(sorted(path.name for path in CORPUS.glob("*.md") if path.name != "README.md"))
+    return tuple(path.name for path in markdown_documents(CORPUS_DIR))
 
 
 def read_documents(names: tuple[str, ...]) -> str:
     """Los documentos pedidos, cada uno entre etiquetas <documento nombre="...">."""
     return "\n".join(
-        f'<documento nombre="{name}">\n{(CORPUS / name).read_text(encoding="utf-8")}\n</documento>'
-        for name in names
+        _tagged(name, (CORPUS_DIR / name).read_text(encoding="utf-8")) for name in names
     )
+
+
+def _tagged(name: str, text: str) -> str:
+    return f'<documento nombre="{name}">\n{text}\n</documento>'

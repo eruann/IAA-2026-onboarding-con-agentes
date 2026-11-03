@@ -1,5 +1,7 @@
 import json
 
+from langchain_core.language_models import BaseChatModel
+
 from onboarding.agents.lineage import OUTPUT, _todos, build_lineage, current_state, follow, render
 
 # Funciones de ejemplo: así los tests no dependen de lo que hoy tiene cada nodo, que
@@ -10,11 +12,11 @@ def knowledge_function() -> str:
     return "dato"
 
 
-def _ask(model) -> str:
+def _ask(model: BaseChatModel) -> str:
     return model.invoke("hola")
 
 
-def node_example(model) -> str:
+def node_example(model: BaseChatModel) -> str:
     # TODO(rol): primera línea
     # que sigue acá.
     data = knowledge_function()

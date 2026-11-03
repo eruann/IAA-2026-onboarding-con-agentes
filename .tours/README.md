@@ -2,7 +2,7 @@
 
 Cada `.tour` es un recorrido por el código que se abre en VS Code con la
 extensión CodeTour. `bienvenida.tour` es el común; después hay uno por rol
-(`pm`, `plataforma`, `agentes`, `rag`, `grafo`, `experiencia`, `comms`).
+(`pm`, `plataforma`, `agentes`, `rag`, `grafo`, `experiencia`, `misiones`, `comms`).
 
 Los `.tour` se editan directo (son JSON). Lo más práctico es pedírselo a un
 agente: "agregá un paso al recorrido de rag que muestre X". Este archivo es lo
@@ -12,8 +12,8 @@ que tiene que seguir para no romper nada.
 
 ```json
 {
-  "title": "Tu primer PR está acá",
-  "file": "src/onboarding/agents/nodes.py",
+  "title": "Un agente por dentro",
+  "file": "src/onboarding/agents/answer_question/node.py",
   "pattern": "recorrido: nodo-respuesta$",
   "description": "Texto del paso...\n\n---\n\n(bloque de preguntas)"
 }

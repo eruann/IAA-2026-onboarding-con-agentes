@@ -12,30 +12,25 @@ from typing import Literal, get_args
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from onboarding.knowledge.rag import document_names, read_documents
 from onboarding.llm import get_chat_model, load_prompt
+from onboarding.paths import CORPUS_DIR
 
 Relation = Literal["knows_about", "introduced", "belongs_to", "owns_process"]
 
-# corpus/ está en la raíz del repo, tanto local como en Docker (/app/corpus)
-CORPUS = Path(__file__).resolve().parents[4] / "corpus"
-ORGANIGRAMA = CORPUS / "organigrama.md"
+EXTRACTION_PROMPT = Path(__file__).with_name("extraction_prompt.md")
+ORG_CHART = "organigrama.md"
 
 
 @lru_cache
-def _organigrama() -> str:
-    return ORGANIGRAMA.read_text(encoding="utf-8")
+def _org_chart() -> str:
+    return (CORPUS_DIR / ORG_CHART).read_text(encoding="utf-8")
 
 
 @lru_cache
-def _procedimientos() -> str:
-    # Todo el corpus menos el organigrama (va aparte) y el README (no es un
-    # documento de la empresa, explica cómo escribir el corpus).
-    excluidos = {"README.md", ORGANIGRAMA.name}
-    documentos = sorted(p for p in CORPUS.glob("*.md") if p.name not in excluidos)
-    return "\n".join(
-        f'<documento nombre="{p.name}">\n{p.read_text(encoding="utf-8")}\n</documento>'
-        for p in documentos
-    )
+def _procedures() -> str:
+    # Todo el corpus menos el organigrama, que va aparte
+    return read_documents(tuple(name for name in document_names() if name != ORG_CHART))
 
 
 # Lo que tiene que devolver el modelo, como JSON Schema: los mismos campos que
@@ -86,12 +81,12 @@ def extract_triples(text: str, model: BaseChatModel | None = None) -> list[Knowl
     # El organigrama y los procedimientos van con el prompt: sin verlos, el modelo
     # no puede saber qué relaciones ya están escritas y tiene que descartar.
     system = (
-        f"{load_prompt('extract_knowledge')}\n"
-        f"<organigrama>\n{_organigrama()}\n</organigrama>\n"
-        f"<procedimientos>\n{_procedimientos()}\n</procedimientos>"
+        f"{load_prompt(EXTRACTION_PROMPT)}\n"
+        f"<organigrama>\n{_org_chart()}\n</organigrama>\n"
+        f"<procedimientos>\n{_procedures()}\n</procedimientos>"
     )
-    salida = extractor.invoke([SystemMessage(system), HumanMessage(text)])
+    output = extractor.invoke([SystemMessage(system), HumanMessage(text)])
     # Nada de deducir: si la frase de respaldo no está en el texto, el modelo la
     # inventó o la parafraseó, y la relación no va al grafo.
-    triples = (salida or {}).get("triples", [])
+    triples = (output or {}).get("triples", [])
     return [KnowledgeTriple(**triple) for triple in triples if triple["evidence"] in text]

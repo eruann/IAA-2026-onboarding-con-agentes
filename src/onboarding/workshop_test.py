@@ -8,7 +8,7 @@ from onboarding.workshop import (
     all_workshops,
     describe_params,
     is_pending,
-    markdown_row,
+    markdown_table,
 )
 
 
@@ -78,8 +78,16 @@ def test_cada_taller_se_puede_dibujar(workshop) -> None:
     assert workshop.guide is not None and workshop.guide.exists()
 
 
-def test_una_fila_markdown_escapa_el_pipe() -> None:
-    assert markdown_row(("a | b", 3, "✅")) == "| a \\| b | 3 | ✅ |"
+def test_arma_una_tabla_markdown_y_escapa_el_pipe() -> None:
+    assert markdown_table(("x", "y"), [("a | b", 3)]) == "| x | y |\n|---|---|\n| a \\| b | 3 |"
+
+
+def test_los_talleres_salen_en_el_orden_de_los_roles() -> None:
+    from onboarding.workshop import ROLE_ORDER
+
+    roles = [workshop.role for workshop in all_workshops()]
+    assert roles == [role for role in ROLE_ORDER if role in roles]
+    assert len(roles) == len(set(roles))
 
 
 @pytest.mark.parametrize("workshop", all_workshops(), ids=lambda workshop: workshop.role)

@@ -23,7 +23,9 @@ sale solo de la firma de la función.
 
 ## El archivo `workshop.py`
 
-Es Python, pero solo declara cosas: no lleva lógica. El del Grafo:
+Es Python, pero solo declara cosas: no lleva lógica. Si una prueba necesita una
+ayuda que no es una función del rol (una revisión, una medición), va en un
+`checks.py` al lado, con su `checks_test.py`. El del Grafo:
 
 ```python
 from pathlib import Path
@@ -34,7 +36,7 @@ from onboarding.workshop import Tool, Workshop
 
 WORKSHOP = Workshop(
     role="Grafo cultural y datos",
-    intent="answer_question",
+    intent="extract_knowledge",
     summary="Lo no escrito: quién sabe qué, más allá del organigrama. ...",
     tools=(
         Tool(extract_triples, "Extraer relaciones", "Pegá una conversación. Ej.: ..."),
@@ -115,17 +117,20 @@ grafo). Nada de esto se configura por taller.
 
 ## Crear el taller de un rol nuevo
 
-1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`)
-   y `LEEME.md` (qué construye el rol, qué falta, cómo probar y pedidos de plan
-   de ejemplo). Los dos son andamiaje: empiezan con la marca `andamiaje` y su
-   leyenda ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
-2. Exportar `WORKSHOP` por la interfaz pública del módulo (su `__init__.py`).
-3. Sumarlo en `all_workshops()` de [`onboarding/workshop.py`](../src/onboarding/workshop.py)
-   y sacar el rol de `UPCOMING`.
-   - Los roles de la knowledge layer (RAG) entran por `WORKSHOPS` en
-     `knowledge/__init__.py`, que es un archivo compartido: avisalo en el PR.
+1. En la carpeta del rol, crear `workshop.py` (con `WORKSHOP = Workshop(...)`,
+   solo la declaración), `checks.py` si hace falta alguna ayuda, y `LEEME.md` con
+   las mismas secciones que los demás: "Qué construís y qué trae el taller",
+   "Qué falta", "Qué probar en el taller" y "Pedidos de plan". Los tres son
+   andamiaje: empiezan con la marca `andamiaje` y su leyenda
+   ([AGENTS.md](../AGENTS.md#producto-y-andamiaje)).
+2. Exportarlo en `WORKSHOPS` desde la interfaz pública del paquete (su
+   `__init__.py`): `agents`, `knowledge` y `game` lo hacen igual.
+   - `knowledge/__init__.py` es un archivo compartido: avisalo en el PR.
+3. Sumar el rol a `ROLE_ORDER` en [`onboarding/workshop.py`](../src/onboarding/workshop.py)
+   (el orden del selector) y sacarlo de `UPCOMING`.
 4. Correr los tests: `workshop_test.py` revisa que todas las pruebas de todos los
-   talleres se puedan dibujar y que la guía exista.
+   talleres se puedan dibujar, que la guía exista y que el orden sea el de
+   `ROLE_ORDER`.
 
 ## Pedírselo a Claude Code o Codex
 
