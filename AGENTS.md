@@ -168,16 +168,30 @@ En `.js` va con `//` y en los `LEEME.md` como cita (`>`). Buscar:
 `grep -rl "^# andamiaje" src/`.
 
 - **Producto:** el asistente en sí: `agents/` (grafo, nodos, estado, prompts),
-  `knowledge/`, `llm/factory.py`, `game/`, `bot/`, `api/`, `db/`, `config.py`,
-  `seed.py`, y de `ui/` la entrada, las pantallas de Empleado y Jefe y lo que
-  usan (`entry.py`, `screens.py`, `chat.py`, `layout.py`, `errors.py`,
-  `prefs.py`). Las migraciones (`db/migrations/versions/`) son producto y no
-  llevan marca: las genera Alembic.
+  `knowledge/`, `llm/` (`factory.py`, `prompts.py` y `catalog.py`, la lista de
+  modelos del selector), `game/`, `bot/`, `api/`, `db/`, `config.py`, `seed.py`, y
+  de `ui/` la entrada, las pantallas de Empleado y Jefe y lo que usan
+  (`entry.py`, `screens.py`, `chat.py`, `layout.py`, `errors.py`, `prefs.py`).
+  Las migraciones (`db/migrations/versions/`) son producto y no llevan marca: las
+  genera Alembic.
 - **Andamiaje:** de `ui/`, los talleres (`pages.py`, `tool_form.py`,
   `access.py`, `grafo.js`), `onboarding/workshop.py`, cada
-  `*/workshop.py`, `*/checks.py` y `LEEME.md`, `agents/lineage.py` y `agents/diagram.py`,
-  `llm/catalog.py`. Fuera de `src/` y sin marca porque el formato no admite
-  comentarios: `agents/grafo.json` y `.tours/`.
+  `*/workshop.py`, `*/checks.py` y `LEEME.md`, `agents/lineage.py` y
+  `agents/diagram.py`. Sin marca porque el formato no admite comentarios:
+  `src/onboarding/agents/grafo.json` y, fuera de `src/`, `.tours/`.
+
+**El producto funciona sin el andamiaje** ([ADR 0013](docs/adr/0013-producto-sin-andamiaje.md)):
+borrarlo tiene que ser borrar sus archivos, sin tocar nada más.
+
+- El producto (y sus tests) nunca importa un módulo de andamiaje. Al revés sí:
+  el andamiaje importa lo que necesite, aunque no esté en la interfaz pública
+  (por ejemplo, `ui/pages.py` importa `agents/diagram.py` directo).
+- Si el andamiaje tiene que aparecer en una pantalla del producto, se engancha
+  desde afuera: `ui/__init__.py` carga los talleres solo si están, y el botón
+  "Talleres (Test)" lo suma `ui/pages.py` a `ENTRY_EXTRAS` de la entrada.
+- Dos tests de `file_tags_test.py` (que sobrevive al borrado) lo controlan: uno
+  busca imports del producto a andamiaje y el otro borra el andamiaje en una copia
+  e importa todo lo que queda.
 
 Archivo nuevo: elegí la marca según para qué sirve. Si es para el asistente, es
 producto; si es para que el equipo trabaje o entienda, es andamiaje. Si una

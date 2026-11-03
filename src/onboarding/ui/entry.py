@@ -5,52 +5,21 @@
 """La entrada (`/ui/`): elegís con qué persona de la empresa entrás.
 
 Sin tildar nada vas a la pantalla del Empleado; con "Entrar como jefe", a la del
-Jefe. Aparte, el botón de los talleres (Test) para el equipo: ver access.py.
+Jefe. Debajo, lo que agregue el andamiaje en `ENTRY_EXTRAS` (el botón de los
+talleres, ver ui/access.py).
 """
+
+from collections.abc import Callable
 
 from nicegui import run, ui
 
-from onboarding.config import get_settings
 from onboarding.game import list_people
 from onboarding.ui import prefs as browser_prefs
-from onboarding.ui.access import check_password, workshops_key, workshops_mode
 from onboarding.ui.layout import load_session, setup_page
 
-
-def _test_button(prefs: dict) -> None:
-    """Botón a los talleres: directo en dev, con clave en prod, oculto si no hay clave."""
-    settings = get_settings()
-    mode = workshops_mode(settings)
-    if mode == "off":
-        return
-    if mode == "open":
-        ui.button(
-            "Talleres (Test)",
-            icon="science",
-            color=None,
-            on_click=lambda: ui.navigate.to("talleres"),
-        ).props("outline").classes("boton-borde w-full")
-        return
-
-    async def enter() -> None:
-        if not check_password(settings, password.value):
-            ui.notify("Clave incorrecta.", type="negative")
-            return
-        prefs["test_key"] = workshops_key(password.value)
-        await browser_prefs.save(prefs)
-        ui.navigate.to("talleres")
-
-    with ui.dialog() as dialog, ui.card().classes("w-80"):
-        ui.label("Talleres del equipo").classes("text-h6")
-        password = (
-            ui.input("Clave", password=True, password_toggle_button=True)
-            .classes("w-full")
-            .on("keydown.enter", enter)
-        )
-        ui.button("Entrar", on_click=enter).classes("w-full")
-    ui.button("Talleres (Test)", icon="lock", color=None, on_click=dialog.open).props(
-        "outline"
-    ).classes("boton-borde w-full")
+# Botones que suma el andamiaje debajo de "Entrar" (el de los talleres lo agrega
+# ui/pages.py al cargarse). Sin andamiaje la lista queda vacía.
+ENTRY_EXTRAS: list[Callable[[dict], None]] = []
 
 
 # recorrido: entrada
@@ -96,4 +65,5 @@ async def entry() -> None:
                 ui.navigate.to("jefe" if as_manager.value else "empleado")
 
             ui.button("Entrar", on_click=enter).classes("w-full")
-        _test_button(prefs)
+        for extra in ENTRY_EXTRAS:
+            extra(prefs)

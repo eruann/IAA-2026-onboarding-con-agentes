@@ -32,7 +32,8 @@ Tests controlan las tres secciones, los archivos de cada carpeta y los imports.
 - Todas las carpetas de agente tienen la misma forma y todas las pruebas se
   buscan en el mismo lugar: el `workshop.py`, ordenado igual en todos. Cada
   tarjeta del taller muestra de qué sección sale la prueba.
-- El producto ya no importa andamiaje: `game` y `knowledge` no exportan talleres.
+- `game` y `knowledge` ya no exportan talleres. Quedaban otras dependencias del
+  producto hacia el andamiaje; las resuelve [0013](0013-producto-sin-andamiaje.md).
 - RAG y Experiencia tienen su guía en `agents/<su agente>/` y no en su carpeta de
   producto (`knowledge/rag/`, `game/`); el docstring de esos paquetes lo dice.
 - Quien tenga una rama abierta que toque esos talleres tiene que actualizarla.

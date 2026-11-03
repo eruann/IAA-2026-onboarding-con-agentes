@@ -75,10 +75,15 @@ WORKSHOP = Workshop(
 
 ## Sumar una prueba
 
-1. Escribí la función en el módulo de tu rol, con **tipo en todos los
-   parámetros** (ver la tabla de abajo).
-2. Sumala a `tools`: `Tool(mi_funcion, "Título", "Ayuda corta")`.
+1. Escribí la función con **tipo en todos los parámetros** (ver la tabla de
+   abajo): en el producto si es parte de tu rol, o en el `checks.py` de tu agente
+   si es una prueba ad hoc.
+2. Importala en la sección que le toca del `workshop.py` (1, 2 o 3) y sumala a
+   `tools`: `Tool(mi_funcion, "Título", "Ayuda corta")`.
 3. Escribí su test al lado, como siempre (`<modulo>_test.py`).
+
+Nunca al revés: el producto no importa nada del taller, para que se pueda borrar
+el andamiaje sin romperlo ([ADR 0013](adr/0013-producto-sin-andamiaje.md)).
 
 Listo: al recargar la página aparece una tarjeta nueva en **Pruebas**, con un
 campo por parámetro y el botón **Probar**.
