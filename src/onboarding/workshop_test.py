@@ -57,6 +57,16 @@ def test_las_opciones_de_un_literal_mantienen_su_tipo() -> None:
     assert describe_params(con_numeros)[0].choices == (1, 2, 3)
 
 
+def test_un_selector_sin_valor_por_defecto_arranca_en_la_primera_opcion() -> None:
+    def sin_default(modo: Literal["rápido", "lento"]) -> str:
+        return modo
+
+    param = describe_params(sin_default)[0]
+
+    assert param.default == "rápido"
+    assert param.required
+
+
 def test_un_parametro_sin_tipo_falla_con_mensaje_claro() -> None:
     def sin_tipo(texto) -> str:
         return texto
@@ -111,3 +121,11 @@ def test_la_conversacion_del_chat_no_se_dibuja_como_campo() -> None:
         ("pregunta", "text"),
         ("history", "history"),
     ]
+
+
+def test_los_talleres_cuyo_agente_no_responde_preguntas_tienen_su_saludo() -> None:
+    # El saludo general invita a preguntar por la empresa: solo sirve para el
+    # coordinador y para el agente que responde preguntas
+    for workshop in all_workshops():
+        if workshop.intent not in (None, "answer_question"):
+            assert workshop.greeting, workshop.role

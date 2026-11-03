@@ -67,6 +67,8 @@ class Workshop:
     tools: tuple[Tool, ...] = ()
     guide: Path | None = None  # LEEME.md que muestra la interfaz
     embeds: tuple[Embed, ...] = ()  # páginas del rol que se ven dentro del taller
+    # Lo primero que dice el chat: qué escribirle a este agente. None: el saludo general
+    greeting: str | None = None
 
 
 @dataclass(frozen=True)
@@ -117,11 +119,16 @@ def describe_params(fn: Callable) -> list[Param]:
             raise TypeError(f"{fn.__name__}: al parámetro {name!r} le falta el tipo")
         kind, choices = _kind_of(hints[name])
         has_default = parameter.default is not inspect.Parameter.empty
+        default = parameter.default if has_default else None
+        # Un selector sin valor por defecto arranca en la primera opción: así la prueba
+        # se puede correr sin elegir nada antes
+        if kind == "choice" and not has_default and choices:
+            default = choices[0]
         params.append(
             Param(
                 name=name,
                 kind=kind,
-                default=parameter.default if has_default else None,
+                default=default,
                 required=not has_default,
                 choices=choices,
             )

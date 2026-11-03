@@ -32,4 +32,8 @@ WORKSHOP = Workshop(
         Tool(who_knows_about, "¿Quién sabe de?", "Escribí un tema: a quién derivaría el agente."),
     ),
     guide=Path(__file__).parent / "LEEME.md",
+    greeting=(
+        "Pegame una conversación o contame a quién le consultás qué, y te muestro las "
+        "relaciones que encuentro (quién sabe de qué), cada una con la frase que la respalda."
+    ),
 )

@@ -45,6 +45,10 @@ WORKSHOP = Workshop(
         ),
     ),
     guide=Path(__file__).parent / "LEEME.md",
+    greeting=(
+        "Contame qué misión hiciste y qué evidencia tenés (qué hiciste, con quién, qué "
+        "lo prueba), y te digo si alcanza para darla por cumplida."
+    ),
     embeds=(
         Embed(
             "Panel del jefe",
