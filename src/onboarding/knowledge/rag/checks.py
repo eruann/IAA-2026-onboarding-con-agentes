@@ -100,7 +100,7 @@ def evaluate_retrieval(k: int = 5) -> str:
             "La sección todavía no se mide (issue #16).",
             "",
             markdown_table(
-                ("id", "pregunta", "documento esperado", "documentos que trajo", ""), rows
+                ("id", "pregunta", "documento esperado", "documentos que trajo", "resultado"), rows
             ),
         ]
     )

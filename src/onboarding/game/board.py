@@ -10,7 +10,7 @@ Solo leen. Entregar evidencia, aprobar y canjear se hacen en otro lado.
 
 from dataclasses import dataclass
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from onboarding.db.session import session_scope
@@ -113,14 +113,15 @@ def manager_board(session: Session | None = None) -> ManagerBoard:
                 select(Person).where(Person.is_newcomer.is_(True)).order_by(Person.name)
             ).all()
         ]
+        # El orden lo hace la base: así respeta acentos y mayúsculas como Postgres
         rows = db_session.execute(
             select(Person.name, QuestRow.title, QuestAssignment.status)
             .join(Person, QuestAssignment.person_id == Person.id)
             .join(QuestRow, QuestAssignment.quest_id == QuestRow.id)
             .where(Person.is_newcomer.is_(True), QuestAssignment.status.in_(MANAGER_ORDER))
+            .order_by(
+                case(MANAGER_ORDER, value=QuestAssignment.status), Person.name, QuestRow.title
+            )
         ).all()
-    pending = sorted(
-        (PendingMission(name, title, status) for name, title, status in rows),
-        key=lambda item: (MANAGER_ORDER[item.status], item.person, item.quest),
-    )
+    pending = [PendingMission(name, title, status) for name, title, status in rows]
     return ManagerBoard(pending=pending, newcomers=newcomers)

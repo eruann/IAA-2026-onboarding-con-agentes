@@ -19,7 +19,12 @@ from onboarding.ui.chat import chat
 from onboarding.ui.layout import load_session, page_frame, setup_page, sidebar
 
 # El color de cada estado (el nombre sale de game.STATUS_LABELS, el mismo del panel)
-STATUS_COLORS = {"pending": "grey-7", "submitted": "orange-8", "approved": "positive"}
+STATUS_COLORS = {
+    "pending": "grey-7",
+    "submitted": "orange-8",
+    "approved": "positive",
+    "rejected": "negative",
+}
 
 
 def _employee_board(board: EmployeeBoard) -> None:
@@ -35,7 +40,7 @@ def _employee_board(board: EmployeeBoard) -> None:
         label = STATUS_LABELS.get(mission.status, mission.status)
         if mission.status == "rejected":
             label += ": revisala y volvé a entregar"
-        color = STATUS_COLORS.get(mission.status, "negative")
+        color = STATUS_COLORS.get(mission.status, "grey-7")
         with ui.card().classes("w-full seccion shadow-none"):
             with ui.row().classes("w-full items-center no-wrap"):
                 ui.label(mission.title).classes("text-subtitle1 text-weight-medium")

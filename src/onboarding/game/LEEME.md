@@ -17,8 +17,13 @@ canje, el panel del jefe y el bot de Slack.
 - `game/points.py` → `level_for`: el nivel según los puntos. **Ya funciona.**
 - `api/routes/panel.py` y `api/templates/panel/`: el panel del jefe, con
   ingresantes y misiones pendientes. **Ya funciona.**
-- `game/quests.py`: cargar las misiones de `data/quests.yaml` como `Quest`.
-  Pendiente.
+- `game/quests.py`: la forma de una misión (`Quest`), sus estados y sus reglas
+  (`check_quests`). **Ya funciona.** El seed avisa si una misión no cumple las
+  reglas.
+- `game/board.py`: los tableros del Empleado (`employee_board`) y del Jefe
+  (`manager_board`). **Ya funcionan**, solo leen.
+- `game/data.py` → `sync_game_data`: carga personas y misiones de `data/` en la
+  base (lo usa el seed). **Ya funciona.**
 - `game/rewards.py`: catálogo, canje (descuenta puntos) e historial. Pendiente:
   las funciones ya están con su firma (`list_rewards`, `redeem`,
   `redemption_history`) y el taller las muestra como pendientes.
@@ -61,8 +66,9 @@ premio, ajustalas (tienen su test en `checks_test.py`).
 - **Revisar las misiones**: cada vez que cambies `data/quests.yaml`. Marca si
   faltan misiones para llegar a 6-8, campos vacíos, `key` repetidas, puntos que
   no son un número positivo o un `approver` que no existe.
-- **Ver el catálogo** y **Canjear un premio**: aparecen como pendientes hasta que
-  las implementes.
+- **Ver el catálogo** y **Ver lo que canjeó una persona**: aparecen como
+  pendientes hasta que las implementes. Canjear escribe en la base, así que no
+  está como prueba del taller: se prueba desde la pantalla del Empleado.
 - **Revisar el catálogo de canje**: para ajustar el balance con PM. Si un premio
   cuesta más que todas las misiones juntas, nadie lo puede canjear.
 - **Calcular el nivel**: probá los bordes (99, 100, 250, 500).

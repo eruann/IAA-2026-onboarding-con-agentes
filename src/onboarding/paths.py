@@ -8,9 +8,12 @@ Sirve igual en tu compu y en Docker (donde el repo está en /app). Los tests que
 necesitan otros datos parchean `DATA_DIR` acá y alcanza para todos.
 """
 
+import logging
 from pathlib import Path
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_ROOT / "data"  # personas, misiones y canje de la empresa ficticia
@@ -30,6 +33,7 @@ def load_data_yaml(name: str, required: bool = False) -> list[dict]:
     if not path.exists():
         if required:
             raise FileNotFoundError(f"No está {repo_relative(path)}.")
+        logger.warning("Falta %s: se saltea", repo_relative(path))
         return []
     return yaml.safe_load(path.read_text(encoding="utf-8")) or []
 

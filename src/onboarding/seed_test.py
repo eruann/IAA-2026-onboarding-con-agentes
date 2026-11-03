@@ -63,3 +63,13 @@ def test_seed_corrige_el_nombre_sin_crear_otra_persona(db_session: Session, data
     people = db_session.scalars(select(Person).where(Person.key == "seed-test-ingresante")).all()
     assert [person.name for person in people] == ["Nombre corregido"]
     assert _assignments(db_session, people[0]) == 1
+
+
+@pytest.mark.db
+def test_si_la_ingesta_esta_pendiente_el_seed_avisa_y_sigue(
+    db_session: Session, data_dir, caplog: pytest.LogCaptureFixture
+) -> None:
+    seed(with_corpus=True, session=db_session)
+
+    assert "Ingesta incompleta" in caplog.text
+    assert db_session.scalar(select(Person).where(Person.key == "seed-test-ingresante"))

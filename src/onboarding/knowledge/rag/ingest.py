@@ -22,7 +22,10 @@ logger = logging.getLogger(__name__)
 
 # recorrido: ingesta
 def ingest_directory(path: Path = CORPUS_DIR) -> int:
-    """Corta los documentos de `path` en fragmentos y los guarda. Devuelve cuántos."""
+    """Corta los documentos de `path` en fragmentos y los guarda.
+
+    Hoy corta pero todavía no guarda: termina con NotImplementedError. Sin
+    documentos, devuelve 0."""
     documents = markdown_documents(path)
     if not documents:
         logger.warning("No hay documentos .md en %s", path)

@@ -13,7 +13,7 @@ from pathlib import Path
 
 from onboarding.game.checks import review_quests, review_rewards
 from onboarding.game.points import level_for
-from onboarding.game.rewards import list_rewards, redeem
+from onboarding.game.rewards import list_rewards, redemption_history
 from onboarding.workshop import Embed, Tool, Workshop
 
 # recorrido: taller-experiencia
@@ -33,7 +33,11 @@ WORKSHOP = Workshop(
             "Lee data/quests.yaml y marca lo que no cierra.",
         ),
         Tool(list_rewards, "Ver el catálogo de canje", "Pendiente hasta que exista el canje."),
-        Tool(redeem, "Canjear un premio", "La key de una persona y la de un premio."),
+        Tool(
+            redemption_history,
+            "Ver lo que canjeó una persona",
+            "La key de una persona (ej.: ana-ingresante).",
+        ),
         Tool(
             review_rewards,
             "Revisar el catálogo de canje",

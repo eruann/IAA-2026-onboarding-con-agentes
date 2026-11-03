@@ -20,7 +20,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from onboarding.db.session import session_scope
-from onboarding.game import sync_game_data
+from onboarding.game import check_quests, sync_game_data
 from onboarding.knowledge import ingest_directory
 from onboarding.paths import load_data_yaml
 
@@ -32,6 +32,10 @@ def seed(with_corpus: bool = True, session: Session | None = None) -> None:
     quests = load_data_yaml("quests.yaml")
     rewards = load_data_yaml("rewards.yaml")
     logger.info("people=%s quests=%s rewards=%s", len(people), len(quests), len(rewards))
+    # Las mismas reglas que revisa el taller de Experiencia: se avisa, no se frena
+    for quest, problems in zip(quests, check_quests(quests), strict=True):
+        if problems:
+            logger.warning("Misión %s: %s", quest.get("key", "?"), "; ".join(problems))
 
     with session_scope(session, commit=True) as db_session:
         sync_game_data(db_session, people, quests)

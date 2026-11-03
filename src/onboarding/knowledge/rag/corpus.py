@@ -12,8 +12,9 @@ from onboarding.paths import CORPUS_DIR, markdown_documents
 
 
 def document_names() -> tuple[str, ...]:
-    """Los documentos del corpus, sin el README que documenta la carpeta."""
-    return tuple(path.name for path in markdown_documents(CORPUS_DIR))
+    """Los documentos del corpus (su ruta dentro de corpus/), sin el README que
+    documenta la carpeta."""
+    return tuple(path.relative_to(CORPUS_DIR).as_posix() for path in markdown_documents())
 
 
 def read_documents(names: tuple[str, ...]) -> str:

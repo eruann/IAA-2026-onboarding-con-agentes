@@ -13,7 +13,7 @@ from onboarding.game.board import (
     employee_board,
     manager_board,
 )
-from onboarding.game.checks import quest_rows, review_quests
+from onboarding.game.checks import quest_rows, review_quests  # también en el taller del Diseñador
 from onboarding.game.data import sync_game_data
 from onboarding.game.people import PersonCard, list_people
 from onboarding.game.quests import (
