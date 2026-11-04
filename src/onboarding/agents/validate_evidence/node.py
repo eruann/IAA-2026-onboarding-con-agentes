@@ -6,20 +6,18 @@
 
 from pathlib import Path
 
-from langchain_core.language_models import BaseChatModel
-
-from onboarding.agents.common import Node, NodeSpec, ask_model
+from onboarding.agents.common import Models, Node, NodeSpec, ask_model
 from onboarding.agents.state import OnboardingState
 
 PROMPT = Path(__file__).with_name("prompt.md")
 
 
 # recorrido: nodo-evidencia
-def make_validate_evidence(model: BaseChatModel) -> Node:
+def make_validate_evidence(models: Models) -> Node:
     def validate_evidence(state: OnboardingState) -> dict:
         # TODO(experiencia): decidir aprobada / rechazada / requiere revisión humana.
         # La aprobación final del jefe siempre gana sobre el agente.
-        return {"output": ask_model(model, PROMPT, state)}
+        return {"output": ask_model(models.main, PROMPT, state)}
 
     return validate_evidence
 

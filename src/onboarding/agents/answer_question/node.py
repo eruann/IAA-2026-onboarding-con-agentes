@@ -6,9 +6,7 @@
 
 from pathlib import Path
 
-from langchain_core.language_models import BaseChatModel
-
-from onboarding.agents.common import Node, NodeSpec, ask_model
+from onboarding.agents.common import Models, Node, NodeSpec, ask_model
 from onboarding.agents.state import OnboardingState
 from onboarding.knowledge import RetrievedChunk, retrieve, who_knows_about
 
@@ -31,10 +29,10 @@ def _context(chunks: list[RetrievedChunk]) -> str:
 
 
 # recorrido: nodo-respuesta
-def make_answer_question(model: BaseChatModel) -> Node:
+def make_answer_question(models: Models) -> Node:
     def answer_question(state: OnboardingState) -> dict:
         chunks = retrieve(state.get("input", ""))
-        output = ask_model(model, PROMPT, state, _context(chunks))
+        output = ask_model(models.main, PROMPT, state, _context(chunks))
         citations = list(dict.fromkeys(f"{chunk.document} § {chunk.section}" for chunk in chunks))
 
         referred_to = None

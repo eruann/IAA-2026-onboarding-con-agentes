@@ -7,6 +7,7 @@ sesión. La sesión (quién entró, el modelo, el modo oscuro) vive en el navega
 (ver prefs.py)."""
 
 from collections.abc import Callable
+from typing import NamedTuple
 
 from nicegui import ui
 
@@ -95,12 +96,27 @@ async def logout(prefs: dict) -> None:
     ui.navigate.to("./")  # a la entrada (todas las páginas cuelgan de /ui/)
 
 
+# En el selector del modelo estructurado: usar lo que diga la configuración
+# (LLM_STRUCTURED_MODEL o, si está vacío, el principal)
+CONFIGURED = -1
+
+
+class ModelSelects(NamedTuple):
+    main: ui.select
+    structured: ui.select | None  # solo si se pidió (los talleres)
+
+
 def sidebar(
-    prefs: dict, catalog: ModelCatalog, dark, title: str, extra: Callable[[], None] | None = None
-):
-    """Barra lateral: quién entró, `extra` (p. ej. el selector de taller), modelo,
-    avisos de configuración, modo oscuro y cerrar sesión. Devuelve el selector de
-    modelo."""
+    prefs: dict,
+    catalog: ModelCatalog,
+    dark,
+    title: str,
+    extra: Callable[[], None] | None = None,
+    structured: bool = False,
+) -> ModelSelects:
+    """Barra lateral: quién entró, `extra` (p. ej. el selector de taller), modelo
+    principal y, con `structured`, el del perfil estructurado (ADR 0014), avisos de
+    configuración, modo oscuro y cerrar sesión. Devuelve los selectores."""
     models = catalog.options
 
     async def on_dark_change(event) -> None:
@@ -113,9 +129,17 @@ def sidebar(
         prefs["model"] = f"{option.provider}:{option.model}"
         await browser_prefs.save(prefs)
 
+    async def on_structured_change(event) -> None:
+        index = event.value
+        prefs["structured_model"] = None if index == CONFIGURED else keys[index]
+        await browser_prefs.save(prefs)
+
     # El modelo se guarda por nombre y no por posición: la lista cambia con el tiempo
     keys = [f"{option.provider}:{option.model}" for option in models]
     model_index = keys.index(prefs["model"]) if prefs.get("model") in keys else 0
+    saved = prefs.get("structured_model")
+    structured_index = keys.index(saved) if saved in keys else CONFIGURED
+    structured_select = None
 
     with ui.left_drawer(value=True).props("width=336").classes("sidebar q-pa-lg"):
         ui.label(title).classes("text-subtitle1")
@@ -128,6 +152,16 @@ def sidebar(
             on_change=on_model_change,
             with_input=True,  # filtra mientras escribís
         ).classes("w-full")
+        if structured:
+            options = {CONFIGURED: "Según la configuración"}
+            options |= {index: option.label for index, option in enumerate(models)}
+            structured_select = ui.select(
+                options,
+                label="Modelo para datos estructurados",
+                value=structured_index,
+                on_change=on_structured_change,
+                with_input=True,
+            ).classes("w-full")
         if catalog.notes:
             # Problemas del .env o de los proveedores (modelos que faltan, Ollama
             # apagado...): a la vista, sin tener que leer los logs.
@@ -140,7 +174,7 @@ def sidebar(
         ui.button("Cerrar sesión", on_click=lambda: logout(prefs), color=None).props(
             "outline"
         ).classes("boton-borde q-mt-md")
-    return model_select
+    return ModelSelects(model_select, structured_select)
 
 
 def page_frame(path: str, height: str = "70vh"):

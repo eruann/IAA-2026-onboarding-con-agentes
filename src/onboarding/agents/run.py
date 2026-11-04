@@ -59,6 +59,7 @@ def run_turn(
     actor_name: str | None = None,
     history: Sequence[Turn] = (),
     model: BaseChatModel | None = None,
+    structured_model: BaseChatModel | None = None,
 ) -> TurnResult:
     state: OnboardingState = {"input": text, "messages": _messages(history)}
     if intent:
@@ -73,7 +74,8 @@ def run_turn(
     # mensaje además de la respuesta. "tasks": avisa cuando un nodo arranca, para
     # saber en cuál falló si algo sale mal.
     try:
-        for mode, event in build_graph(model).stream(state, stream_mode=["tasks", "updates"]):
+        graph = build_graph(model, structured_model)
+        for mode, event in graph.stream(state, stream_mode=["tasks", "updates"]):
             if mode == "tasks":
                 if "result" not in event and "error" not in event:
                     running = event["name"]

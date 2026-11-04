@@ -12,31 +12,23 @@ necesita este corpus); el elegido es
 `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384
 dimensiones, multilingüe, el liviano estándar para similitud semántica).
 Gratis, sin API key, corre offline. OpenRouter no sirve acá: no ofrece
-embeddings.
+embeddings. A diferencia de los modelos `e5`, este no necesita prefijos
+distintos para preguntas y para documentos.
 
-A diferencia de los modelos `e5`, este no necesita prefijos distintos para
-preguntas y para documentos: el mismo `embed_texts` sirve para ambos casos.
+El modelo se obtiene de `onboarding.llm.get_embeddings()`, como todo modelo
+(regla 5): así cualquier otra parte que necesite embeddings usa el mismo.
 """
 
 from collections.abc import Sequence
 
-from fastembed import TextEmbedding
+from onboarding.llm import get_embeddings
 
-MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+# La dimensión del vector que elige el modelo del ADR 0005: la usa models.py
+# para la columna `embedding` de `chunks`.
 EMBEDDING_DIM = 384
-
-_model: TextEmbedding | None = None
-
-
-def _get_model() -> TextEmbedding:
-    # Carga perezosa: importar este módulo no debe descargar los pesos del modelo.
-    global _model
-    if _model is None:
-        _model = TextEmbedding(MODEL_NAME)
-    return _model
 
 
 # recorrido: embeddings
 def embed_texts(texts: Sequence[str]) -> list[list[float]]:
     """Embeddings de `texts`, tanto preguntas como fragmentos del corpus."""
-    return [vector.tolist() for vector in _get_model().embed(list(texts))]
+    return get_embeddings().embed_documents(list(texts))

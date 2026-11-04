@@ -3,6 +3,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 from onboarding.agents.answer_question import NODE, make_answer_question
 from onboarding.agents.answer_question import node as node_module
+from onboarding.agents.common import Models
 from onboarding.knowledge import RetrievedChunk
 
 CHUNK = RetrievedChunk(
@@ -25,7 +26,7 @@ def test_responde_con_los_fragmentos_el_nombre_y_la_conversacion(
     recording_llm, fake_retrieve
 ) -> None:
     fake_retrieve([CHUNK])
-    node = make_answer_question(recording_llm)
+    node = make_answer_question(Models.same(recording_llm))
 
     result = node(
         {
@@ -57,7 +58,7 @@ def test_sin_fragmentos_deriva_con_quien_sabe_del_tema(
 ) -> None:
     fake_retrieve([])
     monkeypatch.setattr(node_module, "who_knows_about", lambda topic: ["Romina Castro"])
-    node = make_answer_question(recording_llm)
+    node = make_answer_question(Models.same(recording_llm))
 
     result = node({"input": "¿Puedo traer a mi mascota?"})
 
@@ -75,7 +76,7 @@ def test_sin_fragmentos_y_sin_grafo_todavia_no_deriva_a_nadie(
         raise NotImplementedError("TODO(grafo): consulta del grafo")
 
     monkeypatch.setattr(node_module, "who_knows_about", _not_implemented)
-    node = make_answer_question(recording_llm)
+    node = make_answer_question(Models.same(recording_llm))
 
     result = node({"input": "¿Puedo traer a mi mascota?"})
 

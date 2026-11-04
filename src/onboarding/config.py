@@ -24,7 +24,10 @@ class Settings(BaseSettings):
 
     # Modelo. El código nunca nombra un proveedor: todo sale de llm.factory.
     llm_provider: LLMProvider = "fake"
-    llm_model: str = "anthropic/claude-haiku-4.5"
+    llm_model: str = "anthropic/claude-haiku-4.5"  # perfil principal: conversar
+    # Perfil estructurado (salida con forma fija): "proveedor:modelo" o solo el
+    # modelo (usa LLM_PROVIDER). Vacío: el mismo que el principal. Ver ADR 0014.
+    llm_structured_model: str = ""
     openrouter_api_key: SecretStr | None = None
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     openai_compat_base_url: str = "http://ollama:11434/v1"

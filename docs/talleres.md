@@ -138,6 +138,15 @@ rojo punteado. Cuando corrés una prueba, marca en violeta las funciones de la
 knowledge layer que usa (sale del mismo análisis del código que dibuja el
 grafo). Nada de esto se configura por taller.
 
+### Los dos selectores de modelo
+
+La barra lateral de los talleres tiene dos: **Modelo**, el principal (con el que
+conversa cada agente), y **Modelo para datos estructurados**, el de las tareas que
+devuelven datos con forma fija, como la extracción de relaciones de Grafo. Con
+«Según la configuración», usa `LLM_STRUCTURED_MODEL` o, si está vacía, el principal
+([ADR 0014](adr/0014-perfiles-de-modelo.md)). Las pruebas que reciben
+`BaseChatModel | None` siguen teniendo su propio selector.
+
 ## Crear el taller de un rol nuevo
 
 1. En la carpeta de su agente (`agents/<nodo>/`), crear `workshop.py` (con

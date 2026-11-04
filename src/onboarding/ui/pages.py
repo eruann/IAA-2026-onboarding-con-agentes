@@ -254,12 +254,13 @@ async def talleres(taller: int = 0) -> None:
     # principal para no trabar la página.
     catalog = await run.io_bound(model_catalog)
     models = catalog.options
-    model_select = sidebar(
+    model_select, structured_select = sidebar(
         prefs,
         catalog,
         dark,
         title=f"Talleres · {name}",
         extra=lambda: _workshop_select(workshops, current),
+        structured=True,
     )
     mark_path, mark_uses = _graph_panel(prefs)
 
@@ -275,6 +276,7 @@ async def talleres(taller: int = 0) -> None:
                 intent=workshop.intent,
                 on_turn=mark_path,
                 greeting=workshop.greeting,
+                structured_select=structured_select,
             )
         with ui.expansion("Pruebas", icon="science").classes("w-full seccion"):
             for tool in workshop.tools:

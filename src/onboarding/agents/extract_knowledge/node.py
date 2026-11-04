@@ -4,9 +4,11 @@
 
 """Nodo de la red informal. Titular: rol Grafo cultural y datos.
 
-Lee un texto y saca relaciones "quién sabe qué", cada una con la frase que la
-respalda (`extract_triples`). La forma de una relación (`KnowledgeTriple`) y las
-consultas al grafo están en la knowledge layer.
+Como los demás agentes: junta su contexto y le pregunta al modelo con su prompt
+(`ask_model` + `prompt.md`). Su contexto son las relaciones "quién sabe qué" que
+saca del texto `extract_triples`, cada una con la frase que la respalda; esa
+función tiene sus propias instrucciones (`extraction_prompt.md`). La forma de una
+relación (`KnowledgeTriple`) y las consultas al grafo están en la knowledge layer.
 """
 
 from functools import lru_cache
@@ -16,13 +18,14 @@ from typing import get_args
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from onboarding.agents.common import Node, NodeSpec
+from onboarding.agents.common import Models, Node, NodeSpec, ask_model
 from onboarding.agents.state import OnboardingState
 from onboarding.knowledge import KnowledgeTriple, Relation, document_names, read_documents
-from onboarding.llm import get_chat_model, load_prompt
+from onboarding.llm import get_structured_model, load_prompt
 from onboarding.paths import CORPUS_DIR
 
-PROMPT = Path(__file__).with_name("prompt.md")
+PROMPT = Path(__file__).with_name("prompt.md")  # el del agente
+EXTRACTION_PROMPT = Path(__file__).with_name("extraction_prompt.md")  # el de extract_triples
 ORG_CHART = "organigrama.md"
 
 RELATIONS = {
@@ -73,16 +76,16 @@ def _procedures() -> str:
 
 # recorrido: extraccion
 def extract_triples(text: str, model: BaseChatModel | None = None) -> list[KnowledgeTriple]:
-    # Sin modelo explícito, el del proyecto (regla 5). Pasar uno sirve para probar
-    # con otro modelo o, en los tests, con uno de salida fija.
-    model = model or get_chat_model()
+    # Sin modelo explícito, el del perfil estructurado (regla 5). Pasar uno sirve para
+    # probar con otro modelo o, en los tests, con uno de salida fija.
+    model = model or get_structured_model()
     # json_schema: el proveedor restringe la salida al esquema. Con function_calling
     # los modelos chicos (qwen2.5 7B en Ollama) inventan sus propios argumentos.
     extractor = model.with_structured_output(_SCHEMA, method="json_schema")
     # El organigrama y los procedimientos van con el prompt: sin verlos, el modelo
     # no puede saber qué relaciones ya están escritas y tiene que descartar.
     system = (
-        f"{load_prompt(PROMPT)}\n"
+        f"{load_prompt(EXTRACTION_PROMPT)}\n"
         f"<organigrama>\n{_org_chart()}\n</organigrama>\n"
         f"<procedimientos>\n{_procedures()}\n</procedimientos>"
     )
@@ -93,22 +96,24 @@ def extract_triples(text: str, model: BaseChatModel | None = None) -> list[Knowl
     return [KnowledgeTriple(**triple) for triple in triples if triple["evidence"] in text]
 
 
+def _relations(triples: list[KnowledgeTriple]) -> str:
+    """Las relaciones encontradas, como contexto para el prompt del agente."""
+    lines = [
+        f"- {t.subject} {RELATIONS.get(t.relation, t.relation)} {t.object} («{t.evidence}»)"
+        for t in triples
+    ] or ["(ninguna con respaldo en el texto)"]
+    return "<relaciones>\n" + "\n".join(lines) + "\n</relaciones>"
+
+
 # recorrido: nodo-red-informal
-def make_extract_knowledge(model: BaseChatModel) -> Node:
+def make_extract_knowledge(models: Models) -> Node:
     def extract_knowledge(state: OnboardingState) -> dict:
         # TODO(grafo): guardar las relaciones en nodes/edges, y correr al final de
         # cada conversación (no solo cuando se elige este nodo) sin pisar la
         # respuesta que ya dio otro agente.
-        triples = extract_triples(state.get("input", ""), model)
-        if not triples:
-            return {"output": "No encontré relaciones con respaldo en el texto.", "citations": []}
-        lines = [
-            f"- **{t.subject}** {RELATIONS.get(t.relation, t.relation)} **{t.object}** "
-            f"(«{t.evidence}»)"
-            for t in triples
-        ]
+        triples = extract_triples(state.get("input", ""), models.structured)
         return {
-            "output": f"Encontré {len(triples)} relaciones:\n\n" + "\n".join(lines),
+            "output": ask_model(models.main, PROMPT, state, _relations(triples)),
             "citations": [t.evidence for t in triples],
         }
 

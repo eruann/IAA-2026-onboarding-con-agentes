@@ -13,6 +13,7 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 from langchain_core.language_models import FakeListChatModel
+from langchain_core.messages import AIMessage
 from pydantic import Field
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -20,6 +21,7 @@ from sqlalchemy.orm import Session
 # El default de los tests es el proveedor fake: ningún test toca la red ni
 # gasta tokens salvo que esté marcado con @pytest.mark.llm.
 os.environ.setdefault("LLM_PROVIDER", "fake")
+os.environ["LLM_STRUCTURED_MODEL"] = ""  # los tests nunca usan un modelo real
 os.environ.setdefault("ENV", "test")
 
 from onboarding.api.main import create_app  # noqa: E402
@@ -105,21 +107,35 @@ class FailingChatModel(FakeListChatModel):
 
 
 class StructuredChatModel:
-    """Devuelve siempre la misma salida estructurada y guarda los últimos mensajes.
+    """Un modelo con salida estructurada fija y respuesta de texto fija.
 
-    FakeListChatModel no sirve para esto: no implementa with_structured_output.
+    La llamada estructurada (`with_structured_output(...).invoke`) devuelve `output`
+    y guarda sus mensajes en `seen`; la de texto (`invoke`, la de `ask_model`)
+    devuelve `reply` y guarda sus mensajes en `seen_reply`. FakeListChatModel no
+    sirve para esto: no implementa with_structured_output.
     """
 
-    def __init__(self, output: dict | None) -> None:
+    def __init__(self, output: dict | None, reply: str = "respuesta del agente") -> None:
         self.output = output
+        self.reply = reply
         self.seen: list = []
+        self.seen_reply: list = []
 
-    def with_structured_output(self, schema: dict, method: str) -> "StructuredChatModel":
-        return self
+    def with_structured_output(self, schema: dict, method: str) -> "_StructuredOutput":
+        return _StructuredOutput(self)
+
+    def invoke(self, messages: list) -> AIMessage:
+        self.seen_reply = messages
+        return AIMessage(self.reply)
+
+
+class _StructuredOutput:
+    def __init__(self, model: StructuredChatModel) -> None:
+        self.model = model
 
     def invoke(self, messages: list) -> dict | None:
-        self.seen = messages
-        return self.output
+        self.model.seen = messages
+        return self.model.output
 
 
 @pytest.fixture
