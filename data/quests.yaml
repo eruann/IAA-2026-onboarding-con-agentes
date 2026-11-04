@@ -33,3 +33,17 @@
   points: 50
   approver: agent
   evidence_required: Mencioná dos prácticas de cuidado y el canal para reportar un mensaje sospechoso.
+
+- key: reunion-con-tu-lider
+  title: Tené tu reunión de bienvenida
+  description: Participá de la reunión de bienvenida con tu supervisor directo para conversar sobre el alcance del rol y las primeras tareas.
+  points: 20
+  approver: manager
+  evidence_required: Contá con quién fue la reunión y nombrá una prioridad o tarea acordada.
+
+- key: conoce-sigma-wms
+  title: Conocé Sigma WMS
+  description: Recorré con una persona referente el flujo básico del sistema y ubicá dónde consultar el manual completo.
+  points: 30
+  approver: helpdesk
+  evidence_required: Mencioná una operación aprendida y dónde encontraste el manual.
