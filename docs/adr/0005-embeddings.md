@@ -59,6 +59,24 @@ fragmentos cortando por `##`, issue #16):
   retrieval igual trae fragmentos (el agente tiene que derivar en vez de
   usarlos para inventar una respuesta).
 
+**Ajuste de `k` (también medido):** con el modelo ya elegido, correr
+`evaluate_retrieval` con distintos `k` mostró que el recall ya llega a su
+máximo en `k=3` y no mejora con `k` más alto — solo se diluye la precisión
+con fragmentos de otros documentos:
+
+| k | Recall | Precisión |
+|---|---|---|
+| 1 | 80% | 80% |
+| 2 | 88% | 58% |
+| 3 | **92%** | **51%** |
+| 4 | 92% | 39% |
+| 5 | 92% | 34% |
+
+Por eso el default de `retrieve()` (y de `answer_question`) pasó de `k=5` a
+`k=3`: mismo recall, mejor precisión. `evaluate_retrieval` ahora también mide
+**Sección@k** (si el fragmento trajo, además del documento, la sección
+esperada), para las preguntas que tienen una única sección correcta.
+
 **Costo de indexar:** una sola corrida de `ingest_directory` sobre los 25
 documentos, ~154 fragmentos, corre en unos segundos en CPU sin GPU (más la
 descarga única del modelo, ~130 MB, cacheada después en

@@ -24,9 +24,14 @@ class RetrievedChunk:
 
 
 # recorrido: busqueda
-def retrieve(query: str, k: int = 5) -> list[RetrievedChunk]:
+def retrieve(query: str, k: int = 3) -> list[RetrievedChunk]:
     """Los `k` fragmentos más parecidos a `query`, por similitud de coseno en
     pgvector. `score` es la similitud (1 = idéntico, 0 = nada que ver).
+
+    `k=3` por default: medido contra `eval/rag_questions.yaml` (ver ADR 0005),
+    es donde el recall ya llegó a su máximo (92%); subirlo no trae más
+    documentos correctos, solo diluye la precisión con fragmentos de otros
+    documentos.
 
     Sin parámetro de sesión a propósito: esta función se expone tal cual en el
     taller de `/ui` (y en el de Diseñador de misiones) como una herramienta más,

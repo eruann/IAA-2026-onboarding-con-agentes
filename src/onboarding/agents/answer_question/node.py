@@ -33,7 +33,7 @@ def _context(chunks: list[RetrievedChunk]) -> str:
 # recorrido: nodo-respuesta
 def make_answer_question(model: BaseChatModel) -> Node:
     def answer_question(state: OnboardingState) -> dict:
-        chunks = retrieve(state.get("input", ""), k=5)
+        chunks = retrieve(state.get("input", ""))
         output = ask_model(model, PROMPT, state, _context(chunks))
         citations = list(dict.fromkeys(f"{chunk.document} § {chunk.section}" for chunk in chunks))
 

@@ -55,9 +55,10 @@ def _expected(question: dict) -> list[str]:
     return [expected] if isinstance(expected, str) else list(expected)
 
 
-def evaluate_retrieval(k: int = 5) -> str:
+def evaluate_retrieval(k: int = 3) -> str:
     """Corre las preguntas de eval/rag_questions.yaml contra `retrieve` y mide si
-    trae el documento correcto. Solo el retrieval: no llama al modelo."""
+    trae el documento (y, cuando hay una sola sección esperada, la sección)
+    correctos. Solo el retrieval: no llama al modelo."""
     if not QUESTIONS_FILE.exists():
         raise FileNotFoundError(
             f"No está {QUESTIONS_FILE}: el set de preguntas solo viene en la imagen de desarrollo."
@@ -66,31 +67,50 @@ def evaluate_retrieval(k: int = 5) -> str:
     rows = []
     hits = 0
     precisions = []
+    section_hits = 0
+    section_checked = 0
     for question in questions:
         expected = _expected(question)
-        found = [chunk.document for chunk in retrieve(question["question"], k=k)]
+        expected_section = question.get("expected_section")
+        chunks = retrieve(question["question"], k=k)
+        found = [chunk.document for chunk in chunks]
         if not expected:
             # Sin respuesta en el corpus: no cuenta para el recall; el agente tiene
             # que derivar. Se muestra qué trajo igual.
             result = "sin respuesta en el corpus"
+            section_result = "—"
         else:
             relevant = sum(document in expected for document in found)
             precisions.append(relevant / len(found) if found else 0.0)
             hit = relevant > 0
             hits += hit
             result = "✅" if hit else "❌"
+            if expected_section is None:
+                # Varios documentos responden la pregunta: no hay una única
+                # sección correcta a la que apuntar (ver rag_questions.yaml).
+                section_result = "—"
+            else:
+                section_checked += 1
+                section_hit = any(
+                    chunk.document in expected and chunk.section == expected_section
+                    for chunk in chunks
+                )
+                section_hits += section_hit
+                section_result = "✅" if section_hit else "❌"
         cells = (
             question["id"],
             question["question"],
             ", ".join(expected) or "—",
             ", ".join(dict.fromkeys(found)) or "—",
             result,
+            section_result,
         )
         rows.append(cells)
 
     answerable = len(precisions)
     recall = hits / answerable if answerable else 0.0
     precision = sum(precisions) / answerable if answerable else 0.0
+    section_recall = section_hits / section_checked if section_checked else 0.0
     return "\n".join(
         [
             f"**Recall@{k}: {hits}/{answerable} ({recall:.0%})**: preguntas en las que "
@@ -99,11 +119,20 @@ def evaluate_retrieval(k: int = 5) -> str:
             f"**Precisión@{k}: {precision:.0%}**: de lo que trajo, cuánto era del "
             "documento correcto (promedio).",
             "",
-            "Cada fragmento ya guarda su sección (issue #16), pero esta tabla todavía "
-            "mide solo el documento, no si la sección es la esperada.",
+            f"**Sección@{k}: {section_hits}/{section_checked} ({section_recall:.0%})**: de "
+            "las preguntas con una sección esperada, en cuántas el fragmento correcto "
+            "(documento y sección) apareció entre los resultados.",
             "",
             markdown_table(
-                ("id", "pregunta", "documento esperado", "documentos que trajo", "resultado"), rows
+                (
+                    "id",
+                    "pregunta",
+                    "documento esperado",
+                    "documentos que trajo",
+                    "resultado",
+                    "sección",
+                ),
+                rows,
             ),
         ]
     )

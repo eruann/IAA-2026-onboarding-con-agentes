@@ -37,28 +37,32 @@ mirar y medir tu trabajo están en `checks.py`:
 
 - `chunk_document`: muestra cómo corta `chunk_text` un documento del corpus.
 - `evaluate_retrieval`: corre las preguntas de `eval/rag_questions.yaml` contra
-  `retrieve` y calcula recall y precisión.
+  `retrieve` y calcula recall, precisión y, para las preguntas con una única
+  sección esperada, si también trajo la sección correcta.
 
 No hace falta tocarlas para avanzar. Si cambiás lo que devuelve `chunk_text` o
 `retrieve`, ajustalas (tienen su test en `checks_test.py`).
 
 ## Qué falta
 
-El primer PR del rol (ADR 0005, tablas, ingesta de punta a punta, `retrieve()`
-e [issue #16](https://github.com/eruann/IAA-2026-onboarding-con-agentes/issues/16))
-ya está. Lo que sigue:
+El primer PR del rol (ADR 0005, tablas, ingesta de punta a punta, `retrieve()`,
+[issue #16](https://github.com/eruann/IAA-2026-onboarding-con-agentes/issues/16))
+y la conexión de `answer_question` a `retrieve` ya están. También se midió y
+bajó el `k` default (de 5 a 3, mejor precisión con el mismo recall — ver ADR
+0005) y `evaluate_retrieval` ya mide la sección, no solo el documento. Lo que
+sigue:
 
-1. `evaluate_retrieval` mide el documento, no la sección: ahora que cada
-   fragmento guarda su sección, se puede medir también si trajo la sección
-   esperada (`expected_section` ya está en `eval/rag_questions.yaml`, solo
-   falta usarlo).
-2. `answer_question` (`node.py`) todavía no usa `retrieve`: responde con dos
-   documentos fijos metidos enteros en el prompt. Conectarlo es el siguiente
-   paso (ver `AGENTS.md`, rol Agentes y orquestación, o pedí un plan para
-   esto).
-3. Estimación de tokens y costo por ingresante (con los datos de `llm_calls`).
-4. Afinar precisión@5 (hoy 34%, ver el ADR 0005 cerrado): probar otro `k`,
-   otro tamaño de fragmento, o filtrar resultados por un piso de similitud.
+1. Estimación de tokens y costo por ingresante — bloqueada en
+   [`llm/callbacks.py`](../../llm/callbacks.py): la tabla `llm_calls` todavía
+   no se persiste (`# TODO(plataforma)`, solo loguea). Es del rol Tech Lead /
+   Plataforma, no de RAG: cuando esté, se puede calcular el costo con esos
+   datos.
+2. Seguir afinando Precisión@3 (hoy 51%, ver el ADR 0005): otro tamaño de
+   fragmento, o filtrar resultados por un piso de similitud — con cuidado,
+   porque el score de este modelo no separa bien las preguntas respondibles
+   de las que no tienen soporte en el corpus (ver el `TODO(rag)` en
+   `node.py`), así que un piso mal elegido puede hacer que el agente derive
+   preguntas que sí podía responder.
 
 ## Qué probar en el taller
 
@@ -73,15 +77,17 @@ ya está. Lo que sigue:
   (`docker compose run --rm app python -m onboarding.knowledge.rag corpus`).
 - **Evaluar la búsqueda**: tu número principal. Recall@k es en cuántas preguntas
   trajo el documento correcto; precisión@k, cuánto de lo que trajo era de ese
-  documento. Las preguntas sin respuesta no cuentan: ahí el agente tiene que
-  derivar. Hoy: Recall@5 92%, Precisión@5 34% (ver el ADR 0005 cerrado para el
-  detalle). Corrélo antes y después de cada cambio (tamaño de fragmento,
-  modelo de embeddings, `k`) y anotá los números en el PR.
+  documento; sección@k, de las preguntas con una única sección esperada, en
+  cuántas trajo también esa sección. Las preguntas sin respuesta no cuentan:
+  ahí el agente tiene que derivar. Hoy (k=3, el default medido — ver ADR
+  0005): Recall 92%, Precisión 51%. Corrélo antes y después de cada cambio
+  (tamaño de fragmento, modelo de embeddings, `k`) y anotá los números en el PR.
 - **Verificar una cita**: pegá una frase y el texto de un documento. Es el
   control que evita que el bot cite algo que no está.
-- **Chat**: el agente de conocimiento (`answer_question`). Por ahora sigue
-  respondiendo con dos documentos fijos enteros (`node.py` todavía no usa
-  `retrieve`, ver "Qué falta").
+- **Chat**: el agente de conocimiento (`answer_question`). Busca con
+  `retrieve`, responde citando documento y sección, y deriva si no encuentra
+  nada (con `who_knows_about`, del rol Grafo — hoy un stub, así que por ahora
+  deriva sin nombrar a nadie en ese caso puntual).
 
 El set de preguntas (`eval/rag_questions.yaml`) se copia a la imagen al
 construirla: si lo cambiás, `docker compose up --build`.
