@@ -8,27 +8,49 @@ from pathlib import Path
 
 from onboarding.agents.common import Models, Node, NodeSpec, ask_model
 from onboarding.agents.state import OnboardingState
-from onboarding.knowledge import read_documents
+from onboarding.knowledge import RetrievedChunk, retrieve, who_knows_about
 
 PROMPT = Path(__file__).with_name("prompt.md")
 
-# Transitorio: los documentos van enteros en el prompt, como en el primer chat del
-# proyecto (PR #15). Se reemplaza por knowledge.retrieve (TODO de abajo).
-CONTEXT_DOCUMENTS = ("organigrama.md", "tesoreria.md")
+
+def _context(chunks: list[RetrievedChunk]) -> str:
+    if not chunks:
+        return (
+            "<fragmentos>\n"
+            "(no se encontró documentación relacionada con la pregunta)\n"
+            "</fragmentos>"
+        )
+    fragments = "\n\n".join(
+        f'<fragmento documento="{chunk.document}" seccion="{chunk.section}">\n'
+        f"{chunk.text}\n</fragmento>"
+        for chunk in chunks
+    )
+    return f"<fragmentos>\n{fragments}\n</fragmentos>"
 
 
 # recorrido: nodo-respuesta
 def make_answer_question(models: Models) -> Node:
     def answer_question(state: OnboardingState) -> dict:
-        # TODO(rag): 1) knowledge.retrieve en vez de CONTEXT_DOCUMENTS
-        # 2) responder citando documento y sección 3) si no hay soporte, no
-        # inventar: derivar con knowledge.who_knows_about ("preguntale a X").
-        context = f"<documentos>\n{read_documents(CONTEXT_DOCUMENTS)}\n</documentos>"
-        return {
-            "output": ask_model(models.main, PROMPT, state, context),
-            "citations": [],
-            "referred_to": None,
-        }
+        chunks = retrieve(state.get("input", ""))
+        output = ask_model(models.main, PROMPT, state, _context(chunks))
+        citations = list(dict.fromkeys(f"{chunk.document} § {chunk.section}" for chunk in chunks))
+
+        referred_to = None
+        if not chunks:
+            # Sin ningún fragmento (corpus vacío, por ejemplo): no hay nada para
+            # ofrecerle al modelo, así que conviene derivar directo.
+            # TODO(rag): esto no cubre "hubo fragmentos pero ninguno sirve" — se
+            # midió que el score de similitud de este modelo no separa bien esos
+            # casos de los respondibles (ver ADR 0005). Mientras tanto, esa parte
+            # queda en manos del prompt: le pide al modelo decir que no sabe y
+            # derivar en el texto de la respuesta, sin estructurar a quién acá.
+            try:
+                people = who_knows_about(state.get("input", ""))
+            except NotImplementedError:
+                people = []
+            referred_to = people[0] if people else None
+
+        return {"output": output, "citations": citations, "referred_to": referred_to}
 
     return answer_question
 

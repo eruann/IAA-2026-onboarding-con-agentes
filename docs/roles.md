@@ -11,7 +11,7 @@ ejecutarla solo. El backup la cubre si el titular desaparece una semana.
 | 1 | PM / Producto | | |
 | 2 | Tech Lead / Plataforma | Matías Rodriguez (@eruann) | |
 | 3 | Agentes y orquestación | Matías Rodriguez (@eruann) | |
-| 4 | RAG y evaluación | Andrés Salinas (@silo86) | |
+| 4 | RAG y evaluación | Duilio Camps | Andrés Salinas (@silo86) |
 | 5 | Grafo cultural y datos | Gabriel Figueiro (@ghfigueiro) | |
 | 6 | Experiencia: interfaz y game design | Fausto Baritoli (@faustoabc) | |
 | 7 | Diseñador de misiones | | |

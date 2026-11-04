@@ -87,6 +87,14 @@ def test_el_modelo_estructurado_sin_proveedor_usa_el_de_siempre() -> None:
     assert get_structured_model(settings=settings).model_name == "google/gemma-4-31b-it:free"
 
 
-def test_los_embeddings_todavia_son_pendientes() -> None:
-    with pytest.raises(NotImplementedError, match=r"TODO\(rag\)"):
-        get_embeddings()
+def test_get_embeddings_devuelve_siempre_la_misma_instancia() -> None:
+    # Un solo modelo para todo el sistema (ADR 0005): no se recarga en cada llamada.
+    assert get_embeddings() is get_embeddings()
+
+
+@pytest.mark.llm  # descarga y corre el modelo de embeddings real
+def test_get_embeddings_calcula_vectores_de_384_dimensiones() -> None:
+    [vector] = get_embeddings().embed_documents(["texto de prueba"])
+
+    assert len(vector) == 384
+    assert get_embeddings().embed_query("texto de prueba") == vector

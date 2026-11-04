@@ -22,6 +22,7 @@ Modelos vía OpenRouter: "anthropic/claude-haiku-4.5", "openai/gpt-4o-mini",
 
 from typing import get_args
 
+from fastembed import TextEmbedding
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel, FakeListChatModel
 from langchain_openai import ChatOpenAI
@@ -29,6 +30,12 @@ from pydantic import SecretStr
 
 from onboarding.config import LLMProvider, Settings, get_settings
 from onboarding.llm.callbacks import UsageLogger
+
+# Modelo de embeddings (ADR 0005, cerrada): local vía fastembed (ONNX, sin
+# torch), gratis, sin API key. `intfloat/multilingual-e5-small` no está en el
+# registro de esta versión de fastembed (sí `multilingual-e5-large`, 1024 dim:
+# mucho más pesado de lo que pide este corpus). 384 dimensiones.
+EMBEDDINGS_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # Respuestas del proveedor `fake`: determinísticas, sin red ni costo.
 # Los tests que necesiten otra cosa pasan sus propias respuestas.
@@ -97,6 +104,34 @@ def get_structured_model(
     return get_chat_model(settings, provider=provider, model=model)
 
 
+class _FastEmbed(Embeddings):
+    """`fastembed` con la interfaz `Embeddings` de LangChain. Carga perezosa: crear
+    la instancia no descarga los pesos del modelo, recién el primer `embed_*`."""
+
+    def __init__(self, model_name: str) -> None:
+        self._model_name = model_name
+        self._model: TextEmbedding | None = None
+
+    def _loaded(self) -> TextEmbedding:
+        if self._model is None:
+            self._model = TextEmbedding(self._model_name)
+        return self._model
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return [vector.tolist() for vector in self._loaded().embed(texts)]
+
+    def embed_query(self, text: str) -> list[float]:
+        return self.embed_documents([text])[0]
+
+
+_embeddings: Embeddings | None = None
+
+
 def get_embeddings(settings: Settings | None = None) -> Embeddings:
-    """El modelo de embeddings, para RAG. Ningún módulo lo instancia por su cuenta."""
-    raise NotImplementedError("TODO(rag): elegir el modelo de embeddings en el ADR 0005")
+    """El modelo de embeddings, para RAG (ADR 0005, cerrada). Uno solo para todo el
+    sistema (no depende de `settings` hoy: el modelo es fijo, ver el ADR), cacheado
+    acá para no recargarlo en cada llamada."""
+    global _embeddings
+    if _embeddings is None:
+        _embeddings = _FastEmbed(EMBEDDINGS_MODEL)
+    return _embeddings
