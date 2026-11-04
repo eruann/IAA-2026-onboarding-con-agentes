@@ -21,7 +21,13 @@
       "funcion": "make_answer_question.<locals>.answer_question",
       "usa": [
         {
-          "funcion": "read_documents",
+          "funcion": "retrieve",
+          "via": [
+            "answer_question"
+          ]
+        },
+        {
+          "funcion": "who_knows_about",
           "via": [
             "answer_question"
           ]
@@ -154,13 +160,13 @@
     {
       "funcion": "retrieve",
       "archivo": "src/onboarding/knowledge/rag/retriever.py",
-      "usada_por_el_grafo": false,
+      "usada_por_el_grafo": true,
       "modelo": null
     },
     {
       "funcion": "who_knows_about",
       "archivo": "src/onboarding/knowledge/informal_network/queries.py",
-      "usada_por_el_grafo": false,
+      "usada_por_el_grafo": true,
       "modelo": null
     }
   ]

@@ -24,6 +24,8 @@ from onboarding.knowledge.informal_network import KnowledgeTriple, Relation, who
 from onboarding.knowledge.rag import (
     DEFAULT_MAX_CHARS,
     DEFAULT_OVERLAP,
+    Chunk,
+    RetrievedChunk,
     chunk_text,
     document_names,
     ingest_directory,
@@ -35,8 +37,10 @@ from onboarding.knowledge.rag import (
 # recorrido: knowledge-interfaz
 __all__ = [
     # Lo escrito
+    "Chunk",
     "DEFAULT_MAX_CHARS",
     "DEFAULT_OVERLAP",
+    "RetrievedChunk",
     "chunk_text",
     "document_names",
     "ingest_directory",

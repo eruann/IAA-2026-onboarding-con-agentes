@@ -41,13 +41,13 @@ def questions(tmp_path, monkeypatch):
     monkeypatch.setattr(checks, "retrieve", fake_retrieve)
 
 
-def test_cada_fragmento_dice_su_largo_y_los_titulos_que_tiene() -> None:
+def test_cada_fragmento_dice_su_largo_y_su_seccion() -> None:
     rows = chunk_document("tesoreria.md", max_chars=1200, overlap=0)
 
     assert len(rows) > 1
     assert [row["fragmento"] for row in rows] == list(range(1, len(rows) + 1))
     assert all(row["caracteres"] == len(row["texto"]) for row in rows)
-    assert any(row["títulos ## adentro"] for row in rows)
+    assert all(row["sección"] for row in rows)
 
 
 @pytest.mark.usefixtures("questions")

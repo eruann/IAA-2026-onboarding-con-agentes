@@ -14,14 +14,19 @@ responden cada pregunta, y medir qué tan bien lo hace.
 **Lo construís vos:** tu agente (`node.py` y `prompt.md`, en esta carpeta) y lo
 escrito, en `knowledge/rag/` (producto):
 
-- `chunking.py` → `chunk_text`: corta un documento en fragmentos. **Ya
-  funciona**, pero por párrafos y sin mirar los títulos `##` (ver más abajo).
-- `models.py`: tablas `documents` y `chunks`. Pendiente.
-- `embeddings.py` → `embed_texts`: pendiente. Antes, decidir el modelo de
-  embeddings en el [ADR 0005](../../../../docs/adr/0005-embeddings.md).
-- `ingest.py` → `ingest_directory`: lee y corta el corpus; falta guardar en
-  pgvector.
-- `retriever.py` → `retrieve`: la búsqueda. Pendiente.
+- `chunking.py` → `chunk_text`: corta un documento en fragmentos, respetando
+  los títulos `##` (issue #16 cerrado: cada fragmento sabe su sección, nunca
+  mezcla dos). **Ya funciona.**
+- `models.py`: tablas `documents` y `chunks`, con el vector de 384 dimensiones
+  de `embeddings.py`. **Ya funciona** (migración `0004`).
+- `embeddings.py` → `embed_texts`: [ADR 0005](../../../../docs/adr/0005-embeddings.md)
+  cerrada — modelo local (`paraphrase-multilingual-MiniLM-L12-v2` vía
+  `fastembed`, sin API key, 384 dim). **Ya funciona.**
+- `ingest.py` → `ingest_directory`: corta el corpus, calcula embeddings y
+  guarda en pgvector; idempotente (no reingesta un documento si no cambió, y
+  borra los fragmentos viejos si cambió). **Ya funciona.**
+- `retriever.py` → `retrieve`: búsqueda por similitud de coseno en pgvector.
+  **Ya funciona.**
 - `citations.py` → `quote_is_supported`: verifica que una cita esté textual.
   **Ya funciona.**
 
@@ -39,37 +44,44 @@ No hace falta tocarlas para avanzar. Si cambiás lo que devuelve `chunk_text` o
 
 ## Qué falta
 
-1. ADR 0005: elegir el modelo de embeddings, midiendo, no por gusto.
-2. Tablas `documents` y `chunks` con su migración.
-3. Ingesta de punta a punta: cortar, calcular embeddings y guardar, sin
-   duplicar si se corre dos veces.
-4. `retrieve()`: búsqueda por similitud en pgvector.
-5. [Issue #16](https://github.com/eruann/IAA-2026-onboarding-con-agentes/issues/16):
-   cortar respetando los títulos `##` y guardar la sección de cada fragmento.
-   Con eso se puede medir también la sección correcta.
+El primer PR del rol (ADR 0005, tablas, ingesta de punta a punta, `retrieve()`
+e [issue #16](https://github.com/eruann/IAA-2026-onboarding-con-agentes/issues/16))
+ya está. Lo que sigue:
+
+1. `evaluate_retrieval` mide el documento, no la sección: ahora que cada
+   fragmento guarda su sección, se puede medir también si trajo la sección
+   esperada (`expected_section` ya está en `eval/rag_questions.yaml`, solo
+   falta usarlo).
+2. `answer_question` (`node.py`) todavía no usa `retrieve`: responde con dos
+   documentos fijos metidos enteros en el prompt. Conectarlo es el siguiente
+   paso (ver `AGENTS.md`, rol Agentes y orquestación, o pedí un plan para
+   esto).
+3. Estimación de tokens y costo por ingresante (con los datos de `llm_calls`).
+4. Afinar precisión@5 (hoy 34%, ver el ADR 0005 cerrado): probar otro `k`,
+   otro tamaño de fragmento, o filtrar resultados por un piso de similitud.
 
 ## Qué probar en el taller
 
 - **Ver cómo se corta un documento**: elegí `tesoreria.md` y mirá la columna
-  *títulos ## adentro*: cuando un fragmento tiene varios, mezcla secciones (el
-  issue #16). Probá con otros tamaños y solape, y volvé a mirar después de
-  cambiar `chunk_text`.
+  *sección*: cada fragmento tiene una sola (issue #16 cerrado). Probá con
+  otros tamaños y solape.
   Mirá también la columna *caracteres*: en `glosario.md` y `tesoreria.md` hay
   fragmentos de más de `max_chars` (hasta ~2000 con el tamaño por defecto). Un
   párrafo largo que llega cuando ya hay un fragmento empezado no se corta.
-- **Buscar en el corpus**: aparece como pendiente hasta que exista `retrieve`.
-  Después, probá preguntas del set de evaluación y mirá si trae el documento y la
-  sección correctos.
+- **Buscar en el corpus**: probá preguntas del set de evaluación y mirá si
+  trae el documento y la sección correctos. Necesita el corpus ingestado
+  (`docker compose run --rm app python -m onboarding.knowledge.rag corpus`).
 - **Evaluar la búsqueda**: tu número principal. Recall@k es en cuántas preguntas
   trajo el documento correcto; precisión@k, cuánto de lo que trajo era de ese
   documento. Las preguntas sin respuesta no cuentan: ahí el agente tiene que
-  derivar. Corrélo antes y después de cada cambio (tamaño de fragmento, modelo de
-  embeddings, `k`) y anotá los números en el PR.
+  derivar. Hoy: Recall@5 92%, Precisión@5 34% (ver el ADR 0005 cerrado para el
+  detalle). Corrélo antes y después de cada cambio (tamaño de fragmento,
+  modelo de embeddings, `k`) y anotá los números en el PR.
 - **Verificar una cita**: pegá una frase y el texto de un documento. Es el
   control que evita que el bot cite algo que no está.
-- **Chat**: el agente de conocimiento (`answer_question`). Hoy responde con dos
-  documentos enteros; cuando use `retrieve`, va a responder con lo que encuentre
-  tu búsqueda.
+- **Chat**: el agente de conocimiento (`answer_question`). Por ahora sigue
+  respondiendo con dos documentos fijos enteros (`node.py` todavía no usa
+  `retrieve`, ver "Qué falta").
 
 El set de preguntas (`eval/rag_questions.yaml`) se copia a la imagen al
 construirla: si lo cambiás, `docker compose up --build`.

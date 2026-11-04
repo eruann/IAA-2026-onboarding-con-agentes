@@ -41,11 +41,7 @@ def seed(with_corpus: bool = True, session: Session | None = None) -> None:
         sync_game_data(db_session, people, quests)
 
     if with_corpus:
-        try:
-            ingest_directory()
-        except NotImplementedError as pending:
-            # La ingesta todavía no guarda: se avisa y el resto del seed sigue
-            logger.warning("Ingesta incompleta: %s", pending)
+        ingest_directory(session=session)
 
 
 def main() -> None:

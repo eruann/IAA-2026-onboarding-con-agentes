@@ -34,18 +34,15 @@ def chunk_document(
     overlap: int = DEFAULT_OVERLAP,
 ) -> list[dict]:
     """Cómo corta `chunk_text` un documento del corpus: un fragmento por fila,
-    con los títulos `##` que caen adentro (si son varios, mezcla secciones)."""
+    cada uno con la sección `##` a la que pertenece (issue #16: ya no mezcla
+    secciones distintas en un mismo fragmento)."""
     chunks = chunk_text((CORPUS_DIR / document).read_text(encoding="utf-8"), max_chars, overlap)
     return [
         {
             "fragmento": number,
-            "caracteres": len(chunk),
-            "títulos ## adentro": ", ".join(
-                line.removeprefix("## ").strip()
-                for line in chunk.splitlines()
-                if line.startswith("## ")
-            ),
-            "texto": chunk,
+            "sección": chunk.section or "(antes del primer ##)",
+            "caracteres": len(chunk.text),
+            "texto": chunk.text,
         }
         for number, chunk in enumerate(chunks, start=1)
     ]
@@ -102,7 +99,8 @@ def evaluate_retrieval(k: int = 5) -> str:
             f"**Precisión@{k}: {precision:.0%}**: de lo que trajo, cuánto era del "
             "documento correcto (promedio).",
             "",
-            "La sección todavía no se mide (issue #16).",
+            "Cada fragmento ya guarda su sección (issue #16), pero esta tabla todavía "
+            "mide solo el documento, no si la sección es la esperada.",
             "",
             markdown_table(
                 ("id", "pregunta", "documento esperado", "documentos que trajo", "resultado"), rows

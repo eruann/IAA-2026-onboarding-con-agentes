@@ -16,6 +16,8 @@ dependencies = [
     "psycopg[binary]>=3.2",
     "pgvector>=0.3",
     "alembic>=1.13",
+    # Embeddings locales (ADR 0005): ONNX, sin torch, imagen liviana
+    "fastembed>=0.3",
     # Agentes y modelos. El proveedor es OpenRouter vía API compatible con OpenAI:
     # no hay dependencia de un vendor de LLM en concreto.
     "langgraph>=0.2",
