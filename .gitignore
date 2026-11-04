@@ -33,3 +33,6 @@ eval/runs/
 
 # Temporales de Word
 ~$*.docx
+
+# Claves de la carpeta personal: se sube solo el ejemplo (secrets.toml.example)
+src/onboarding/mi_caperta/secrets.toml
