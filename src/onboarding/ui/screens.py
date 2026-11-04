@@ -62,7 +62,7 @@ async def _screen(title: str, manager: bool):
         ui.navigate.to("./")
         return None
     catalog = await run.io_bound(model_catalog)
-    model_select = sidebar(prefs, catalog, dark, title=f"{title} · {prefs['name']}")
+    model_select = sidebar(prefs, catalog, dark, title=f"{title} · {prefs['name']}").main
     return prefs, catalog.options, model_select
 
 

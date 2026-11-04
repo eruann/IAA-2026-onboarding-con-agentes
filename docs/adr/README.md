@@ -24,5 +24,6 @@ Estados: `propuesta` → `aceptada` → `reemplazada por 000X`.
 | [0011](0011-una-carpeta-por-agente.md) | Una carpeta por agente, prompts al lado del código y la misma estructura en cada rol | aceptada; la parte de talleres, reemplazada por 0012 |
 | [0012](0012-taller-en-la-carpeta-del-agente.md) | El taller de cada rol vive en la carpeta de su agente | aceptada |
 | [0013](0013-producto-sin-andamiaje.md) | El producto funciona sin el andamiaje | aceptada |
+| [0014](0014-perfiles-de-modelo.md) | Perfiles de modelo: cada tarea pide lo que necesita | aceptada |
 
 Plantilla: [_plantilla.md](_plantilla.md)

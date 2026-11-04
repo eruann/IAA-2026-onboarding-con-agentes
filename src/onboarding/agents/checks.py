@@ -10,10 +10,11 @@ import time
 
 from langchain_core.language_models import BaseChatModel, FakeListChatModel
 
+from onboarding.agents.common import Models
 from onboarding.agents.graph import NODES, route
 from onboarding.agents.run import TurnError, TurnResult, path_text, run_turn
 from onboarding.agents.state import Intent, OnboardingState
-from onboarding.llm import load_prompt
+from onboarding.llm import get_structured_model, load_prompt
 from onboarding.paths import repo_relative
 from onboarding.workshop import ChatHistory, markdown_table
 
@@ -49,12 +50,14 @@ def check_nodes(use_real_model: bool = False, model: BaseChatModel | None = None
     """Corre cada nodo con un mensaje de ejemplo y revisa que devuelva lo que espera el
     coordinador. Salvo que se pida un modelo real, usa el fake: sin costo y sin red."""
     model = model if use_real_model and model else _fake_model()
+    # Con el modelo real, cada nodo recibe también el del perfil estructurado
+    models = Models(model, get_structured_model(model)) if use_real_model else Models.same(model)
     state: OnboardingState = {"input": SAMPLE_INPUT, "messages": [], "actor_name": "Ana"}
     rows = []
     for node in NODES:
         start = time.perf_counter()
         try:
-            problems = _contract_problems(node.make(model)(dict(state)))
+            problems = _contract_problems(node.make(models)(dict(state)))
             result = "; ".join(problems) or "✅"
         except NotImplementedError as error:
             if "structured_output" in str(error):

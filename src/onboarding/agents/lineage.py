@@ -123,7 +123,7 @@ def _calls_model(fn: Callable, call: ast.Call) -> bool:
         and target.attr in MODEL_METHODS
         and isinstance(target.value, ast.Name)
         and _is_model(fn, target.value.id)
-    ) or (isinstance(target, ast.Name) and target.id == "get_chat_model")
+    ) or (isinstance(target, ast.Name) and target.id in ("get_chat_model", "get_structured_model"))
 
 
 def _ours(obj: object) -> bool:

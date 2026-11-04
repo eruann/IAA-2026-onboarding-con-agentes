@@ -6,9 +6,7 @@
 
 from pathlib import Path
 
-from langchain_core.language_models import BaseChatModel
-
-from onboarding.agents.common import Node, NodeSpec, ask_model
+from onboarding.agents.common import Models, Node, NodeSpec, ask_model
 from onboarding.agents.state import OnboardingState
 from onboarding.knowledge import read_documents
 
@@ -20,14 +18,14 @@ CONTEXT_DOCUMENTS = ("organigrama.md", "tesoreria.md")
 
 
 # recorrido: nodo-respuesta
-def make_answer_question(model: BaseChatModel) -> Node:
+def make_answer_question(models: Models) -> Node:
     def answer_question(state: OnboardingState) -> dict:
         # TODO(rag): 1) knowledge.retrieve en vez de CONTEXT_DOCUMENTS
         # 2) responder citando documento y sección 3) si no hay soporte, no
         # inventar: derivar con knowledge.who_knows_about ("preguntale a X").
         context = f"<documentos>\n{read_documents(CONTEXT_DOCUMENTS)}\n</documentos>"
         return {
-            "output": ask_model(model, PROMPT, state, context),
+            "output": ask_model(models.main, PROMPT, state, context),
             "citations": [],
             "referred_to": None,
         }

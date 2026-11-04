@@ -60,11 +60,24 @@ los `.py` staged. Si un commit se frena por Ruff, corregí el error; no uses
    internos. A la knowledge layer se entra solo por `onboarding.knowledge`
    (`from onboarding.knowledge import retrieve`); `rag` e `informal_network` se
    usan directo únicamente desde adentro de la capa.
-5. El modelo se obtiene **siempre** de `onboarding.llm.get_chat_model()`. Ningún
-   módulo nombra un proveedor ni instancia un cliente.
-6. Los prompts viven en un `.md` **al lado del código que los usa** (el
-   `prompt.md` de cada agente), no embebidos en el código, y se cargan con
-   `onboarding.llm.load_prompt(ruta)`.
+5. Todo modelo sale **siempre** de `onboarding.llm`; ningún módulo nombra un
+   proveedor ni instancia un cliente. Cada tarea pide el modelo **por perfil**,
+   según lo que necesita, nunca por nombre
+   ([ADR 0014](docs/adr/0014-perfiles-de-modelo.md)):
+   - **principal** (`get_chat_model()`, `LLM_MODEL`): conversar.
+   - **estructurado** (`get_structured_model()`, `LLM_STRUCTURED_MODEL`): devolver
+     datos con forma fija (salida estructurada). Vacío, usa el principal.
+   - **embeddings** (`get_embeddings()`): textos a vectores. Uno solo para todo el
+     sistema, porque solo se comparan vectores del mismo modelo; lo elige el
+     ADR 0005.
+
+   Un agente recibe los suyos en `Models` (`agents/common.py`) y usa `models.main`
+   o `models.structured`. Un perfil nuevo se suma con un ADR, no por tarea.
+6. Los prompts viven en un `.md` **al lado del código que los usa**, no
+   embebidos en el código, y se cargan con `onboarding.llm.load_prompt(ruta)`.
+   `prompt.md` es siempre el del agente (el que usa `ask_model`); si una función
+   del agente necesita otras instrucciones, van al lado con su propio nombre
+   (por ejemplo, `extraction_prompt.md` de `extract_triples`).
 7. Función pública nueva, test nuevo. El test va al lado del módulo como
    `<modulo>_test.py` (pytest no reconoce otro nombre). Las fixtures están en
    `src/onboarding/conftest.py`. Los tests no llaman a modelos reales: está el
@@ -106,7 +119,7 @@ src/onboarding/
   paths.py                 # raíz del repo, data/, corpus/, eval/ y load_data_yaml()
   db/session.py            # session_scope(): la sesión que te pasan o una propia
   agents/
-    common.py              # Node, ask_model y NodeSpec (lo compartido por los agentes)
+    common.py              # Node, Models, ask_model y NodeSpec (lo compartido por los agentes)
     graph.py               # NODES (la lista de agentes) y el coordinador (route)
     workshop.py, checks.py, LEEME.md   # el taller del coordinador (rol Agentes)
     <nodo>/                # un agente: answer_question, validate_evidence, …

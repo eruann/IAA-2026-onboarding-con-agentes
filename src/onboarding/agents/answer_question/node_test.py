@@ -1,10 +1,11 @@
 from langchain_core.messages import AIMessage, HumanMessage
 
 from onboarding.agents.answer_question import NODE, make_answer_question
+from onboarding.agents.common import Models
 
 
 def test_responde_con_los_documentos_el_nombre_y_la_conversacion(recording_llm) -> None:
-    node = make_answer_question(recording_llm)
+    node = make_answer_question(Models.same(recording_llm))
 
     result = node(
         {

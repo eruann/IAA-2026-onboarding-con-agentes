@@ -1,8 +1,9 @@
+from onboarding.agents.common import Models
 from onboarding.agents.generate_quest import NODE, make_generate_quest
 
 
 def test_propone_con_su_prompt_y_el_pedido(recording_llm) -> None:
-    node = make_generate_quest(recording_llm)
+    node = make_generate_quest(Models.same(recording_llm))
 
     result = node({"input": "Misiones para un analista de Tesorería"})
 
