@@ -9,8 +9,11 @@ extracción. Eso se mide en eval/.
 import pytest
 from langchain_core.messages import SystemMessage
 
+from onboarding.agents.common import Models
 from onboarding.agents.extract_knowledge import extract_triples, make_extract_knowledge
+from onboarding.agents.extract_knowledge.node import EXTRACTION_PROMPT, PROMPT
 from onboarding.knowledge import KnowledgeTriple
+from onboarding.llm import load_prompt
 
 TEXTO = "Para Excel avanzado, preguntale a Diego. Es un genio."
 RESPALDO = "Para Excel avanzado, preguntale a Diego."
@@ -64,24 +67,36 @@ def test_el_prompt_lleva_organigrama_y_procedimientos(structured_llm) -> None:
 
 def test_sin_modelo_usa_el_del_proyecto(monkeypatch: pytest.MonkeyPatch, structured_llm) -> None:
     modelo = structured_llm({"triples": [_triple(RESPALDO)]})
-    monkeypatch.setattr("onboarding.agents.extract_knowledge.node.get_chat_model", lambda: modelo)
+    node_module = "onboarding.agents.extract_knowledge.node"
+    monkeypatch.setattr(f"{node_module}.get_structured_model", lambda: modelo)
 
     assert len(extract_triples(TEXTO)) == 1
 
 
-def test_el_nodo_lista_las_relaciones_con_su_respaldo(structured_llm) -> None:
-    node = make_extract_knowledge(structured_llm({"triples": [_triple(RESPALDO)]}))
+def test_el_nodo_le_pasa_las_relaciones_a_su_prompt_y_cita_el_respaldo(structured_llm) -> None:
+    modelo = structured_llm(
+        {"triples": [_triple(RESPALDO)]}, reply="Registré que Diego sabe de Excel."
+    )
+    node = make_extract_knowledge(Models.same(modelo))
+
+    result = node({"input": TEXTO, "actor_name": "Ana"})
+
+    # La respuesta es la del agente, con su propio prompt (no el de la extracción)
+    assert result == {"output": "Registré que Diego sabe de Excel.", "citations": [RESPALDO]}
+    system = modelo.seen_reply[0].content
+    assert system.startswith(load_prompt(PROMPT))
+    assert f"- Diego sabe de Excel avanzado («{RESPALDO}»)" in system
+    assert "La persona se llama Ana" in system
+    # La extracción usó sus instrucciones, que no son las del agente
+    assert modelo.seen[0].content.startswith(load_prompt(EXTRACTION_PROMPT))
+    assert PROMPT != EXTRACTION_PROMPT
+
+
+def test_sin_relaciones_el_agente_igual_responde(structured_llm) -> None:
+    modelo = structured_llm({"triples": []}, reply="No encontré nada: ¿me das un ejemplo?")
+    node = make_extract_knowledge(Models.same(modelo))
 
     result = node({"input": TEXTO})
 
-    assert "**Diego** sabe de **Excel avanzado**" in result["output"]
-    assert result["citations"] == [RESPALDO]
-
-
-def test_el_nodo_sin_relaciones_lo_dice(structured_llm) -> None:
-    node = make_extract_knowledge(structured_llm({"triples": []}))
-
-    assert node({"input": TEXTO}) == {
-        "output": "No encontré relaciones con respaldo en el texto.",
-        "citations": [],
-    }
+    assert result == {"output": "No encontré nada: ¿me das un ejemplo?", "citations": []}
+    assert "(ninguna con respaldo en el texto)" in modelo.seen_reply[0].content

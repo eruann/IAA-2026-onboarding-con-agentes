@@ -159,6 +159,17 @@ LLM_MODEL=anthropic/claude-haiku-4.5
 Con una sola key se puede apuntar a cualquier modelo cambiando `LLM_MODEL`
 (`openai/gpt-4o-mini`, `qwen/qwen-2.5-72b-instruct`, etc.).
 
+Las tareas que devuelven datos con forma fija (por ejemplo, la extracción de
+relaciones de Grafo) pueden usar otro modelo, que soporte salida estructurada:
+
+```
+LLM_STRUCTURED_MODEL=openrouter:nvidia/nemotron-3-ultra-550b-a55b:free
+```
+
+`proveedor:modelo` o solo el modelo (usa `LLM_PROVIDER`). Vacía, esas tareas
+usan el mismo modelo que `LLM_MODEL`. En los talleres, además, se elige en vivo
+con «Modelo para datos estructurados» ([ADR 0014](adr/0014-perfiles-de-modelo.md)).
+
 ### La key es de cada uno
 
 **No hay una key compartida del equipo.** Cada uno usa la suya en su `.env`, que

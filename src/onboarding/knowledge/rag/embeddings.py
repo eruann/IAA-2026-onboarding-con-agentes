@@ -14,6 +14,9 @@ Opciones sobre la mesa:
 
 Criterio de decisión: medir recall del retrieval con el set fijo de preguntas de
 eval/rag_questions.yaml, no elegir por gusto.
+
+El modelo elegido se obtiene de `onboarding.llm.get_embeddings()`, como todo
+modelo (regla 5): así cualquier otra parte que necesite embeddings usa el mismo.
 """
 
 from collections.abc import Sequence

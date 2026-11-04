@@ -12,9 +12,11 @@
 
 **Lo construís vos:**
 
-- `agents/extract_knowledge/` → tu agente, igual que los demás: `node.py` (el nodo
-  y `extract_triples`, que saca relaciones de un texto con la frase que las
-  respalda; **ya funciona**) y su prompt al lado, `prompt.md`.
+- `agents/extract_knowledge/` → tu agente, igual que los demás: `node.py` junta
+  su contexto y le contesta a la persona con su prompt, `prompt.md`
+  (`ask_model`). Su contexto son las relaciones que saca `extract_triples`, cada
+  una con la frase que la respalda (**ya funciona**), con sus propias
+  instrucciones en `extraction_prompt.md`.
 - `knowledge/informal_network/triples.py` → `KnowledgeTriple`: la forma de una
   relación, lo que el resto del sistema usa de tu parte.
 - `knowledge/informal_network/queries.py` → `who_knows_about`: pendiente.

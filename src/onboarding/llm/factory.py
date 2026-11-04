@@ -8,10 +8,21 @@ Cambiar de modelo es cambiar `LLM_MODEL` en el entorno; cambiar de proveedor es
 cambiar `LLM_PROVIDER`. Los agentes reciben un chat model de LangChain y no
 saben (ni tienen que saber) qué hay detrás.
 
+Cada tarea pide el modelo por perfil, según lo que necesita (ADR 0014):
+
+- principal (`get_chat_model`): conversar. Es `LLM_MODEL`.
+- estructurado (`get_structured_model`): devolver datos con forma fija (salida
+  estructurada), aunque el pedido sea largo. Es `LLM_STRUCTURED_MODEL` o, si está
+  vacío, el principal que se esté usando.
+- embeddings (`get_embeddings`): textos a vectores, para RAG. Lo elige el ADR 0005.
+
 Modelos vía OpenRouter: "anthropic/claude-haiku-4.5", "openai/gpt-4o-mini",
 "qwen/qwen-2.5-72b-instruct", "meta-llama/llama-3.3-70b-instruct:free", etc.
 """
 
+from typing import get_args
+
+from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel, FakeListChatModel
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
@@ -62,3 +73,30 @@ def get_chat_model(
         max_tokens=max_tokens,
         callbacks=[UsageLogger()],
     )
+
+
+def _provider_and_model(value: str, default_provider: LLMProvider) -> tuple[LLMProvider, str]:
+    """ "openrouter:google/gemma…" o solo "google/gemma…" (con el proveedor de siempre).
+    Los nombres de modelo pueden tener ":" (":free"): solo cuenta si antes hay un
+    proveedor conocido."""
+    prefix, _, rest = value.partition(":")
+    if rest and prefix in get_args(LLMProvider):
+        return prefix, rest  # type: ignore[return-value]
+    return default_provider, value
+
+
+def get_structured_model(
+    fallback: BaseChatModel | None = None, settings: Settings | None = None
+) -> BaseChatModel:
+    """El modelo del perfil estructurado: el de LLM_STRUCTURED_MODEL o, si está vacío,
+    `fallback` (el principal que se esté usando; sin él, el de LLM_MODEL)."""
+    settings = settings or get_settings()
+    if not settings.llm_structured_model:
+        return fallback or get_chat_model(settings)
+    provider, model = _provider_and_model(settings.llm_structured_model, settings.llm_provider)
+    return get_chat_model(settings, provider=provider, model=model)
+
+
+def get_embeddings(settings: Settings | None = None) -> Embeddings:
+    """El modelo de embeddings, para RAG. Ningún módulo lo instancia por su cuenta."""
+    raise NotImplementedError("TODO(rag): elegir el modelo de embeddings en el ADR 0005")

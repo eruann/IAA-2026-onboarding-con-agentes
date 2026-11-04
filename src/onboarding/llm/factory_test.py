@@ -2,7 +2,7 @@ import pytest
 from langchain_core.language_models import FakeListChatModel
 
 from onboarding.config import Settings
-from onboarding.llm.factory import get_chat_model
+from onboarding.llm.factory import get_chat_model, get_embeddings, get_structured_model
 
 
 def test_proveedor_fake_no_necesita_api_key() -> None:
@@ -53,3 +53,40 @@ def test_el_modelo_y_el_proveedor_se_pueden_elegir_por_llamada() -> None:
 
     assert model.model_name == "qwen/qwen3:free"
     assert "openrouter.ai" in str(model.openai_api_base)
+
+
+def test_sin_modelo_estructurado_se_usa_el_principal_que_se_este_usando() -> None:
+    principal = FakeListChatModel(responses=["x"])
+
+    assert get_structured_model(principal, Settings(llm_structured_model="")) is principal
+    default = get_structured_model(settings=Settings(llm_provider="fake"))
+    assert isinstance(default, FakeListChatModel)
+
+
+def test_el_modelo_estructurado_puede_ser_de_otro_proveedor() -> None:
+    settings = Settings(
+        llm_provider="fake",
+        openrouter_api_key="sk-test",
+        llm_structured_model="openrouter:nvidia/nemotron-3-ultra:free",
+    )
+
+    model = get_structured_model(FakeListChatModel(responses=["x"]), settings)
+
+    assert model.model_name == "nvidia/nemotron-3-ultra:free"
+    assert "openrouter.ai" in str(model.openai_api_base)
+
+
+def test_el_modelo_estructurado_sin_proveedor_usa_el_de_siempre() -> None:
+    # El ":free" del nombre no se confunde con un proveedor
+    settings = Settings(
+        llm_provider="openrouter",
+        openrouter_api_key="sk-test",
+        llm_structured_model="google/gemma-4-31b-it:free",
+    )
+
+    assert get_structured_model(settings=settings).model_name == "google/gemma-4-31b-it:free"
+
+
+def test_los_embeddings_todavia_son_pendientes() -> None:
+    with pytest.raises(NotImplementedError, match=r"TODO\(rag\)"):
+        get_embeddings()

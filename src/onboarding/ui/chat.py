@@ -12,6 +12,7 @@ from nicegui import run, ui
 from onboarding.agents import TurnError, path_text, run_turn
 from onboarding.llm import ModelOption, get_chat_model
 from onboarding.ui.errors import explain, render_error
+from onboarding.ui.layout import CONFIGURED
 
 
 def _bubble(who: str, name: str):
@@ -44,11 +45,15 @@ def chat(
     intent: str | None = None,
     on_turn: Callable[[list[str], str | None], None] | None = None,
     greeting: str | None = None,
+    structured_select=None,
 ) -> list[tuple[str, str]]:
     """Chat con el agente. `intent`: a qué nodo va (None: decide el coordinador).
     `on_turn(path, failed)` se llama después de cada mensaje, salga bien o falle
     (los talleres marcan el recorrido en el grafo). Devuelve la conversación (se va
     llenando), para las pruebas que la usan.
+
+    `structured_select`: el selector del modelo estructurado (los talleres); sin él,
+    lo decide la configuración (ADR 0014).
 
     Si un mensaje falla, su globo ofrece reintentarlo con otro modelo. Esos botones
     valen mientras el mensaje que falló sea lo último de la conversación.
@@ -102,8 +107,17 @@ def chat(
                     .classes("boton-borde")
                 )
 
+    def structured_model():
+        """El modelo estructurado elegido en el taller, o None: el de la configuración."""
+        index = structured_select.value if structured_select is not None else CONFIGURED
+        if index in (None, CONFIGURED):
+            return None
+        choice = models[index]
+        return get_chat_model(provider=choice.provider, model=choice.model)
+
     async def answer(text: str, bubble, footer, index: int, retrying: bool = False) -> None:
         option = models[index]
+        structured = structured_model()
         bubble.clear()
         footer.clear()
         with bubble, ui.row().classes("items-center gap-2"):
@@ -118,6 +132,7 @@ def chat(
                     actor_name=name,
                     history=list(history),
                     model=get_chat_model(provider=option.provider, model=option.model),
+                    structured_model=structured,
                 )
             )
         except Exception as failure:  # la pregunta falló: no queda en el historial
