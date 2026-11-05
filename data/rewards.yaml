@@ -4,16 +4,16 @@
 
 - key: cafe
   title: Café de la esquina
-  cost: 50
+  cost: 40
 
 - key: equipo-de-mate
   title: Equipo de mate
-  cost: 200
+  cost: 90
 
 - key: curso
   title: Curso a elección
-  cost: 400
+  cost: 120
 
 - key: dia-libre
   title: Día libre
-  cost: 600
+  cost: 160
