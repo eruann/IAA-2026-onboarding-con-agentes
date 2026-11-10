@@ -37,7 +37,7 @@ WORKSHOP = Workshop(
             "Revisar las misiones",
             "Lee data/quests.yaml y marca lo que no cierra.",
         ),
-        Tool(list_rewards, "Ver el catálogo de canje", "Pendiente hasta que exista el canje."),
+        Tool(list_rewards, "Ver el catálogo de canje", "Muestra premios y puntos necesarios."),
         Tool(
             redemption_history,
             "Ver lo que canjeó una persona",
