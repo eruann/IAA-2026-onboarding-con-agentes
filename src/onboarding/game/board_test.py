@@ -1,9 +1,19 @@
+from pathlib import Path
+
 import pytest
+import yaml
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from onboarding.game.board import employee_board, manager_board
 from onboarding.game.models import Person, QuestAssignment, QuestRow, Redemption
+
+
+def _use_people_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, people: list[dict]) -> None:
+    (tmp_path / "people.yaml").write_text(
+        yaml.safe_dump(people, allow_unicode=True), encoding="utf-8"
+    )
+    monkeypatch.setattr("onboarding.paths.DATA_DIR", tmp_path)
 
 
 def _quest(key: str, points: int) -> QuestRow:
@@ -46,6 +56,99 @@ def test_una_persona_sin_misiones_tiene_el_tablero_vacio(db_session: Session) ->
         0,
         "Recién llegado",
     )
+
+
+@pytest.mark.db
+def test_el_tablero_filtra_ingresantes_y_misiones_por_jefe(
+    db_session: Session,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    people_data = [
+        {
+            "key": "t-manager-a",
+            "name": "Jefa A",
+            "role": "Jefa",
+            "area": "X",
+            "is_newcomer": False,
+            "is_manager": True,
+        },
+        {
+            "key": "t-manager-b",
+            "name": "Jefe B",
+            "role": "Jefe",
+            "area": "X",
+            "is_newcomer": False,
+            "is_manager": True,
+        },
+        {
+            "key": "t-new-a1",
+            "name": "Ingresante A1",
+            "role": "Analista",
+            "area": "X",
+            "is_newcomer": True,
+            "manager_key": "t-manager-a",
+        },
+        {
+            "key": "t-new-a2",
+            "name": "Ingresante A2",
+            "role": "Analista",
+            "area": "X",
+            "is_newcomer": True,
+            "manager_key": "t-manager-a",
+        },
+        {
+            "key": "t-new-b1",
+            "name": "Ingresante B1",
+            "role": "Analista",
+            "area": "X",
+            "is_newcomer": True,
+            "manager_key": "t-manager-b",
+        },
+        {
+            "key": "t-new-unmanaged",
+            "name": "Ingresante sin equipo",
+            "role": "Analista",
+            "area": "X",
+            "is_newcomer": True,
+        },
+    ]
+    _use_people_yaml(tmp_path, monkeypatch, people_data)
+    people = [
+        Person(
+            key=item["key"],
+            name=item["name"],
+            role=item["role"],
+            area=item["area"],
+            is_newcomer=item["is_newcomer"],
+        )
+        for item in people_data
+    ]
+    quests = [_quest("t-team-mission-a", 10), _quest("t-team-mission-b", 20)]
+    db_session.add_all([*people, *quests])
+    db_session.flush()
+    people_by_key = {person.key: person for person in people}
+    db_session.add_all(
+        [
+            QuestAssignment(
+                person_id=people_by_key[person_key].id,
+                quest_id=quests[index % len(quests)].id,
+                status="submitted",
+            )
+            for index, person_key in enumerate(("t-new-a1", "t-new-a2", "t-new-b1"))
+        ]
+    )
+    db_session.flush()
+
+    board_a = manager_board(db_session, manager_key="t-manager-a")
+    board_b = manager_board(db_session, manager_key="t-manager-b")
+    board_invalid = manager_board(db_session, manager_key="t-new-unmanaged")
+
+    assert {person.key for person in board_a.newcomers} == {"t-new-a1", "t-new-a2"}
+    assert [item.person for item in board_a.pending] == ["Ingresante A1", "Ingresante A2"]
+    assert {person.key for person in board_b.newcomers} == {"t-new-b1"}
+    assert [item.person for item in board_b.pending] == ["Ingresante B1"]
+    assert board_invalid.newcomers == [] and board_invalid.pending == []
 
 
 @pytest.mark.db

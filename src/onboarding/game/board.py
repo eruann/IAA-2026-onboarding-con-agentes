@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from onboarding.db.session import session_scope
 from onboarding.game.models import Person, QuestAssignment, QuestRow, Redemption
-from onboarding.game.people import PersonCard, person_card
+from onboarding.game.people import PersonCard, person_card, team_for_manager
 from onboarding.game.points import level_for
 from onboarding.game.quests import QuestStatus
 
@@ -104,21 +104,34 @@ class ManagerBoard:
 
 
 # TODO(experiencia): solo el equipo de este jefe (falta saber quién es jefe de quién).
-def manager_board(session: Session | None = None) -> ManagerBoard:
-    """Las misiones de los ingresantes que esperan algo, y los ingresantes."""
+def manager_board(session: Session | None = None, manager_key: str | None = None) -> ManagerBoard:
+    """Misiones pendientes e ingresantes; opcionalmente limita al equipo del jefe."""
     with session_scope(session) as db_session:
+        team_keys = None
+        if manager_key is not None:
+            team_keys = {person.key for person in team_for_manager(manager_key, db_session)}
+            if not team_keys:
+                return ManagerBoard(pending=[], newcomers=[])
+
+        newcomers_query = select(Person).where(Person.is_newcomer.is_(True))
+        if team_keys is not None:
+            newcomers_query = newcomers_query.where(Person.key.in_(team_keys))
         newcomers = [
             person_card(person)
-            for person in db_session.scalars(
-                select(Person).where(Person.is_newcomer.is_(True)).order_by(Person.name)
-            ).all()
+            for person in db_session.scalars(newcomers_query.order_by(Person.name)).all()
         ]
         # El orden lo hace la base: así respeta acentos y mayúsculas como Postgres
+        pending_conditions = [
+            Person.is_newcomer.is_(True),
+            QuestAssignment.status.in_(MANAGER_ORDER),
+        ]
+        if team_keys is not None:
+            pending_conditions.append(Person.key.in_(team_keys))
         rows = db_session.execute(
             select(Person.name, QuestRow.title, QuestAssignment.status)
             .join(Person, QuestAssignment.person_id == Person.id)
             .join(QuestRow, QuestAssignment.quest_id == QuestRow.id)
-            .where(Person.is_newcomer.is_(True), QuestAssignment.status.in_(MANAGER_ORDER))
+            .where(*pending_conditions)
             .order_by(
                 case(MANAGER_ORDER, value=QuestAssignment.status), Person.name, QuestRow.title
             )
