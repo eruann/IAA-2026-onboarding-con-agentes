@@ -1,0 +1,1735 @@
+# Benchmark de captura de conocimiento informal (agente extract_knowledge).
+# Set fijo: se define ANTES de correr el experimento (ver eval/README.md, regla 1).
+#
+# Cada caso es una conversación y lo que `extract_triples` tiene que devolver
+# según las reglas de agents/extract_knowledge/extraction_prompt.md, contra el
+# organigrama y los procedimientos de corpus/. Los casos `must_not` miden lo que
+# NO tiene que capturar (precisión); los `expected`, lo que sí (recall).
+#
+# Campos de cada caso:
+#   id            único, prefijo = regla que prueba
+#   rule          la regla del prompt que se está probando (lista abajo)
+#   conversation  el texto que recibe el agente
+#   expected      relaciones esperadas (lista vacía: no hay nada que extraer)
+#     subject               nombre completo, tal como aparece en la frase
+#     relation              una de knows_about | introduced | belongs_to | owns_process
+#                           | works_with, o una lista de alternativas válidas
+#     object_keywords       alguna tiene que aparecer en el objeto (comparar en
+#                           minúsculas y sin tildes). En `introduced` y
+#                           `works_with`, el nombre de la otra persona
+#     evidence              frase textual de respaldo: tiene que estar letra por
+#                           letra en `conversation`, con sus errores de tipeo
+#     criticality           high | medium | low. En los casos de borde, el más alto
+#                           de los dos (regla del prompt: ante la duda, el más
+#                           alto); llevan el comentario "dudoso". null: no se
+#                           mide (p. ej. belongs_to)
+#     negated, exclusive    si se omiten, se espera false
+#     inferred              true si es una herramienta deducida (va en `inferred`
+#                           de la salida, siempre low); si se omite, se espera false
+#     subject_position,
+#     subject_organization  si se omiten, se espera vacío; si están, cómo lo dice
+#                           el texto (comparar sin tildes ni mayúsculas)
+#   must_not      lo que no se tiene que devolver, con el motivo (opcional)
+#     object_keywords_forbidden  palabras que no pueden aparecer en ningún objeto
+#   agent         solo para medir el agente completo (node.py), no la extracción:
+#     needs_review   true si no se sabe de qué organización es la persona
+#     off_role       true si la tarea choca con el puesto oficial (role_fit_prompt.md)
+#     not_same_as    id del organigrama con el que NO se tiene que unificar
+#     same_as        id con el que SÍ se tiene que unificar (p. ej. solo el apellido)
+#   redundancy    solo en los casos de un grupo de redundancia: {group, kind}
+#     kind  original    primera mención del dato
+#           paraphrase  el mismo dato con otras palabras
+#           verbatim    la frase del original idéntica, en otra conversación
+#           distinct    control: se parece pero es otro dato; no se unifica
+#
+# Al final, `redundancy_groups`: qué casos forman cada grupo y cuántas relaciones
+# tiene que dejar el dato en el grafo (siempre 1).
+#
+# Reglas (rule):
+#   referral          "preguntale a X", "X sabe de": knows_about
+#   introduced        presentación entre gente de la empresa
+#   works_with        trabajan juntos o se conocen por trabajo (no lo social, ni
+#                     lo que dice el organigrama, ni una presentación)
+#   inferred          la herramienta de algo que alguien hizo, solo si la
+#                     conversación o un procedimiento dice con qué se hace; nunca
+#                     temas de negocio
+#   office_task       tareas de apoyo de oficina: se devuelven y son low
+#   social_excluded   lo puramente social o personal no se devuelve
+#   social_with_work  contexto social que trae organización o tema de trabajo
+#   pronoun           "lo vea con él": knows_about del nombrado antes
+#   typo_evidence     la frase se copia con sus errores de tipeo
+#   opinion           las opiniones sobre personas se descartan
+#   org_chart_dup     lo que ya dice el organigrama no se devuelve
+#   documented        lo que ya dice un procedimiento no se devuelve
+#   role_derived      lo que se deduce del puesto no se devuelve
+#   beyond_role       conocimiento práctico no escrito, aunque sea de su área
+#   criticality       niveles high / medium / low según bienvenida.md y reglas
+#   negation          "no se encarga", "dejó de ser", "antes X, ahora Y"
+#   exclusive         "solo", "el único", "nadie más que" (y lo que no lo es)
+#   object_verbatim   no corregir nombres de empresas o bancos
+#   full_name         el sujeto con todos sus apellidos
+#   external_profile  puesto y organización de gente de afuera
+#   off_role          tarea que choca con el puesto oficial (nivel agente)
+#   identity          homónimos externos de internos y nombres parecidos (tipeo,
+#                     apodo, apellido de más, una letra de diferencia). Nivel
+#                     agente (identity.py): `same_as` / `not_same_as`. Un "puede
+#                     ser" (pendiente de validar) cuenta como no unificado
+#   empty             no hay nada que extraer
+#   mixed             conversación larga con casos que sí y que no
+#   redundancy        el mismo dato informal repetido (paráfrasis y textual)
+#
+# Métricas sugeridas: precisión y recall de relaciones (match = subject +
+# relation + alguna object_keyword), exactitud de evidence (substring exacto),
+# acierto de criticidad, negated y exclusive sobre las relaciones que matchean,
+# y tasa de falsos positivos en los casos `empty` y `must_not`.
+# Redundancia, por grupo: tasa de duplicación = (relaciones del dato − 1) /
+# menciones repetidas, separada en paráfrasis y textual; y uniones de más =
+# casos `distinct` que quedaron unidos al dato.
+
+cases:
+
+  # ---------------------------------------------------------------- referral
+  - id: referral-001
+    rule: referral
+    conversation: |
+      Para armar tablas dinámicas en Excel, preguntale a Ana Ruiz.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [tablas dinamicas, excel]
+        evidence: "Para armar tablas dinámicas en Excel, preguntale a Ana Ruiz."
+        criticality: low
+
+  - id: referral-002
+    rule: referral
+    conversation: |
+      Ana Ruiz tiene una plantilla que arma el informe mensual de indicadores en diez minutos; pedísela a ella.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [informe mensual, indicadores, plantilla]
+        evidence: "Ana Ruiz tiene una plantilla que arma el informe mensual de indicadores en diez minutos; pedísela a ella."
+        criticality: medium
+
+  - id: referral-003
+    rule: referral
+    conversation: |
+      Preguntale a Ana Ruiz por el reporte de pedidos pendientes de Sigma, ella lo armó.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [reporte de pedidos pendientes, pedidos pendientes]
+        evidence: "Preguntale a Ana Ruiz por el reporte de pedidos pendientes de Sigma, ella lo armó."
+        criticality: medium   # dudoso: ante la duda, el más alto
+        exclusive: false
+
+  # ------------------------------------------------------------- introduced
+  - id: introduced-001
+    rule: introduced
+    conversation: |
+      A Carla Bianchi me la presentó Rocío Miranda el primer día.
+    expected:
+      - subject: Rocío Miranda
+        relation: introduced
+        object_keywords: [carla bianchi]
+        evidence: "A Carla Bianchi me la presentó Rocío Miranda el primer día."
+        criticality: low
+
+  - id: introduced-002
+    rule: introduced
+    conversation: |
+      Sergio Arriaga me presentó a Daniela Foglia y me dijo que cualquier duda con las alarmas de la cámara 2 la hable con ella, que sabe cuáles dan falsos positivos cuando se descongela el evaporador.
+    expected:
+      - subject: Sergio Arriaga
+        relation: introduced
+        object_keywords: [daniela foglia]
+        evidence: "Sergio Arriaga me presentó a Daniela Foglia y me dijo que cualquier duda con las alarmas de la cámara 2 la hable con ella, que sabe cuáles dan falsos positivos cuando se descongela el evaporador."
+        criticality: low
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [falsos positivos, alarmas de la camara 2, evaporador]
+        evidence: "Sergio Arriaga me presentó a Daniela Foglia y me dijo que cualquier duda con las alarmas de la cámara 2 la hable con ella, que sabe cuáles dan falsos positivos cuando se descongela el evaporador."
+        criticality: high
+
+  # ------------------------------------------------------------- works_with
+  - id: works_with-001
+    rule: works_with
+    conversation: |
+      Ana Ruiz trabaja codo a codo con Pablo Sosa desde hace años.
+    expected:
+      - subject: Ana Ruiz
+        relation: works_with
+        object_keywords: [pablo sosa]
+        evidence: "Ana Ruiz trabaja codo a codo con Pablo Sosa desde hace años."
+        criticality: null
+
+  - id: works_with-002
+    rule: works_with
+    conversation: |
+      Valeria Acosta conoce a Rodrigo Salas, el oficial de cuentas del Banco Galicia.
+    expected:
+      - subject: Valeria Acosta
+        relation: works_with
+        object_keywords: [rodrigo salas]
+        evidence: "Valeria Acosta conoce a Rodrigo Salas, el oficial de cuentas del Banco Galicia."
+        criticality: null
+      - subject: Rodrigo Salas
+        relation: belongs_to
+        object_keywords: [banco galicia]
+        evidence: "Valeria Acosta conoce a Rodrigo Salas, el oficial de cuentas del Banco Galicia."
+        criticality: null
+        subject_position: oficial de cuentas
+        subject_organization: Banco Galicia
+
+  - id: works_with-003
+    rule: works_with
+    conversation: |
+      Tomás Giménez y Gastón Ruiz son amigos de la infancia y juegan al pádel los jueves.
+    expected: []
+    must_not:
+      - {subject: Tomás Giménez, about: Gastón Ruiz, reason: amistad, no trabajo}
+      - {subject: Gastón Ruiz, about: Tomás Giménez, reason: amistad, no trabajo}
+
+  - id: works_with-004
+    rule: works_with
+    conversation: |
+      Daniela Foglia trabaja con Sergio Arriaga, que es su jefe.
+    expected: []
+    must_not:
+      - {subject: Daniela Foglia, about: Sergio Arriaga, reason: organigrama (Daniela reporta a Sergio)}
+
+  - id: works_with-005
+    rule: works_with
+    conversation: |
+      Federico Medina me presentó a Natalia Herrera el primer día.
+    expected:
+      - subject: Federico Medina
+        relation: introduced
+        object_keywords: [natalia herrera]
+        evidence: "Federico Medina me presentó a Natalia Herrera el primer día."
+        criticality: low
+    must_not:
+      - {subject: Federico Medina, about: Natalia Herrera, reason: es una presentación (introduced), no works_with}
+
+  # --------------------------------------------------------------- inferred
+  - id: inferred-001
+    rule: inferred
+    conversation: |
+      Ana Ruiz hizo la tabla dinámica del informe de ventas. El informe de ventas es un Excel que comparte Comercial.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [tabla dinamica, informe de ventas]
+        evidence: "Ana Ruiz hizo la tabla dinámica del informe de ventas."
+        criticality: null
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [excel]
+        evidence: "Ana Ruiz hizo la tabla dinámica del informe de ventas."
+        criticality: low
+        inferred: true
+
+  - id: inferred-002
+    rule: inferred
+    conversation: |
+      Lucas Ferrari sabe destrabar un remito de cadena de frío cuando el registrador no aparece activado aunque ya lo esté.
+    expected:
+      - subject: Lucas Ferrari
+        relation: knows_about
+        object_keywords: [remito, registrador]
+        evidence: "Lucas Ferrari sabe destrabar un remito de cadena de frío cuando el registrador no aparece activado aunque ya lo esté."
+        criticality: high
+      # La herramienta sale de sigma-wms.md: el remito se emite en Sigma WMS y exige
+      # el registrador activado
+      - subject: Lucas Ferrari
+        relation: knows_about
+        object_keywords: [sigma]
+        evidence: "Lucas Ferrari sabe destrabar un remito de cadena de frío cuando el registrador no aparece activado aunque ya lo esté."
+        criticality: low
+        inferred: true
+
+  - id: inferred-003
+    rule: inferred
+    conversation: |
+      Ana Ruiz hizo la tabla dinámica del informe de ventas.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [tabla dinamica, informe de ventas]
+        evidence: "Ana Ruiz hizo la tabla dinámica del informe de ventas."
+        criticality: null
+    must_not:
+      - {subject: Ana Ruiz, about: Excel, reason: nada dice con qué herramienta se hace el informe, object_keywords_forbidden: [excel, sheets]}
+
+  - id: inferred-004
+    rule: inferred
+    conversation: |
+      Ana Ruiz armó el presupuesto de mantenimiento de las cámaras de frío de este año.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [presupuesto de mantenimiento, presupuesto]
+        evidence: "Ana Ruiz armó el presupuesto de mantenimiento de las cámaras de frío de este año."
+        criticality: null
+    must_not:
+      - {subject: Ana Ruiz, about: finanzas, reason: tema de negocio y no una herramienta, object_keywords_forbidden: [finanzas, excel]}
+
+  # ------------------------------------------------------------ office_task
+  - id: office_task-001
+    rule: office_task
+    redundancy: {group: red-viandas, kind: original}
+    conversation: |
+      Tomás Giménez es el que se encarga de pedir las viandas los viernes.
+    expected:
+      - subject: Tomás Giménez
+        relation: owns_process
+        object_keywords: [viandas]
+        evidence: "Tomás Giménez es el que se encarga de pedir las viandas los viernes."
+        criticality: low
+    agent:
+      off_role: false
+
+  - id: office_task-002
+    rule: office_task
+    conversation: |
+      Para reponer el café de la cocina del segundo piso hay que avisarle a Ana Ruiz.
+    expected:
+      - subject: Ana Ruiz
+        relation: [owns_process, knows_about]
+        object_keywords: [cafe]
+        evidence: "Para reponer el café de la cocina del segundo piso hay que avisarle a Ana Ruiz."
+        criticality: low
+
+  - id: office_task-003
+    rule: office_task
+    conversation: |
+      Lucía Paredes organiza el fútbol de los jueves con la gente de Sarandí.
+    expected:
+      - subject: Lucía Paredes
+        relation: owns_process
+        object_keywords: [futbol]
+        evidence: "Lucía Paredes organiza el fútbol de los jueves con la gente de Sarandí."
+        criticality: low
+    agent:
+      off_role: false
+
+  - id: office_task-004
+    rule: office_task
+    conversation: |
+      Joaquín Álvarez tiene la llave del depósito de librería; si necesitás resmas, pedíselas a él.
+    expected:
+      - subject: Joaquín Álvarez
+        relation: [knows_about, owns_process]
+        object_keywords: [deposito de libreria, libreria, resmas]
+        evidence: "Joaquín Álvarez tiene la llave del depósito de librería; si necesitás resmas, pedíselas a él."
+        criticality: low
+    agent:
+      needs_review: true   # no está en el organigrama y la frase no dice su organización
+
+  # ------------------------------------------------------- social_excluded
+  - id: social_excluded-001
+    rule: social_excluded
+    conversation: |
+      Ayer fuimos a almorzar con Hernán Ledesma y Pablo Sosa a la cantina de enfrente.
+    expected: []
+    must_not:
+      - {subject: Hernán Ledesma, about: almuerzo, reason: hecho social sin tarea}
+      - {subject: Pablo Sosa, about: almuerzo, reason: hecho social sin tarea}
+
+  - id: social_excluded-002
+    rule: social_excluded
+    conversation: |
+      Fuimos a la parrilla de la esquina y el mozo nos presentó a su hermano Ramiro, que toca la guitarra.
+    expected: []
+    must_not:
+      - {subject: Ramiro, about: presentación, reason: gente conocida fuera del trabajo}
+
+  - id: social_excluded-003
+    rule: social_excluded
+    conversation: |
+      Gastón Ruiz es fanático de Racing y los lunes no se le puede hablar si perdió.
+    expected: []
+    must_not:
+      - {subject: Gastón Ruiz, about: Racing, reason: gusto personal, no sirve para una tarea}
+
+  # ------------------------------------------------------ social_with_work
+  - id: social_with_work-001
+    rule: social_with_work
+    conversation: |
+      Fuimos a tomar un café con Marina Ocampo, de Laboratorios Verenta, y hablamos de las nuevas condiciones de estabilidad de sus biológicos.
+    expected:
+      - subject: Marina Ocampo
+        relation: belongs_to
+        object_keywords: [laboratorios verenta, verenta]
+        evidence: "Fuimos a tomar un café con Marina Ocampo, de Laboratorios Verenta, y hablamos de las nuevas condiciones de estabilidad de sus biológicos."
+        criticality: null
+        subject_organization: Laboratorios Verenta
+      - subject: Marina Ocampo
+        relation: knows_about
+        object_keywords: [estabilidad]
+        evidence: "Fuimos a tomar un café con Marina Ocampo, de Laboratorios Verenta, y hablamos de las nuevas condiciones de estabilidad de sus biológicos."
+        criticality: high
+        subject_organization: Laboratorios Verenta
+    must_not:
+      - {subject: Marina Ocampo, about: café, reason: el hecho social no se devuelve}
+
+  - id: social_with_work-002
+    rule: social_with_work
+    conversation: |
+      En el asado de fin de año conocí a Leandro Costa, el despachante que trabaja con Compras, y me explicó que los registradores importados se traban en aduana si la factura no dice el número de serie.
+    expected:
+      - subject: Leandro Costa
+        relation: knows_about
+        object_keywords: [aduana, registradores importados, numero de serie]
+        evidence: "En el asado de fin de año conocí a Leandro Costa, el despachante que trabaja con Compras, y me explicó que los registradores importados se traban en aduana si la factura no dice el número de serie."
+        criticality: high   # dudoso: ante la duda, el más alto
+        subject_position: despachante
+    must_not:
+      - {subject: Leandro Costa, about: asado, reason: el hecho social no se devuelve}
+
+  # ----------------------------------------------------------------- pronoun
+  - id: pronoun-001
+    rule: pronoun
+    redundancy: {group: red-peralta, kind: original}
+    conversation: |
+      Me presentaron a Gustavo Peralta de Transportes Andinos y me dijeron que cualquier demora de un camión en ruta la vea con él.
+    expected:
+      - subject: Gustavo Peralta
+        relation: belongs_to
+        object_keywords: [transportes andinos]
+        evidence: "Me presentaron a Gustavo Peralta de Transportes Andinos y me dijeron que cualquier demora de un camión en ruta la vea con él."
+        criticality: null
+        subject_organization: Transportes Andinos
+      - subject: Gustavo Peralta
+        relation: knows_about
+        object_keywords: [demora, camion en ruta]
+        evidence: "Me presentaron a Gustavo Peralta de Transportes Andinos y me dijeron que cualquier demora de un camión en ruta la vea con él."
+        criticality: high
+        subject_organization: Transportes Andinos
+    must_not:
+      - {subject: Gustavo Peralta, about: introduced, reason: la frase no dice quién lo presentó}
+
+  - id: pronoun-002
+    rule: pronoun
+    conversation: |
+      Silvia Paz es la abogada del estudio Paz & Rivas; si llega una carta documento, consultale a ella antes de contestar nada.
+    expected:
+      - subject: Silvia Paz
+        relation: knows_about
+        object_keywords: [carta documento]
+        evidence: "Silvia Paz es la abogada del estudio Paz & Rivas; si llega una carta documento, consultale a ella antes de contestar nada."
+        criticality: high
+        subject_position: abogada
+        subject_organization: estudio Paz & Rivas
+      - subject: Silvia Paz
+        relation: belongs_to
+        object_keywords: [paz & rivas, paz y rivas]
+        evidence: "Silvia Paz es la abogada del estudio Paz & Rivas; si llega una carta documento, consultale a ella antes de contestar nada."
+        criticality: null
+        subject_position: abogada
+        subject_organization: estudio Paz & Rivas
+
+  # ------------------------------------------------------------ typo_evidence
+  - id: typo_evidence-001
+    rule: typo_evidence
+    conversation: |
+      Me presentaron a Esteban Lucero del banco Supervielle y me digeron que cualquier problema con las tranferencias lo vea con él.
+    expected:
+      - subject: Esteban Lucero
+        relation: knows_about
+        object_keywords: [tranferencias, transferencias]
+        evidence: "Me presentaron a Esteban Lucero del banco Supervielle y me digeron que cualquier problema con las tranferencias lo vea con él."
+        criticality: high
+        subject_organization: banco Supervielle
+      - subject: Esteban Lucero
+        relation: belongs_to
+        object_keywords: [supervielle]
+        evidence: "Me presentaron a Esteban Lucero del banco Supervielle y me digeron que cualquier problema con las tranferencias lo vea con él."
+        criticality: null
+        subject_organization: banco Supervielle
+
+  - id: typo_evidence-002
+    rule: typo_evidence
+    conversation: |
+      Sergio Arriaga sabe como resetear el controlador de la camara 1 cuando queda en error y no vuelve a enfriar.
+    expected:
+      - subject: Sergio Arriaga
+        relation: knows_about
+        object_keywords: [controlador, camara 1]
+        evidence: "Sergio Arriaga sabe como resetear el controlador de la camara 1 cuando queda en error y no vuelve a enfriar."
+        criticality: high
+
+  # ----------------------------------------------------------------- opinion
+  - id: opinion-001
+    rule: opinion
+    conversation: |
+      Silvina Ortega es muy desordenada y nunca contesta los mails.
+    expected: []
+    must_not:
+      - {subject: Silvina Ortega, about: desordenada, reason: opinión sobre una persona}
+
+  - id: opinion-002
+    rule: opinion
+    conversation: |
+      Gastón Ruiz es medio insoportable, pero es el único que sabe destrabar el autoelevador viejo cuando se queda sin freno.
+    expected:
+      - subject: Gastón Ruiz
+        relation: knows_about
+        object_keywords: [autoelevador]
+        evidence: "Gastón Ruiz es medio insoportable, pero es el único que sabe destrabar el autoelevador viejo cuando se queda sin freno."
+        criticality: high   # dudoso: ante la duda, el más alto
+        exclusive: true
+    must_not:
+      - {subject: Gastón Ruiz, about: insoportable, reason: opinión sobre una persona}
+
+  # ----------------------------------------------------------- org_chart_dup
+  - id: org_chart_dup-001
+    rule: org_chart_dup
+    conversation: |
+      Federico Medina es el Jefe de Tesorería y aprueba las órdenes de pago.
+    expected: []
+    must_not:
+      - {subject: Federico Medina, about: órdenes de pago, reason: lo dice el organigrama}
+      - {subject: Federico Medina, about: tesorería, reason: puesto del organigrama}
+
+  - id: org_chart_dup-002
+    rule: org_chart_dup
+    conversation: |
+      Daniela Foglia reporta a Sergio Arriaga y Sergio reporta a Pablo Domínguez.
+    expected: []
+    must_not:
+      - {subject: Daniela Foglia, about: reporta, reason: lo dice el organigrama}
+
+  - id: org_chart_dup-003
+    rule: org_chart_dup
+    conversation: |
+      Martín Ibarra es el Gerente General, y además es el que tiene el contacto del dueño del edificio de Córdoba cuando hay que pedir arreglos.
+    expected:
+      - subject: Martín Ibarra
+        relation: knows_about
+        object_keywords: [dueño del edificio, edificio de cordoba]
+        evidence: "Martín Ibarra es el Gerente General, y además es el que tiene el contacto del dueño del edificio de Córdoba cuando hay que pedir arreglos."
+        criticality: medium   # dudoso: ante la duda, el más alto
+    must_not:
+      - {subject: Martín Ibarra, about: gerente general, reason: lo dice el organigrama}
+
+  # -------------------------------------------------------------- documented
+  - id: documented-001
+    rule: documented
+    conversation: |
+      Para pedir la casilla de mail tenés que llamar al interno 100 y lo gestiona Lucía Paredes.
+    expected: []
+    must_not:
+      - {subject: Lucía Paredes, about: casilla de mail, reason: mesa-de-ayuda.md y organigrama}
+
+  - id: documented-002
+    rule: documented
+    conversation: |
+      Las compras de menos de 50 dólares las autoriza el propio equipo; las demás las aprueba el jefe de área.
+    expected: []
+
+  - id: documented-003
+    rule: documented
+    conversation: |
+      Si salta una alarma crítica un sábado, hay que llamar a Martín Beltrán, que está de guardia.
+    expected: []
+    must_not:
+      - {subject: Martín Beltrán, about: guardia, reason: excursiones-de-temperatura.md y organigrama}
+
+  - id: documented-004
+    rule: documented
+    conversation: |
+      La decisión de liberar un lote que tuvo una excursión la toma Lorena Quiroga, nadie más.
+    expected: []
+    must_not:
+      - {subject: Lorena Quiroga, about: liberar, reason: excursiones-de-temperatura.md (decisión exclusiva de la Dirección Técnica)}
+
+  - id: documented-005
+    rule: documented
+    conversation: |
+      Si te rechazan un eCheq de un cliente, Tomás Giménez le avisa en el día a Valeria Acosta y ella reclama al cliente.
+    expected: []
+    must_not:
+      - {subject: Valeria Acosta, about: cheque rechazado, reason: tesoreria.md (cheques rechazados)}
+      - {subject: Tomás Giménez, about: cheque rechazado, reason: tesoreria.md (cheques rechazados)}
+
+  # ------------------------------------------------------------ role_derived
+  - id: role_derived-001
+    rule: role_derived
+    conversation: |
+      Diego Fernández sabe cómo dar de alta un proveedor nuevo.
+    expected: []
+    must_not:
+      - {subject: Diego Fernández, about: alta de proveedor, reason: es el Jefe de Compras (y proveedores.md)}
+
+  - id: role_derived-002
+    rule: role_derived
+    conversation: |
+      Carla Bianchi sabe todo lo de trazabilidad ANMAT.
+    expected: []
+    must_not:
+      - {subject: Carla Bianchi, about: trazabilidad, reason: es la Responsable de Trazabilidad ANMAT}
+
+  - id: role_derived-003
+    rule: role_derived
+    conversation: |
+      Natalia Herrera es la que más sabe de impuestos en la empresa.
+    expected: []
+    must_not:
+      - {subject: Natalia Herrera, about: impuestos, reason: es la Responsable de Impuestos}
+
+  # ------------------------------------------------------------- beyond_role
+  - id: beyond_role-001
+    rule: beyond_role
+    redundancy: {group: red-anmat, kind: original}
+    conversation: |
+      Carla Bianchi sabe que el portal de trazabilidad de ANMAT se cae los lunes a la mañana y que conviene informar los movimientos después de las 14.
+    expected:
+      - subject: Carla Bianchi
+        relation: knows_about
+        object_keywords: [portal de trazabilidad, caidas, lunes]
+        evidence: "Carla Bianchi sabe que el portal de trazabilidad de ANMAT se cae los lunes a la mañana y que conviene informar los movimientos después de las 14."
+        criticality: high
+
+  - id: beyond_role-002
+    rule: beyond_role
+    conversation: |
+      Rocío Miranda sabe que el registrador del camión 12 marca medio grado de más, y siempre lo verifica con el termómetro de referencia antes de liberar la carga.
+    expected:
+      - subject: Rocío Miranda
+        relation: knows_about
+        object_keywords: [registrador, camion 12]
+        evidence: "Rocío Miranda sabe que el registrador del camión 12 marca medio grado de más, y siempre lo verifica con el termómetro de referencia antes de liberar la carga."
+        criticality: high
+
+  - id: beyond_role-003
+    rule: beyond_role
+    redundancy: {group: red-generador, kind: original}
+    conversation: |
+      Cuando se corta la luz en Sarandí, Sergio Arriaga es el que sabe arrancar el generador a mano.
+    expected:
+      - subject: Sergio Arriaga
+        relation: knows_about
+        object_keywords: [generador]
+        evidence: "Cuando se corta la luz en Sarandí, Sergio Arriaga es el que sabe arrancar el generador a mano."
+        criticality: high
+        exclusive: false
+
+  - id: beyond_role-004
+    rule: beyond_role
+    redundancy: {group: red-arca, kind: original}
+    conversation: |
+      Si ARCA te bloquea la clave fiscal de la empresa, Natalia Herrera conoce a una persona en la agencia de Avellaneda que lo destraba en el día.
+    expected:
+      - subject: Natalia Herrera
+        relation: knows_about
+        object_keywords: [clave fiscal, arca, agencia de avellaneda]
+        evidence: "Si ARCA te bloquea la clave fiscal de la empresa, Natalia Herrera conoce a una persona en la agencia de Avellaneda que lo destraba en el día."
+        criticality: high
+
+  # ------------------------------------------------------------- criticality
+  - id: criticality-001
+    rule: criticality
+    conversation: |
+      Para conseguir hielo seco un domingo, llamalo a Raúl, el del galpón de Wilde.
+    expected:
+      - subject: Raúl
+        relation: knows_about
+        object_keywords: [hielo seco]
+        evidence: "Para conseguir hielo seco un domingo, llamalo a Raúl, el del galpón de Wilde."
+        criticality: high
+    agent:
+      needs_review: true   # "el galpón de Wilde" no es una organización nombrada
+
+  - id: criticality-002
+    rule: criticality
+    conversation: |
+      Gabriela Ponce, de Seguros La Austral, es la que tramita los siniestros de la flota; cualquier choque de un camión lo hablás con ella.
+    expected:
+      - subject: Gabriela Ponce
+        relation: knows_about
+        object_keywords: [siniestros, choque]
+        evidence: "Gabriela Ponce, de Seguros La Austral, es la que tramita los siniestros de la flota; cualquier choque de un camión lo hablás con ella."
+        criticality: high   # dudoso: ante la duda, el más alto
+        subject_organization: Seguros La Austral
+      - subject: Gabriela Ponce
+        relation: belongs_to
+        object_keywords: [la austral]
+        evidence: "Gabriela Ponce, de Seguros La Austral, es la que tramita los siniestros de la flota; cualquier choque de un camión lo hablás con ella."
+        criticality: null
+        subject_organization: Seguros La Austral
+
+  - id: criticality-003
+    rule: criticality
+    conversation: |
+      En caso de necesitar útiles se debe conversar con Joaquín Álvarez.
+    expected:
+      - subject: Joaquín Álvarez
+        relation: [knows_about, owns_process]
+        object_keywords: [utiles]
+        evidence: "En caso de necesitar útiles se debe conversar con Joaquín Álvarez."
+        criticality: low
+    agent:
+      needs_review: true
+
+  # ---------------------------------------------------------------- negation
+  - id: negation-001
+    rule: negation
+    conversation: |
+      Diego Fernández no se encarga de la compra de útiles de librería.
+    expected:
+      - subject: Diego Fernández
+        relation: owns_process
+        object_keywords: [utiles, libreria]
+        evidence: "Diego Fernández no se encarga de la compra de útiles de librería."
+        criticality: low
+        negated: true
+
+  - id: negation-002
+    rule: negation
+    conversation: |
+      Esteban Lucero dejó de ser el oficial de cuenta del banco Supervielle; ahora nos atiende Paula Rinaldi.
+    expected:
+      - subject: Esteban Lucero
+        relation: [knows_about, owns_process]
+        object_keywords: [oficial de cuenta]
+        evidence: "Esteban Lucero dejó de ser el oficial de cuenta del banco Supervielle; ahora nos atiende Paula Rinaldi."
+        criticality: high
+        negated: true
+      - subject: Paula Rinaldi
+        relation: [knows_about, owns_process]
+        object_keywords: [oficial de cuenta, supervielle]
+        evidence: "Esteban Lucero dejó de ser el oficial de cuenta del banco Supervielle; ahora nos atiende Paula Rinaldi."
+        criticality: high
+        negated: false
+
+  - id: negation-003
+    rule: negation
+    conversation: |
+      Antes las devoluciones de Nortelab las veía Ana Ruiz, ahora las ve Pablo Sosa.
+    expected:
+      - subject: Ana Ruiz
+        relation: [owns_process, knows_about]
+        object_keywords: [devoluciones]
+        evidence: "Antes las devoluciones de Nortelab las veía Ana Ruiz, ahora las ve Pablo Sosa."
+        criticality: high   # dudoso: ante la duda, el más alto
+        negated: true
+      - subject: Pablo Sosa
+        relation: [owns_process, knows_about]
+        object_keywords: [devoluciones]
+        evidence: "Antes las devoluciones de Nortelab las veía Ana Ruiz, ahora las ve Pablo Sosa."
+        criticality: high   # dudoso: ante la duda, el más alto
+        negated: false
+
+  # --------------------------------------------------------------- exclusive
+  - id: exclusive-001
+    rule: exclusive
+    conversation: |
+      Solo Tomás Giménez sabe operar el token del Banco Patagonia de la cuenta en dólares.
+    expected:
+      - subject: Tomás Giménez
+        relation: knows_about
+        object_keywords: [token, patagonia]
+        evidence: "Solo Tomás Giménez sabe operar el token del Banco Patagonia de la cuenta en dólares."
+        criticality: high
+        exclusive: true
+
+  - id: exclusive-002
+    rule: exclusive
+    redundancy: {group: red-camara3, kind: original}
+    conversation: |
+      Nadie más que Daniela Foglia sabe cuánto tarda la cámara 3 en recuperar temperatura después de una descarga grande.
+    expected:
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [camara 3, recuperar temperatura]
+        evidence: "Nadie más que Daniela Foglia sabe cuánto tarda la cámara 3 en recuperar temperatura después de una descarga grande."
+        criticality: high
+        exclusive: true
+
+  - id: exclusive-003
+    rule: exclusive
+    conversation: |
+      El que más sabe de convenio multilateral es Rubén Sclar, el contador del estudio Sclar & Asociados.
+    expected:
+      - subject: Rubén Sclar
+        relation: knows_about
+        object_keywords: [convenio multilateral]
+        evidence: "El que más sabe de convenio multilateral es Rubén Sclar, el contador del estudio Sclar & Asociados."
+        criticality: high
+        exclusive: false
+        subject_position: contador
+        subject_organization: estudio Sclar & Asociados
+      - subject: Rubén Sclar
+        relation: belongs_to
+        object_keywords: [sclar & asociados, sclar y asociados]
+        evidence: "El que más sabe de convenio multilateral es Rubén Sclar, el contador del estudio Sclar & Asociados."
+        criticality: null
+        subject_position: contador
+        subject_organization: estudio Sclar & Asociados
+
+  # --------------------------------------------------------- object_verbatim
+  - id: object_verbatim-001
+    rule: object_verbatim
+    conversation: |
+      Mariela Sosa es la encargada de descuento de cheques en el banco micro.
+    expected:
+      - subject: Mariela Sosa
+        relation: [owns_process, knows_about]
+        object_keywords: [descuento de cheques]
+        evidence: "Mariela Sosa es la encargada de descuento de cheques en el banco micro."
+        criticality: high
+        subject_organization: banco micro
+    must_not:
+      - {subject: Mariela Sosa, about: banco macro, reason: no corregir el nombre del banco, object_keywords_forbidden: [macro]}
+
+  - id: object_verbatim-002
+    rule: object_verbatim
+    conversation: |
+      Para los pagos al exterior, el contacto es Andrés Villalba de Credicop.
+    expected:
+      - subject: Andrés Villalba
+        relation: knows_about
+        object_keywords: [pagos al exterior]
+        evidence: "Para los pagos al exterior, el contacto es Andrés Villalba de Credicop."
+        criticality: high
+        subject_organization: Credicop
+    must_not:
+      - {subject: Andrés Villalba, about: Credicoop, reason: no corregir Credicop, object_keywords_forbidden: [credicoop]}
+
+  # --------------------------------------------------------------- full_name
+  - id: full_name-001
+    rule: full_name
+    conversation: |
+      Nos llamó Juan Manuel Echeverría Paz del Banco Ciudad para avisar que vence la garantía de la cuenta corriente, y cualquier duda la vemos con él.
+    expected:
+      - subject: Juan Manuel Echeverría Paz
+        relation: knows_about
+        object_keywords: [garantia, cuenta corriente]
+        evidence: "Nos llamó Juan Manuel Echeverría Paz del Banco Ciudad para avisar que vence la garantía de la cuenta corriente, y cualquier duda la vemos con él."
+        criticality: high
+        subject_organization: Banco Ciudad
+      - subject: Juan Manuel Echeverría Paz
+        relation: belongs_to
+        object_keywords: [banco ciudad]
+        evidence: "Nos llamó Juan Manuel Echeverría Paz del Banco Ciudad para avisar que vence la garantía de la cuenta corriente, y cualquier duda la vemos con él."
+        criticality: null
+        subject_organization: Banco Ciudad
+    must_not:
+      - {subject: Juan Manuel Echeverría, about: sujeto recortado, reason: el nombre va completo}
+
+  # -------------------------------------------------------- external_profile
+  - id: external_profile-001
+    rule: external_profile
+    conversation: |
+      Julio Gómez, el vendedor de Droguería Norte, sabe cuándo les entra el stock de insulina.
+    expected:
+      - subject: Julio Gómez
+        relation: knows_about
+        object_keywords: [insulina, stock]
+        evidence: "Julio Gómez, el vendedor de Droguería Norte, sabe cuándo les entra el stock de insulina."
+        criticality: medium   # dudoso: ante la duda, el más alto
+        subject_position: vendedor
+        subject_organization: Droguería Norte
+
+  - id: external_profile-002
+    rule: external_profile
+    conversation: |
+      Carolina Ibáñez es quien maneja nuestra cuenta en el Banco Provincia.
+    expected:
+      - subject: Carolina Ibáñez
+        relation: [owns_process, knows_about]
+        object_keywords: [cuenta]
+        evidence: "Carolina Ibáñez es quien maneja nuestra cuenta en el Banco Provincia."
+        criticality: high
+        subject_organization: Banco Provincia
+
+  # ---------------------------------------------------------------- off_role
+  - id: off_role-001
+    rule: off_role
+    conversation: |
+      Lucía Paredes se encarga de llamar a los clientes para reclamar los cheques rechazados.
+    expected:
+      - subject: Lucía Paredes
+        relation: owns_process
+        object_keywords: [cheques rechazados, reclamar]
+        evidence: "Lucía Paredes se encarga de llamar a los clientes para reclamar los cheques rechazados."
+        criticality: high
+    agent:
+      off_role: true   # tesoreria.md: el reclamo lo hace la Analista de Tesorería
+
+  # ---------------------------------------------------------------- identity
+  - id: identity-001
+    rule: identity
+    conversation: |
+      Diego Fernández del Banco Galicia nos ofreció una línea de descuento de cheques y quedó en que cualquier consulta la hablemos con él.
+    expected:
+      - subject: Diego Fernández
+        relation: knows_about
+        object_keywords: [descuento de cheques]
+        evidence: "Diego Fernández del Banco Galicia nos ofreció una línea de descuento de cheques y quedó en que cualquier consulta la hablemos con él."
+        criticality: high
+        subject_organization: Banco Galicia
+      - subject: Diego Fernández
+        relation: belongs_to
+        object_keywords: [banco galicia]
+        evidence: "Diego Fernández del Banco Galicia nos ofreció una línea de descuento de cheques y quedó en que cualquier consulta la hablemos con él."
+        criticality: null
+        subject_organization: Banco Galicia
+    agent:
+      not_same_as: diego-fernandez   # el Jefe de Compras del organigrama
+
+  # ------------------------------------------------------------------- empty
+  - id: empty-001
+    rule: empty
+    conversation: |
+      Hoy hizo mucho calor en Sarandí y el colectivo vino lleno.
+    expected: []
+
+  - id: empty-002
+    rule: empty
+    conversation: |
+      Mañana hay reunión general a las 10, no se olviden de traer la notebook.
+    expected: []
+
+  # ------------------------------------------------------------------- mixed
+  - id: mixed-001
+    rule: mixed
+    conversation: |
+      [09:12] Ana: Bienvenido! Te paso un par de datos para que no te pierdas.
+      [09:13] Ana: Para la caja chica el que está es Tomás Giménez, eso ya lo vas a ver en el organigrama.
+      [09:14] Ana: Ojo con la cámara 4: Daniela Foglia sabe que la puerta no cierra bien si la empujás de costado, siempre la traba con el pie.
+      [09:15] Ana: Hernán Ledesma es un genio, el mejor jefe que tuve.
+      [09:16] Ana: Si un transporte de Córdoba no aparece, Pablo Sosa tiene el celular del chofer de Transportes Andinos, que nunca atiende el fijo.
+      [09:17] Ana: Ayer almorzamos con Romina Castro, re buena onda.
+      [09:18] Ana: Y si necesitás las viandas del viernes, Tomás Giménez es el que las pide.
+    expected:
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [puerta, camara 4]
+        evidence: "Ojo con la cámara 4: Daniela Foglia sabe que la puerta no cierra bien si la empujás de costado, siempre la traba con el pie."
+        criticality: high
+      - subject: Pablo Sosa
+        relation: knows_about
+        object_keywords: [chofer, transportes andinos, celular]
+        evidence: "Si un transporte de Córdoba no aparece, Pablo Sosa tiene el celular del chofer de Transportes Andinos, que nunca atiende el fijo."
+        criticality: high   # dudoso: ante la duda, el más alto
+      - subject: Tomás Giménez
+        relation: owns_process
+        object_keywords: [viandas]
+        evidence: "Y si necesitás las viandas del viernes, Tomás Giménez es el que las pide."
+        criticality: low
+    must_not:
+      - {subject: Tomás Giménez, about: caja chica, reason: lo dice el organigrama}
+      - {subject: Hernán Ledesma, about: genio, reason: opinión sobre una persona}
+      - {subject: Romina Castro, about: almuerzo, reason: hecho social sin tarea}
+
+  - id: mixed-002
+    rule: mixed
+    conversation: |
+      Te cuento cómo funciona Tesorería en la práctica. Valeria Acosta arma la propuesta de pagos y Federico Medina la aprueba, eso está en el procedimiento. Lo que no está escrito es que el home banking del Banco Credicoop rechaza los lotes de más de 200 transferencias, y Valeria Acosta es la única que sabe partirlos sin que se dupliquen pagos. Federico es un poco lento para contestar. Cuando falta plata a fin de mes, Alejandro Benítez tiene un contacto en Bursátil Sur que consigue un adelanto en el día.
+    expected:
+      - subject: Valeria Acosta
+        relation: knows_about
+        object_keywords: [lotes, partir, 200 transferencias]
+        evidence: "Lo que no está escrito es que el home banking del Banco Credicoop rechaza los lotes de más de 200 transferencias, y Valeria Acosta es la única que sabe partirlos sin que se dupliquen pagos."
+        criticality: high
+        exclusive: true
+      - subject: Alejandro Benítez
+        relation: knows_about
+        object_keywords: [adelanto, bursatil sur, falta plata, contacto]
+        evidence: "Cuando falta plata a fin de mes, Alejandro Benítez tiene un contacto en Bursátil Sur que consigue un adelanto en el día."
+        criticality: high
+    must_not:
+      - {subject: Valeria Acosta, about: propuesta de pagos, reason: organigrama y tesoreria.md}
+      - {subject: Federico Medina, about: aprueba, reason: organigrama y tesoreria.md}
+      - {subject: Federico Medina, about: lento, reason: opinión sobre una persona}
+
+  # ------------------------------------------------- más casos por regla (80-100)
+  - id: full_name-002
+    rule: full_name
+    conversation: |
+      Juan Pablo Ríos Etchegaray, el técnico de Frío Total, sabe recargar el gas de las cámaras sin cortar el frío.
+    expected:
+      - subject: Juan Pablo Ríos Etchegaray
+        relation: knows_about
+        object_keywords: [gas, recargar]
+        evidence: "Juan Pablo Ríos Etchegaray, el técnico de Frío Total, sabe recargar el gas de las cámaras sin cortar el frío."
+        criticality: high
+        subject_position: técnico
+        subject_organization: Frío Total
+    must_not:
+      - {subject: Juan Pablo Ríos, about: sujeto recortado, reason: el nombre va completo}
+
+  - id: full_name-003
+    rule: full_name
+    conversation: |
+      Me atendió María Laura Domínguez Achával, de Laboratorios Nortelab, y me explicó que sus genéricos se pueden devolver solo con el precinto intacto; cualquier duda la vemos con ella.
+    expected:
+      - subject: María Laura Domínguez Achával
+        relation: knows_about
+        object_keywords: [devolver, devolucion, precinto]
+        evidence: "Me atendió María Laura Domínguez Achával, de Laboratorios Nortelab, y me explicó que sus genéricos se pueden devolver solo con el precinto intacto; cualquier duda la vemos con ella."
+        criticality: high   # dudoso: ante la duda, el más alto
+        subject_organization: Laboratorios Nortelab
+      - subject: María Laura Domínguez Achával
+        relation: belongs_to
+        object_keywords: [nortelab]
+        evidence: "Me atendió María Laura Domínguez Achával, de Laboratorios Nortelab, y me explicó que sus genéricos se pueden devolver solo con el precinto intacto; cualquier duda la vemos con ella."
+        criticality: null
+        subject_organization: Laboratorios Nortelab
+
+  - id: identity-002
+    rule: identity
+    conversation: |
+      Pablo Sosa, el chofer de Transportes Andinos, sabe por dónde entrar al hospital de Wilde cuando está cortada la calle.
+    expected:
+      - subject: Pablo Sosa
+        relation: knows_about
+        object_keywords: [hospital de wilde, entrar]
+        evidence: "Pablo Sosa, el chofer de Transportes Andinos, sabe por dónde entrar al hospital de Wilde cuando está cortada la calle."
+        criticality: medium   # dudoso: ante la duda, el más alto
+        subject_position: chofer
+        subject_organization: Transportes Andinos
+    agent:
+      not_same_as: pablo-sosa   # el Referente de Logística del organigrama
+
+  - id: identity-003
+    rule: identity
+    conversation: |
+      Romina Castro sabe destrabar la impresora de etiquetas de la recepción cuando se queda sin avanzar el papel.
+    expected:
+      - subject: Romina Castro
+        relation: knows_about
+        object_keywords: [impresora de etiquetas]
+        evidence: "Romina Castro sabe destrabar la impresora de etiquetas de la recepción cuando se queda sin avanzar el papel."
+        criticality: medium   # dudoso: ante la duda, el más alto
+    agent:
+      same_as: romina-castro   # mismo nombre y apellido, sin otra organización
+      off_role: false
+
+  # Nombres parecidos y homónimos externos. Los externos que se llaman igual (o casi)
+  # que alguien del organigrama tienen que quedar como otra persona; las variantes del
+  # nombre de un interno (tipeo, apodo, apellido de más), unidas a él.
+
+  - id: identity-004
+    rule: identity
+    conversation: |
+      Lucía Paredes, la contadora del estudio Lamas, sabe cómo presentar el descargo cuando ARBA manda una intimación por percepciones mal informadas.
+    expected:
+      - subject: Lucía Paredes
+        relation: knows_about
+        object_keywords: [descargo, arba, intimacion]
+        evidence: "Lucía Paredes, la contadora del estudio Lamas, sabe cómo presentar el descargo cuando ARBA manda una intimación por percepciones mal informadas."
+        criticality: high
+        subject_position: contadora
+        subject_organization: estudio Lamas
+    agent:
+      not_same_as: lucia-paredes   # homónima externa: la nuestra es de Mesa de Ayuda
+
+  - id: identity-005
+    rule: identity
+    conversation: |
+      Nos llamó Federico Medina, el despachante de aduana, y nos explicó cómo destrabar un contenedor de vacunas retenido en Ezeiza.
+    expected:
+      - subject: Federico Medina
+        relation: knows_about
+        object_keywords: [contenedor, ezeiza, aduana]
+        evidence: "Nos llamó Federico Medina, el despachante de aduana, y nos explicó cómo destrabar un contenedor de vacunas retenido en Ezeiza."
+        criticality: high
+        subject_position: despachante de aduana
+    agent:
+      not_same_as: federico-medina   # "nos llamó" + otro puesto: no es el Jefe de Tesorería
+      needs_review: true             # externo sin empresa
+
+  - id: identity-006
+    rule: identity
+    conversation: |
+      Marcela Duarte, de Droguería del Plata, sabe qué papeles pide su depósito para aceptar devoluciones de productos refrigerados.
+    expected:
+      - subject: Marcela Duarte
+        relation: knows_about
+        object_keywords: [devoluciones, papeles]
+        evidence: "Marcela Duarte, de Droguería del Plata, sabe qué papeles pide su depósito para aceptar devoluciones de productos refrigerados."
+        criticality: high
+        subject_organization: Droguería del Plata
+    agent:
+      not_same_as: marcela-duarte   # el tema es de Operaciones, pero es de otra empresa
+
+  - id: identity-007
+    rule: identity
+    conversation: |
+      Ana Ruiz Díaz, oficial de cuentas del Banco Nación, sabe cómo destrabar una transferencia retenida por el control de lavado.
+    expected:
+      - subject: Ana Ruiz Díaz
+        relation: knows_about
+        object_keywords: [transferencia retenida, control de lavado]
+        evidence: "Ana Ruiz Díaz, oficial de cuentas del Banco Nación, sabe cómo destrabar una transferencia retenida por el control de lavado."
+        criticality: high
+        subject_position: oficial de cuentas
+        subject_organization: Banco Nación
+    agent:
+      not_same_as: ana-ruiz   # el nombre contiene al de la interna, pero es de un banco
+
+  - id: identity-008
+    rule: identity
+    conversation: |
+      Diego Fernández, el nuestro de Compras, me pasó el dato: el Diego Fernández de Transportes Andinos sabe qué camión de ellos tiene el equipo de frío más confiable para los viajes largos.
+    expected:
+      - subject: Diego Fernández
+        relation: knows_about
+        object_keywords: [camion, equipo de frio]
+        evidence: "el Diego Fernández de Transportes Andinos sabe qué camión de ellos tiene el equipo de frío más confiable para los viajes largos."
+        criticality: high
+        subject_organization: Transportes Andinos
+    agent:
+      not_same_as: diego-fernandez   # los dos homónimos en la misma frase: el que sabe es el externo
+
+  - id: identity-009
+    rule: identity
+    conversation: |
+      Daniel Foglia, el electricista que viene los martes, sabe resetear el compresor de la cámara 2 cuando salta la térmica.
+    expected:
+      - subject: Daniel Foglia
+        relation: knows_about
+        object_keywords: [compresor]
+        evidence: "Daniel Foglia, el electricista que viene los martes, sabe resetear el compresor de la cámara 2 cuando salta la térmica."
+        criticality: high
+        subject_position: electricista
+    agent:
+      not_same_as: daniela-foglia   # una letra de diferencia y mismo tema (cámaras), pero otra persona
+      needs_review: true            # externo sin empresa
+
+  - id: identity-010
+    rule: identity
+    conversation: |
+      Carla Bianchini, que entró este mes a Recursos Humanos, sabe sacar el reporte de horas extra del reloj de fichaje.
+    expected:
+      - subject: Carla Bianchini
+        relation: knows_about
+        object_keywords: [horas extra, reloj de fichaje]
+        evidence: "Carla Bianchini, que entró este mes a Recursos Humanos, sabe sacar el reporte de horas extra del reloj de fichaje."
+        criticality: medium
+    agent:
+      not_same_as: carla-bianchi   # apellido casi igual, otra área: empleada nueva
+      needs_review: true           # todavía no está en el organigrama
+
+  - id: identity-011
+    rule: identity
+    conversation: |
+      Natalia Herera sabe destrabar la máquina de café del segundo piso cuando se traba el molinillo.
+    expected:
+      - subject: Natalia Herera
+        relation: knows_about
+        object_keywords: [maquina de cafe, molinillo]
+        evidence: "Natalia Herera sabe destrabar la máquina de café del segundo piso cuando se traba el molinillo."
+        criticality: low
+    agent:
+      same_as: natalia-herrera   # error de tipeo en el apellido
+
+  - id: identity-012
+    rule: identity
+    conversation: |
+      Hernan Ledezma sabe arrancar el autoelevador viejo cuando no le anda la llave.
+    expected:
+      - subject: Hernan Ledezma
+        relation: knows_about
+        object_keywords: [autoelevador]
+        evidence: "Hernan Ledezma sabe arrancar el autoelevador viejo cuando no le anda la llave."
+        criticality: medium
+    agent:
+      same_as: hernan-ledesma   # sin tilde y con z: misma persona
+
+  - id: identity-013
+    rule: identity
+    conversation: |
+      Nacho Pereyra sabe dónde quedaron archivados en papel los registros de desvíos anteriores a 2019.
+    expected:
+      - subject: Nacho Pereyra
+        relation: knows_about
+        object_keywords: [registros de desvios, archivados]
+        evidence: "Nacho Pereyra sabe dónde quedaron archivados en papel los registros de desvíos anteriores a 2019."
+        criticality: high
+    agent:
+      same_as: ignacio-pereyra   # apodo
+
+  - id: identity-014
+    rule: identity
+    conversation: |
+      Silvina Ortega Paz sabe con quién hablar en la imprenta para que reimpriman en el día las etiquetas de cadena de frío.
+    expected:
+      - subject: Silvina Ortega Paz
+        relation: knows_about
+        object_keywords: [imprenta, etiquetas]
+        evidence: "Silvina Ortega Paz sabe con quién hablar en la imprenta para que reimpriman en el día las etiquetas de cadena de frío."
+        criticality: high   # dudoso: ante la duda, el más alto
+    agent:
+      same_as: silvina-ortega   # con un apellido de más y sin otra organización
+
+  - id: off_role-002
+    rule: off_role
+    conversation: |
+      Rocío Miranda se encarga de cargar los lotes de pago en el home banking los jueves.
+    expected:
+      - subject: Rocío Miranda
+        relation: owns_process
+        object_keywords: [lotes de pago, home banking]
+        evidence: "Rocío Miranda se encarga de cargar los lotes de pago en el home banking los jueves."
+        criticality: high
+    agent:
+      off_role: true   # tesoreria.md: los lotes los carga la Analista de Tesorería
+
+  - id: off_role-003
+    rule: off_role
+    conversation: |
+      Ana Ruiz se encarga de juntar la plata para los regalos de cumpleaños.
+    expected:
+      - subject: Ana Ruiz
+        relation: owns_process
+        object_keywords: [regalos, cumpleanos]
+        evidence: "Ana Ruiz se encarga de juntar la plata para los regalos de cumpleaños."
+        criticality: low
+    agent:
+      off_role: false   # apoyo de oficina: no choca con ningún puesto
+
+  - id: introduced-003
+    rule: introduced
+    conversation: |
+      A Natalia Herrera me la presentó Valeria Acosta cuando entré a Tesorería.
+    expected:
+      - subject: Valeria Acosta
+        relation: introduced
+        object_keywords: [natalia herrera]
+        evidence: "A Natalia Herrera me la presentó Valeria Acosta cuando entré a Tesorería."
+        criticality: low
+
+  - id: introduced-004
+    rule: introduced
+    conversation: |
+      Hernán Ledesma me presentó a Gustavo Peralta, de Transportes Andinos.
+    expected:
+      - subject: Hernán Ledesma
+        relation: introduced
+        object_keywords: [gustavo peralta]
+        evidence: "Hernán Ledesma me presentó a Gustavo Peralta, de Transportes Andinos."
+        criticality: low
+      - subject: Gustavo Peralta
+        relation: belongs_to
+        object_keywords: [transportes andinos]
+        evidence: "Hernán Ledesma me presentó a Gustavo Peralta, de Transportes Andinos."
+        criticality: null
+        subject_organization: Transportes Andinos
+
+  - id: social_with_work-003
+    rule: social_with_work
+    conversation: |
+      En la fiesta de fin de año charlé con Claudio Vera, del Banco Micro, y me contó que el descubierto se puede ampliar si se pide antes del día 20.
+    expected:
+      - subject: Claudio Vera
+        relation: belongs_to
+        object_keywords: [banco micro]
+        evidence: "En la fiesta de fin de año charlé con Claudio Vera, del Banco Micro, y me contó que el descubierto se puede ampliar si se pide antes del día 20."
+        criticality: null
+        subject_organization: Banco Micro
+      - subject: Claudio Vera
+        relation: knows_about
+        object_keywords: [descubierto]
+        evidence: "En la fiesta de fin de año charlé con Claudio Vera, del Banco Micro, y me contó que el descubierto se puede ampliar si se pide antes del día 20."
+        criticality: high
+        subject_organization: Banco Micro
+    must_not:
+      - {subject: Claudio Vera, about: fiesta, reason: el hecho social no se devuelve}
+      - {subject: Claudio Vera, about: banco macro, reason: no corregir el nombre del banco, object_keywords_forbidden: [macro]}
+
+  - id: social_excluded-004
+    rule: social_excluded
+    conversation: |
+      Romina Castro y Mariana Costas van juntas al gimnasio los martes.
+    expected: []
+    must_not:
+      - {subject: Romina Castro, about: gimnasio, reason: actividad personal}
+
+  - id: typo_evidence-003
+    rule: typo_evidence
+    conversation: |
+      Lucía Paredes save configurar el token del banco Galisia en las notebooks nuevas.
+    expected:
+      - subject: Lucía Paredes
+        relation: knows_about
+        object_keywords: [token]
+        evidence: "Lucía Paredes save configurar el token del banco Galisia en las notebooks nuevas."
+        criticality: high   # dudoso: ante la duda, el más alto
+    must_not:
+      - {subject: Lucía Paredes, about: banco Galicia, reason: no corregir Galisia, object_keywords_forbidden: [galicia]}
+
+  - id: typo_evidence-004
+    rule: typo_evidence
+    conversation: |
+      Pablo Sosa tiene el telefono del ensargado de la playa de camiones del Mercado Central.
+    expected:
+      - subject: Pablo Sosa
+        relation: knows_about
+        object_keywords: [playa de camiones, mercado central, ensargado]
+        evidence: "Pablo Sosa tiene el telefono del ensargado de la playa de camiones del Mercado Central."
+        criticality: medium   # dudoso: ante la duda, el más alto
+
+  - id: object_verbatim-003
+    rule: object_verbatim
+    conversation: |
+      Martín Rossi es el oficial de comercio exterior del Banco Santader.
+    expected:
+      - subject: Martín Rossi
+        relation: [knows_about, owns_process]
+        object_keywords: [comercio exterior]
+        evidence: "Martín Rossi es el oficial de comercio exterior del Banco Santader."
+        criticality: high
+        subject_position: oficial de comercio exterior
+        subject_organization: Banco Santader
+    must_not:
+      - {subject: Martín Rossi, about: Santander, reason: no corregir Santader, object_keywords_forbidden: [santander]}
+
+  - id: negation-004
+    rule: negation
+    conversation: |
+      Sergio Arriaga ya no tiene las llaves del portón de la calle Mitre; ahora las tiene Gastón Ruiz.
+    expected:
+      - subject: Sergio Arriaga
+        relation: [knows_about, owns_process]
+        object_keywords: [llaves, porton]
+        evidence: "Sergio Arriaga ya no tiene las llaves del portón de la calle Mitre; ahora las tiene Gastón Ruiz."
+        criticality: low
+        negated: true
+      - subject: Gastón Ruiz
+        relation: [knows_about, owns_process]
+        object_keywords: [llaves, porton]
+        evidence: "Sergio Arriaga ya no tiene las llaves del portón de la calle Mitre; ahora las tiene Gastón Ruiz."
+        criticality: low
+        negated: false
+
+  - id: negation-005
+    rule: negation
+    conversation: |
+      Valeria Acosta no es la que habla con el oficial del Banco Patagonia, eso lo ve Tomás Giménez.
+    expected:
+      - subject: Valeria Acosta
+        relation: [knows_about, owns_process]
+        object_keywords: [oficial, patagonia]
+        evidence: "Valeria Acosta no es la que habla con el oficial del Banco Patagonia, eso lo ve Tomás Giménez."
+        criticality: high
+        negated: true
+      - subject: Tomás Giménez
+        relation: [knows_about, owns_process]
+        object_keywords: [oficial, patagonia]
+        evidence: "Valeria Acosta no es la que habla con el oficial del Banco Patagonia, eso lo ve Tomás Giménez."
+        criticality: high
+        negated: false
+
+  - id: exclusive-004
+    rule: exclusive
+    conversation: |
+      Gastón Ruiz es el único que tiene la clave de la central de incendio.
+    expected:
+      - subject: Gastón Ruiz
+        relation: knows_about
+        object_keywords: [central de incendio]
+        evidence: "Gastón Ruiz es el único que tiene la clave de la central de incendio."
+        criticality: high   # dudoso: ante la duda, el más alto
+        exclusive: true
+
+  - id: exclusive-005
+    rule: exclusive
+    conversation: |
+      Martín Beltrán también sabe liberar el portón del depósito cuando se traba la cerradura eléctrica.
+    expected:
+      - subject: Martín Beltrán
+        relation: knows_about
+        object_keywords: [porton, cerradura]
+        evidence: "Martín Beltrán también sabe liberar el portón del depósito cuando se traba la cerradura eléctrica."
+        criticality: medium   # dudoso: ante la duda, el más alto
+        exclusive: false
+
+  - id: criticality-004
+    rule: criticality
+    conversation: |
+      Ana Ruiz sabe sacar de Sigma el reporte de stock por vencimiento con un filtro que no figura en ningún manual.
+    expected:
+      - subject: Ana Ruiz
+        relation: knows_about
+        object_keywords: [reporte de stock, vencimiento]
+        evidence: "Ana Ruiz sabe sacar de Sigma el reporte de stock por vencimiento con un filtro que no figura en ningún manual."
+        criticality: medium
+
+  - id: criticality-005
+    rule: criticality
+    conversation: |
+      Si cae una inspección de la municipalidad, Gastón Ruiz sabe qué carpeta de habilitaciones mostrar y dónde está guardada.
+    expected:
+      - subject: Gastón Ruiz
+        relation: knows_about
+        object_keywords: [inspeccion, habilitaciones, municipalidad]
+        evidence: "Si cae una inspección de la municipalidad, Gastón Ruiz sabe qué carpeta de habilitaciones mostrar y dónde está guardada."
+        criticality: high
+
+  - id: opinion-003
+    rule: opinion
+    conversation: |
+      Nahuel Ferreyra es un crack y siempre trae facturas los viernes.
+    expected: []
+    must_not:
+      - {subject: Nahuel Ferreyra, about: crack, reason: opinión sobre una persona}
+      - {subject: Nahuel Ferreyra, about: facturas, reason: costumbre personal, no es una tarea}
+
+  - id: empty-003
+    rule: empty
+    conversation: |
+      ¡Feliz cumple, Lucía! Que lo pases lindo.
+    expected: []
+
+  # -------------------------------------------------------------- redundancy
+  # El mismo dato informal (no está en corpus/) dicho varias veces. Cada grupo se
+  # procesa en orden sobre un grafo vacío (ver redundancy_groups, al final).
+
+  # red-camara3 (original: exclusive-002)
+  - id: red-camara3-p1
+    rule: redundancy
+    redundancy: {group: red-camara3, kind: paraphrase}
+    conversation: |
+      Lo de cuánto le lleva a la C3 volver a régimen después de descargar un camión entero lo sabe solamente Daniela Foglia.
+    expected:
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [camara 3, c3, recuperar temperatura, volver a regimen]
+        evidence: "Lo de cuánto le lleva a la C3 volver a régimen después de descargar un camión entero lo sabe solamente Daniela Foglia."
+        criticality: high
+        exclusive: true
+
+  - id: red-camara3-p2
+    rule: redundancy
+    redundancy: {group: red-camara3, kind: paraphrase}
+    conversation: |
+      [08:40] Rocío: si descargás mucho en la cámara 3, preguntale a Daniela Foglia cuánto hay que esperar para volver a cargar, es la única que lo tiene medido.
+    expected:
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [camara 3, esperar, volver a cargar, recuperar temperatura]
+        evidence: "si descargás mucho en la cámara 3, preguntale a Daniela Foglia cuánto hay que esperar para volver a cargar, es la única que lo tiene medido."
+        criticality: high
+        exclusive: true
+
+  - id: red-camara3-v1
+    rule: redundancy
+    redundancy: {group: red-camara3, kind: verbatim}
+    conversation: |
+      Antes de que arranques con la recepción te aviso algo. Nadie más que Daniela Foglia sabe cuánto tarda la cámara 3 en recuperar temperatura después de una descarga grande. El resto lo ves en Sigma.
+    expected:
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [camara 3, recuperar temperatura]
+        evidence: "Nadie más que Daniela Foglia sabe cuánto tarda la cámara 3 en recuperar temperatura después de una descarga grande."
+        criticality: high
+        exclusive: true
+
+  - id: red-camara3-d1
+    rule: redundancy
+    redundancy: {group: red-camara3, kind: distinct}
+    conversation: |
+      Daniela Foglia sabe cuánto tarda la cámara 4 en recuperar temperatura después de un corte de luz.
+    expected:
+      - subject: Daniela Foglia
+        relation: knows_about
+        object_keywords: [camara 4]
+        evidence: "Daniela Foglia sabe cuánto tarda la cámara 4 en recuperar temperatura después de un corte de luz."
+        criticality: high
+
+  # red-generador (original: beyond_role-003)
+  - id: red-generador-p1
+    rule: redundancy
+    redundancy: {group: red-generador, kind: paraphrase}
+    conversation: |
+      Si se va la luz en el depósito de Sarandí, el generador lo prende a mano Sergio Arriaga.
+    expected:
+      - subject: Sergio Arriaga
+        relation: knows_about
+        object_keywords: [generador]
+        evidence: "Si se va la luz en el depósito de Sarandí, el generador lo prende a mano Sergio Arriaga."
+        criticality: high
+
+  - id: red-generador-p2
+    rule: redundancy
+    redundancy: {group: red-generador, kind: paraphrase}
+    conversation: |
+      [10:02] Ana: ojo que el grupo electrógeno no arranca solo, Arriaga sabe hacerlo manual
+    expected:
+      - subject: Arriaga
+        relation: knows_about
+        object_keywords: [grupo electrogeno, generador]
+        evidence: "ojo que el grupo electrógeno no arranca solo, Arriaga sabe hacerlo manual"
+        criticality: high
+    agent:
+      same_as: sergio-arriaga   # solo el apellido: lo resuelve identity.py
+
+  - id: red-generador-v1
+    rule: redundancy
+    redundancy: {group: red-generador, kind: verbatim}
+    conversation: |
+      Te dejo un par de cosas del depósito. Cuando se corta la luz en Sarandí, Sergio Arriaga es el que sabe arrancar el generador a mano. Lo demás está en el POE.
+    expected:
+      - subject: Sergio Arriaga
+        relation: knows_about
+        object_keywords: [generador]
+        evidence: "Cuando se corta la luz en Sarandí, Sergio Arriaga es el que sabe arrancar el generador a mano."
+        criticality: high
+
+  - id: red-generador-d1
+    rule: redundancy
+    redundancy: {group: red-generador, kind: distinct}
+    conversation: |
+      Sergio Arriaga sabe cambiar el filtro del aire acondicionado de la oficina.
+    expected:
+      - subject: Sergio Arriaga
+        relation: knows_about
+        object_keywords: [aire acondicionado, filtro]
+        evidence: "Sergio Arriaga sabe cambiar el filtro del aire acondicionado de la oficina."
+        criticality: low
+
+  # red-anmat (original: beyond_role-001)
+  - id: red-anmat-p1
+    rule: redundancy
+    redundancy: {group: red-anmat, kind: paraphrase}
+    conversation: |
+      Los lunes temprano la web de trazabilidad de ANMAT suele estar caída; Carla Bianchi recomienda cargar los movimientos pasadas las 14.
+    expected:
+      - subject: Carla Bianchi
+        relation: knows_about
+        object_keywords: [trazabilidad, caida, lunes]
+        evidence: "Los lunes temprano la web de trazabilidad de ANMAT suele estar caída; Carla Bianchi recomienda cargar los movimientos pasadas las 14."
+        criticality: high
+
+  - id: red-anmat-p2
+    rule: redundancy
+    redundancy: {group: red-anmat, kind: paraphrase}
+    conversation: |
+      Si querés informar movimientos a ANMAT un lunes a la mañana, ni lo intentes: Carla Bianchi sabe que el sistema no responde hasta la tarde.
+    expected:
+      - subject: Carla Bianchi
+        relation: knows_about
+        object_keywords: [anmat, lunes, no responde]
+        evidence: "Si querés informar movimientos a ANMAT un lunes a la mañana, ni lo intentes: Carla Bianchi sabe que el sistema no responde hasta la tarde."
+        criticality: high
+
+  - id: red-anmat-v1
+    rule: redundancy
+    redundancy: {group: red-anmat, kind: verbatim}
+    conversation: |
+      Una cosa más de trazabilidad. Carla Bianchi sabe que el portal de trazabilidad de ANMAT se cae los lunes a la mañana y que conviene informar los movimientos después de las 14. Cualquier otra duda, al canal.
+    expected:
+      - subject: Carla Bianchi
+        relation: knows_about
+        object_keywords: [portal de trazabilidad, caidas, lunes]
+        evidence: "Carla Bianchi sabe que el portal de trazabilidad de ANMAT se cae los lunes a la mañana y que conviene informar los movimientos después de las 14."
+        criticality: high
+
+  - id: red-anmat-d1
+    rule: redundancy
+    redundancy: {group: red-anmat, kind: distinct}
+    conversation: |
+      Carla Bianchi sabe que el portal de trazabilidad de ANMAT pide renovar el certificado digital cada marzo.
+    expected:
+      - subject: Carla Bianchi
+        relation: knows_about
+        object_keywords: [certificado digital]
+        evidence: "Carla Bianchi sabe que el portal de trazabilidad de ANMAT pide renovar el certificado digital cada marzo."
+        criticality: high
+
+  # red-arca (original: beyond_role-004)
+  - id: red-arca-p1
+    rule: redundancy
+    redundancy: {group: red-arca, kind: paraphrase}
+    conversation: |
+      Natalia Herrera tiene un contacto en la agencia de ARCA de Avellaneda que te desbloquea la clave fiscal de la empresa el mismo día.
+    expected:
+      - subject: Natalia Herrera
+        relation: knows_about
+        object_keywords: [clave fiscal, arca, agencia de avellaneda]
+        evidence: "Natalia Herrera tiene un contacto en la agencia de ARCA de Avellaneda que te desbloquea la clave fiscal de la empresa el mismo día."
+        criticality: high
+
+  - id: red-arca-p2
+    rule: redundancy
+    redundancy: {group: red-arca, kind: paraphrase}
+    conversation: |
+      ¿Se trabó la clave fiscal en ARCA? Hablá con Natalia Herrera, que conoce a alguien en la agencia de Avellaneda y lo resuelve rápido.
+    expected:
+      - subject: Natalia Herrera
+        relation: knows_about
+        object_keywords: [clave fiscal, arca, agencia de avellaneda]
+        evidence: "Hablá con Natalia Herrera, que conoce a alguien en la agencia de Avellaneda y lo resuelve rápido."
+        criticality: high
+
+  - id: red-arca-v1
+    rule: redundancy
+    redundancy: {group: red-arca, kind: verbatim}
+    conversation: |
+      Te paso lo de impuestos que no está en ningún lado. Si ARCA te bloquea la clave fiscal de la empresa, Natalia Herrera conoce a una persona en la agencia de Avellaneda que lo destraba en el día. Lo demás lo ves con Tesorería.
+    expected:
+      - subject: Natalia Herrera
+        relation: knows_about
+        object_keywords: [clave fiscal, arca, agencia de avellaneda]
+        evidence: "Si ARCA te bloquea la clave fiscal de la empresa, Natalia Herrera conoce a una persona en la agencia de Avellaneda que lo destraba en el día."
+        criticality: high
+
+  - id: red-arca-d1
+    rule: redundancy
+    redundancy: {group: red-arca, kind: distinct}
+    conversation: |
+      Natalia Herrera conoce a una persona en ARBA que adelanta los certificados de exclusión de percepciones.
+    expected:
+      - subject: Natalia Herrera
+        relation: knows_about
+        object_keywords: [arba, exclusion de percepciones]
+        evidence: "Natalia Herrera conoce a una persona en ARBA que adelanta los certificados de exclusión de percepciones."
+        criticality: high
+
+  # red-viandas (original: office_task-001)
+  - id: red-viandas-p1
+    rule: redundancy
+    redundancy: {group: red-viandas, kind: paraphrase}
+    conversation: |
+      Las viandas de los viernes las encarga Tomás Giménez.
+    expected:
+      - subject: Tomás Giménez
+        relation: owns_process
+        object_keywords: [viandas]
+        evidence: "Las viandas de los viernes las encarga Tomás Giménez."
+        criticality: low
+
+  - id: red-viandas-p2
+    rule: redundancy
+    redundancy: {group: red-viandas, kind: paraphrase}
+    conversation: |
+      [12:30] Lucía: si querés comida el viernes anotate con Tomás Giménez, él hace el pedido de viandas.
+    expected:
+      - subject: Tomás Giménez
+        relation: owns_process
+        object_keywords: [viandas]
+        evidence: "si querés comida el viernes anotate con Tomás Giménez, él hace el pedido de viandas."
+        criticality: low
+
+  - id: red-viandas-v1
+    rule: redundancy
+    redundancy: {group: red-viandas, kind: verbatim}
+    conversation: |
+      Bienvenida al equipo! Tomás Giménez es el que se encarga de pedir las viandas los viernes. Y el café está en la cocina del segundo piso.
+    expected:
+      - subject: Tomás Giménez
+        relation: owns_process
+        object_keywords: [viandas]
+        evidence: "Tomás Giménez es el que se encarga de pedir las viandas los viernes."
+        criticality: low
+
+  - id: red-viandas-d1
+    rule: redundancy
+    redundancy: {group: red-viandas, kind: distinct}
+    conversation: |
+      Tomás Giménez es el que se encarga de pedir las tortas para los cumpleaños del mes.
+    expected:
+      - subject: Tomás Giménez
+        relation: owns_process
+        object_keywords: [tortas, cumpleanos]
+        evidence: "Tomás Giménez es el que se encarga de pedir las tortas para los cumpleaños del mes."
+        criticality: low
+
+  # red-peralta (original: pronoun-001)
+  - id: red-peralta-p1
+    rule: redundancy
+    redundancy: {group: red-peralta, kind: paraphrase}
+    conversation: |
+      Gustavo Peralta, de Transportes Andinos, es a quien hay que llamar si un camión se atrasa en la ruta.
+    expected:
+      - subject: Gustavo Peralta
+        relation: knows_about
+        object_keywords: [atrasa, demora, ruta]
+        evidence: "Gustavo Peralta, de Transportes Andinos, es a quien hay que llamar si un camión se atrasa en la ruta."
+        criticality: high
+        subject_organization: Transportes Andinos
+
+  - id: red-peralta-p2
+    rule: redundancy
+    redundancy: {group: red-peralta, kind: paraphrase}
+    conversation: |
+      Cuando un camión de Transportes Andinos viene demorado en el viaje, el que lo destraba es Gustavo Peralta, que trabaja ahí.
+    expected:
+      - subject: Gustavo Peralta
+        relation: knows_about
+        object_keywords: [demorado, demora, viaje]
+        evidence: "Cuando un camión de Transportes Andinos viene demorado en el viaje, el que lo destraba es Gustavo Peralta, que trabaja ahí."
+        criticality: high
+        subject_organization: Transportes Andinos
+
+  - id: red-peralta-v1
+    rule: redundancy
+    redundancy: {group: red-peralta, kind: verbatim}
+    conversation: |
+      Te anoto los contactos de afuera. Me presentaron a Gustavo Peralta de Transportes Andinos y me dijeron que cualquier demora de un camión en ruta la vea con él. El de Droguería Norte te lo paso después.
+    expected:
+      - subject: Gustavo Peralta
+        relation: knows_about
+        object_keywords: [demora, camion en ruta]
+        evidence: "Me presentaron a Gustavo Peralta de Transportes Andinos y me dijeron que cualquier demora de un camión en ruta la vea con él."
+        criticality: high
+        subject_organization: Transportes Andinos
+
+  - id: red-peralta-d1
+    rule: redundancy
+    redundancy: {group: red-peralta, kind: distinct}
+    conversation: |
+      Gustavo Peralta, de Transportes Andinos, sabe cómo pedir un camión refrigerado extra un domingo.
+    expected:
+      - subject: Gustavo Peralta
+        relation: knows_about
+        object_keywords: [camion refrigerado, domingo]
+        evidence: "Gustavo Peralta, de Transportes Andinos, sabe cómo pedir un camión refrigerado extra un domingo."
+        criticality: high
+        subject_organization: Transportes Andinos
+
+# Grupos de redundancia. Se procesan los casos en el orden de `cases` sobre un grafo
+# vacío y se cuentan las relaciones distintas del dato (`fact`): lo esperado es
+# `expected_relations`. Cada caso de `distinct_cases` tiene que sumar su propia
+# relación aparte (si se une al dato, es una unión de más). Las relaciones
+# belongs_to que acompañan al dato no cuentan.
+redundancy_groups:
+  - group: red-camara3
+    fact: {subject: Daniela Foglia, relation: knows_about, about: cuánto tarda la cámara 3 en recuperar temperatura tras una descarga}
+    cases: [exclusive-002, red-camara3-p1, red-camara3-p2, red-camara3-v1, red-camara3-d1]
+    expected_relations: 1
+    distinct_cases: [red-camara3-d1]
+
+  - group: red-generador
+    fact: {subject: Sergio Arriaga, relation: knows_about, about: arrancar a mano el generador de Sarandí}
+    cases: [beyond_role-003, red-generador-p1, red-generador-p2, red-generador-v1, red-generador-d1]
+    expected_relations: 1
+    distinct_cases: [red-generador-d1]
+
+  - group: red-anmat
+    fact: {subject: Carla Bianchi, relation: knows_about, about: el portal de trazabilidad de ANMAT se cae los lunes a la mañana}
+    cases: [beyond_role-001, red-anmat-p1, red-anmat-p2, red-anmat-v1, red-anmat-d1]
+    expected_relations: 1
+    distinct_cases: [red-anmat-d1]
+
+  - group: red-arca
+    fact: {subject: Natalia Herrera, relation: knows_about, about: desbloqueo de la clave fiscal en la agencia de ARCA de Avellaneda}
+    cases: [beyond_role-004, red-arca-p1, red-arca-p2, red-arca-v1, red-arca-d1]
+    expected_relations: 1
+    distinct_cases: [red-arca-d1]
+
+  - group: red-viandas
+    fact: {subject: Tomás Giménez, relation: owns_process, about: pedido de viandas de los viernes}
+    cases: [office_task-001, red-viandas-p1, red-viandas-p2, red-viandas-v1, red-viandas-d1]
+    expected_relations: 1
+    distinct_cases: [red-viandas-d1]
+
+  - group: red-peralta
+    fact: {subject: Gustavo Peralta, relation: knows_about, about: demoras de camiones de Transportes Andinos en ruta}
+    cases: [pronoun-001, red-peralta-p1, red-peralta-p2, red-peralta-v1, red-peralta-d1]
+    expected_relations: 1
+    distinct_cases: [red-peralta-d1]

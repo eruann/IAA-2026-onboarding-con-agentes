@@ -57,23 +57,88 @@
           "funcion": "document_names",
           "via": [
             "extract_knowledge",
-            "extract_triples",
-            "_procedures"
+            "_extract",
+            "_inferred",
+            "_procedure_names"
+          ]
+        },
+        {
+          "funcion": "known_people",
+          "via": [
+            "extract_knowledge",
+            "_resolve",
+            "resolve_person"
+          ]
+        },
+        {
+          "funcion": "name_similarity",
+          "via": [
+            "extract_knowledge",
+            "_resolve",
+            "resolve_person"
+          ]
+        },
+        {
+          "funcion": "person_profile",
+          "via": [
+            "extract_knowledge",
+            "_review_if_unplaced"
           ]
         },
         {
           "funcion": "read_documents",
           "via": [
             "extract_knowledge",
-            "extract_triples",
-            "_procedures"
+            "_extract"
+          ]
+        },
+        {
+          "funcion": "rename_person",
+          "via": [
+            "extract_knowledge",
+            "_resolve"
+          ]
+        },
+        {
+          "funcion": "same_name",
+          "via": [
+            "extract_knowledge",
+            "_resolve",
+            "resolve_person"
+          ]
+        },
+        {
+          "funcion": "save_possible_match",
+          "via": [
+            "extract_knowledge",
+            "_save_doubts"
+          ]
+        },
+        {
+          "funcion": "save_tool",
+          "via": [
+            "extract_knowledge"
+          ]
+        },
+        {
+          "funcion": "save_triples",
+          "via": [
+            "extract_knowledge"
+          ]
+        },
+        {
+          "funcion": "what_is_known_about",
+          "via": [
+            "extract_knowledge",
+            "_who_knows"
           ]
         }
       ],
       "modelo": {
         "via": [
           "extract_knowledge",
-          "extract_triples"
+          "_extract",
+          "invoke_structured"
         ]
       }
     }
@@ -140,6 +205,36 @@
       "modelo": null
     },
     {
+      "funcion": "known_people",
+      "archivo": "src/onboarding/knowledge/informal_network/people.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
+      "funcion": "load_graph",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": false,
+      "modelo": null
+    },
+    {
+      "funcion": "name_similarity",
+      "archivo": "src/onboarding/knowledge/informal_network/people.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
+      "funcion": "pending_reviews",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": false,
+      "modelo": null
+    },
+    {
+      "funcion": "person_profile",
+      "archivo": "src/onboarding/knowledge/informal_network/queries.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
       "funcion": "quote_is_supported",
       "archivo": "src/onboarding/knowledge/rag/citations.py",
       "usada_por_el_grafo": false,
@@ -152,16 +247,75 @@
       "modelo": null
     },
     {
+      "funcion": "rename_person",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
       "funcion": "retrieve",
       "archivo": "src/onboarding/knowledge/rag/retriever.py",
       "usada_por_el_grafo": false,
       "modelo": null
     },
     {
+      "funcion": "review",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": false,
+      "modelo": null
+    },
+    {
+      "funcion": "same_name",
+      "archivo": "src/onboarding/knowledge/informal_network/people.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
+      "funcion": "save_possible_match",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
+      "funcion": "save_tool",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
+      "funcion": "save_triples",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": true,
+      "modelo": null
+    },
+    {
+      "funcion": "set_organization",
+      "archivo": "src/onboarding/knowledge/informal_network/store.py",
+      "usada_por_el_grafo": false,
+      "modelo": null
+    },
+    {
+      "funcion": "what_is_known_about",
+      "archivo": "src/onboarding/knowledge/informal_network/queries.py",
+      "usada_por_el_grafo": true,
+      "modelo": {
+        "via": [
+          "what_is_known_about",
+          "_rank_people"
+        ]
+      }
+    },
+    {
       "funcion": "who_knows_about",
       "archivo": "src/onboarding/knowledge/informal_network/queries.py",
       "usada_por_el_grafo": false,
-      "modelo": null
+      "modelo": {
+        "via": [
+          "who_knows_about",
+          "what_is_known_about",
+          "_rank_people"
+        ]
+      }
     }
   ]
 }
