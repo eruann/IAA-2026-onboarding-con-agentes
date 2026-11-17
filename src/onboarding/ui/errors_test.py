@@ -1,4 +1,3 @@
-from onboarding.knowledge import who_knows_about
 from onboarding.ui.errors import explain
 
 
@@ -6,14 +5,21 @@ class RateLimitError(Exception):
     pass
 
 
+def _pendiente() -> None:
+    # Un TODO propio: si el test usara una función real del producto, se rompería el
+    # día que alguien la implemente (pasó con who_knows_about)
+    raise NotImplementedError("TODO(rol): algo pendiente")
+
+
 def test_un_todo_se_muestra_como_pendiente_con_su_archivo() -> None:
     try:
-        who_knows_about("cámaras frías")
+        _pendiente()
     except NotImplementedError as error:
         kind, message = explain(error)
 
     assert kind == "pending"
-    assert "src/onboarding/knowledge/informal_network/queries.py" in message
+    assert "src/onboarding/ui/errors_test.py" in message
+    assert "(_pendiente)" in message
 
 
 def test_los_errores_del_proveedor_se_explican_en_castellano() -> None:
