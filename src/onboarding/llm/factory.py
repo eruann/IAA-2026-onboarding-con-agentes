@@ -22,6 +22,7 @@ Modelos vía OpenRouter: "anthropic/claude-haiku-4.5", "openai/gpt-4o-mini",
 
 from typing import get_args
 
+from langchain_anthropic import ChatAnthropic
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel, FakeListChatModel
 from langchain_openai import ChatOpenAI
@@ -33,6 +34,8 @@ from onboarding.llm.callbacks import UsageLogger
 # Respuestas del proveedor `fake`: determinísticas, sin red ni costo.
 # Los tests que necesiten otra cosa pasan sus propias respuestas.
 FAKE_RESPONSES = ["[fake] respuesta de prueba"]
+# Tope de salida mínimo para Claude directo: deja lugar al razonamiento y a la respuesta
+ANTHROPIC_MIN_TOKENS = 16000
 
 
 # recorrido: modelo-llm
@@ -43,16 +46,43 @@ def get_chat_model(
     model: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 1024,
+    reasoning: bool = False,
 ) -> BaseChatModel:
     """`provider` y `model` pisan a LLM_PROVIDER y LLM_MODEL para esta llamada: así
     la interfaz deja elegir o comparar modelos sin tocar el .env. Las keys y las
-    URLs siguen saliendo de la configuración."""
+    URLs siguen saliendo de la configuración.
+
+    `reasoning` prende el razonamiento de Claude directo (en los demás proveedores
+    razona el modelo si sabe). Es para el perfil estructurado: la salida es un JSON
+    y los bloques de razonamiento no llegan a nadie."""
     settings = settings or get_settings()
     if provider is not None:
         settings = settings.model_copy(update={"llm_provider": provider})
 
     if settings.llm_provider == "fake":
         return FakeListChatModel(responses=FAKE_RESPONSES)
+
+    if settings.llm_provider == "anthropic":
+        if settings.anthropic_api_key is None:
+            raise RuntimeError("Falta ANTHROPIC_API_KEY (o usá otro proveedor)")
+        # Claude 5 no acepta temperature: se usa la del modelo. Para conversar, el
+        # razonamiento va apagado: con él, la respuesta llega como lista de bloques
+        # (thinking + texto) y ask_model la muestra tal cual. Para datos estructurados
+        # va prendido, adaptativo (el modelo decide cuánto pensar; Claude 5 no acepta
+        # un presupuesto fijo): extrae mejor los casos dudosos. El tope alto es por
+        # eso, porque el razonamiento cuenta en max_tokens. Sonnet y Opus 5.5 no se
+        # dejan apagar (error 400 con "disabled"): para conversar van sin el parámetro,
+        # con el adaptativo de fábrica.
+        name = model or settings.llm_model
+        thinking = {"type": "adaptive"} if reasoning else {"type": "disabled"}
+        extra = {"thinking": thinking} if reasoning or "haiku" in name else {}
+        return ChatAnthropic(
+            model=name,
+            api_key=settings.anthropic_api_key,
+            max_tokens=max(max_tokens, ANTHROPIC_MIN_TOKENS),
+            callbacks=[UsageLogger()],
+            **extra,
+        )
 
     if settings.llm_provider == "openrouter":
         if settings.openrouter_api_key is None:
@@ -89,12 +119,13 @@ def get_structured_model(
     fallback: BaseChatModel | None = None, settings: Settings | None = None
 ) -> BaseChatModel:
     """El modelo del perfil estructurado: el de LLM_STRUCTURED_MODEL o, si está vacío,
-    `fallback` (el principal que se esté usando; sin él, el de LLM_MODEL)."""
+    `fallback` (el principal que se esté usando; sin él, el de LLM_MODEL). Con Claude
+    directo, con razonamiento (salvo `fallback`, que ya viene armado)."""
     settings = settings or get_settings()
     if not settings.llm_structured_model:
-        return fallback or get_chat_model(settings)
+        return fallback or get_chat_model(settings, reasoning=True)
     provider, model = _provider_and_model(settings.llm_structured_model, settings.llm_provider)
-    return get_chat_model(settings, provider=provider, model=model)
+    return get_chat_model(settings, provider=provider, model=model, reasoning=True)
 
 
 def get_embeddings(settings: Settings | None = None) -> Embeddings:

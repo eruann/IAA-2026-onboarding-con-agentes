@@ -113,7 +113,7 @@ def chat(
         if index in (None, CONFIGURED):
             return None
         choice = models[index]
-        return get_chat_model(provider=choice.provider, model=choice.model)
+        return get_chat_model(provider=choice.provider, model=choice.model, reasoning=True)
 
     async def answer(text: str, bubble, footer, index: int, retrying: bool = False) -> None:
         option = models[index]

@@ -10,7 +10,7 @@ from typing import Literal
 from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-LLMProvider = Literal["fake", "openrouter", "openai_compat"]
+LLMProvider = Literal["fake", "openrouter", "openai_compat", "anthropic"]
 
 
 # recorrido: configuracion
@@ -32,10 +32,14 @@ class Settings(BaseSettings):
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     openai_compat_base_url: str = "http://ollama:11434/v1"
     openai_compat_api_key: SecretStr | None = SecretStr("ollama")
+    # API de Anthropic directa, sin OpenRouter
+    anthropic_api_key: SecretStr | None = None
     # Modelos que ofrece el selector de la interfaz, como lista JSON en el .env
-    # (ver llm/catalog.py). Vacías: OpenRouter completa con gratis; Ollama, todos.
+    # (ver llm/catalog.py). Vacías: OpenRouter completa con gratis; Ollama, todos;
+    # Anthropic, ninguno.
     openrouter_models: list[str] = []
     ollama_models: list[str] = []
+    anthropic_models: list[str] = []
 
     # Slack por Events API (HTTP). No se usa Socket Mode: no hay worker aparte.
     slack_bot_token: SecretStr | None = None
@@ -48,6 +52,7 @@ class Settings(BaseSettings):
     @field_validator(
         "openrouter_api_key",
         "openai_compat_api_key",
+        "anthropic_api_key",
         "slack_bot_token",
         "slack_signing_secret",
         "admin_password",
@@ -62,7 +67,7 @@ class Settings(BaseSettings):
             return None
         return value
 
-    @field_validator("openrouter_models", "ollama_models", mode="before")
+    @field_validator("openrouter_models", "ollama_models", "anthropic_models", mode="before")
     @classmethod
     def empty_list_means_none(cls, value: object) -> object:
         # `OLLAMA_MODELS=` vacío en el .env no es JSON válido: vale como lista vacía

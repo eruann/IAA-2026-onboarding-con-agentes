@@ -36,7 +36,11 @@ _cache: dict[str, tuple[float, list[dict] | None]] = {}
 
 
 # Cómo se muestra cada proveedor en el selector: así se ve dónde corre el modelo
-PROVIDER_NAMES = {"openrouter": "OpenRouter", "openai_compat": "Ollama local"}
+PROVIDER_NAMES = {
+    "openrouter": "OpenRouter",
+    "openai_compat": "Ollama local",
+    "anthropic": "Anthropic",
+}
 
 
 def _option(provider: LLMProvider, model: str) -> "ModelOption":
@@ -136,6 +140,15 @@ def _ollama(settings: Settings, exclude: str, notes: list[str]) -> list[str]:
     return [model for model in installed if model != exclude]
 
 
+def _anthropic(settings: Settings, exclude: str, notes: list[str]) -> list[str]:
+    # Sin consultar la red: los de la lista, si hay key para usarlos
+    if settings.anthropic_api_key is None:
+        if settings.anthropic_models or settings.llm_provider == "anthropic":
+            notes.append("Falta ANTHROPIC_API_KEY en el .env: no se listan modelos de Anthropic.")
+        return []
+    return [model for model in settings.anthropic_models if model != exclude]
+
+
 # recorrido: modelos-elegibles
 def model_catalog(settings: Settings | None = None) -> ModelCatalog:
     settings = settings or get_settings()
@@ -149,6 +162,7 @@ def model_catalog(settings: Settings | None = None) -> ModelCatalog:
     options += [
         _option("openrouter", model) for model in _openrouter(settings, default.model, limit, notes)
     ]
+    options += [_option("anthropic", model) for model in _anthropic(settings, default.model, notes)]
     options += [
         _option("openai_compat", model) for model in _ollama(settings, default.model, notes)
     ]

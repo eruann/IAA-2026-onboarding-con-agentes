@@ -24,6 +24,7 @@ dependencies = [
     "pyyaml>=6.0",
     # Interfaz web (chat, talleres) montada en la misma app FastAPI: un solo servicio
     "nicegui>=2.0",
+    "langchain-anthropic>=1.7.9",
 ]
 
 [dependency-groups]

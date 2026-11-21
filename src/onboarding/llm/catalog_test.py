@@ -46,6 +46,8 @@ def _settings(**kwargs) -> Settings:
         "openrouter_api_key": "sk-test",
         "openrouter_models": [],
         "ollama_models": [],
+        "anthropic_api_key": None,
+        "anthropic_models": [],
     }
     return Settings(**(defaults | kwargs))
 
@@ -158,6 +160,21 @@ def test_avisa_si_ollama_no_responde_y_hay_lista(monkeypatch) -> None:
 
 def test_avisa_si_falta_la_key_de_openrouter(responden) -> None:
     assert any("OPENROUTER_API_KEY" in note for note in _notes(openrouter_api_key=None))
+
+
+def test_anthropic_muestra_los_de_la_lista_si_hay_key(responden) -> None:
+    options = catalog.model_catalog(
+        _settings(anthropic_api_key="sk-ant-test", anthropic_models=["claude-haiku-5-5"])
+    ).options
+
+    assert _models(options, "anthropic") == ["claude-haiku-5-5"]
+    assert "claude-haiku-5-5 · Anthropic" in [option.label for option in options]
+
+
+def test_avisa_si_falta_la_key_de_anthropic(responden) -> None:
+    notes = _notes(anthropic_models=["claude-haiku-5-5"])
+
+    assert any("ANTHROPIC_API_KEY" in note for note in notes)
 
 
 def test_sin_problemas_no_hay_avisos(responden) -> None:

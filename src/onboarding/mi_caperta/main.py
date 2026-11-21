@@ -1,39 +1,59 @@
+# andamiaje
+# Este archivo es andamiaje: una ayuda para que el equipo de estudiantes
+# construya, pruebe o entienda el producto (talleres, diagramas, guías).
+# No es parte del producto.
+
 import sys
 import tomllib
 from pathlib import Path
 
-import anthropic
-import ollama
 import streamlit as st
-from langchain_anthropic import ChatAnthropic
-from langchain_ollama import ChatOllama
-
-# Carpeta corpus/ del repo, buscada desde este archivo: funciona desde cualquier carpeta
-CORPUS = Path(__file__).resolve().parents[3] / "corpus"
+from pydantic import SecretStr
 
 # streamlit run solo agrega la carpeta de este archivo al path: sumamos src/ para
-# poder importar el paquete onboarding del proyecto
+# poder importar el paquete onboarding del proyecto (todavía no se puede usar
+# onboarding.paths, que es justamente lo que se quiere importar)
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from onboarding.knowledge.informal_network.extraction import extract_triples  # noqa: E402
+from onboarding.agents.extract_knowledge import extract_triples  # noqa: E402
+from onboarding.config import get_settings  # noqa: E402
+from onboarding.knowledge import load_graph, save_triples  # noqa: E402
+from onboarding.llm import get_chat_model, load_prompt, model_catalog  # noqa: E402
+from onboarding.paths import CORPUS_DIR  # noqa: E402
+
+CONFIRMED = 1  # estado de una relación confirmada en el grafo (store.py)
 
 # Modelos de Claude para la extracción (pagos, por API)
 MODELOS_CLAUDE = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"]
 
+# Claude: la clave se lee de secrets.toml, al lado de este archivo (ANTHROPIC_API_KEY).
+# Así funciona desde cualquier carpeta y en la máquina de cualquiera.
+with open(Path(__file__).with_name("secrets.toml"), "rb") as f:
+    CLAVE_ANTHROPIC = tomllib.load(f)["ANTHROPIC_API_KEY"]
+
+# La configuración del proyecto (.env), con dos cambios para esta app: la clave de
+# Claude de secrets.toml y Ollama en esta máquina (la app no corre en Docker, así
+# que no llega a http://ollama:11434). El contexto de Ollama se fija al arrancarlo:
+# OLLAMA_CONTEXT_LENGTH=16384 (ver docs/setup.md).
+AJUSTES = get_settings().model_copy(
+    update={
+        "anthropic_api_key": SecretStr(CLAVE_ANTHROPIC),
+        "openai_compat_base_url": "http://localhost:11434/v1",
+    }
+)
+
 
 def modelos_extraccion():
-    """Claude más los modelos que haya instalados en Ollama, leídos en cada recarga."""
-    try:
-        locales = [m.model for m in ollama.list().models]
-    except Exception:  # Ollama cerrado: solo se ofrece Claude
-        locales = []
+    """Claude más los modelos que haya instalados en Ollama (los mismos que lista el
+    selector de los talleres). Si Ollama está cerrado, solo Claude."""
+    locales = [o.model for o in model_catalog(AJUSTES).options if o.provider == "openai_compat"]
     return MODELOS_CLAUDE + locales
 
 
 def crear_modelo(nombre):
+    # Siempre desde onboarding.llm (regla 5): acá solo se elige el proveedor
     if nombre.startswith("claude"):
-        # Claude 5 no acepta temperature
-        return ChatAnthropic(model=nombre, api_key=CLAVE_ANTHROPIC, max_tokens=2048)
-    return ChatOllama(model=nombre, temperature=0.0, num_ctx=8192)
+        return get_chat_model(AJUSTES, provider="anthropic", model=nombre, max_tokens=2048)
+    return get_chat_model(AJUSTES, provider="openai_compat", model=nombre)
 
 
 @st.cache_data  # se lee una sola vez, no en cada recarga de la página
@@ -42,15 +62,8 @@ def leer_md(ruta):
     return Path(ruta).read_text(encoding="utf-8")
 
 
-procedimiento = leer_md(CORPUS / "tesoreria.md")
-organigrama = leer_md(CORPUS / "organigrama.md")
-
-# Claude: la clave se lee de C:\Cursos\lang_chain\.streamlit\secrets.toml (ANTHROPIC_API_KEY).
-# Se busca por la ubicación de este archivo, así funciona desde cualquier carpeta.
-SECRETS = r"C:\IAA\repo\IAA-2026-onboarding-con-agentes\src\onboarding\mi_caperta\secrets.toml"
-with open(SECRETS, "rb") as f:
-    CLAVE_ANTHROPIC = tomllib.load(f)["ANTHROPIC_API_KEY"]
-client = anthropic.Anthropic(api_key=CLAVE_ANTHROPIC)
+procedimiento = leer_md(CORPUS_DIR / "tesoreria.md")
+organigrama = leer_md(CORPUS_DIR / "organigrama.md")
 
 # Modelos disponibles en el selector: nombre visible -> id del modelo
 MODELOS = {
@@ -58,20 +71,13 @@ MODELOS = {
     "Claude Opus 5.5 (API, pago)": "claude-opus-5-5",
 }
 
-# Instrucciones para el modelo, con el organigrama y el procedimiento como contexto
-instrucciones = f"""Sos un asistente de onboarding para empleados nuevos de Farmalog Sur.
-Respondé siempre en español, de forma breve y amable.
-Usá solo la información del organigrama y del procedimiento de Tesorería. Si no sabés algo, decilo.
-Cuando respondas sobre el procedimiento, indicá la sección de donde sale la información.
-
-<organigrama>
-{organigrama}
-</organigrama>
-
-<procedimiento_tesoreria>
-{procedimiento}
-</procedimiento_tesoreria>
-"""
+# Instrucciones para el modelo (prompt.md, al lado: regla 6), con el organigrama y
+# el procedimiento como contexto
+instrucciones = (
+    f"{load_prompt(Path(__file__).with_name('prompt.md'))}\n"
+    f"<organigrama>\n{organigrama}\n</organigrama>\n\n"
+    f"<procedimiento_tesoreria>\n{procedimiento}\n</procedimiento_tesoreria>\n"
+)
 
 st.title("On Boarding")
 
@@ -81,15 +87,10 @@ if "nombre" not in st.session_state:
         nombre = st.text_input("¿Cómo te llamás?")
         if st.form_submit_button("Comenzar") and nombre.strip():
             st.session_state.nombre = nombre.strip()
-            # El bloque grande se cachea; el nombre va aparte para no romper el caché entre usuarios
-            st.session_state.system = [
-                {"type": "text", "text": instrucciones, "cache_control": {"type": "ephemeral"}},
-                {
-                    "type": "text",
-                    "text": f"El usuario se llama {st.session_state.nombre}. "
-                    "Llamalo por su nombre.",
-                },
-            ]
+            st.session_state.system = (
+                f"{instrucciones}\nEl usuario se llama {st.session_state.nombre}. "
+                "Llamalo por su nombre."
+            )
             st.session_state.messages = []
             st.rerun()
     st.stop()
@@ -127,9 +128,46 @@ with st.expander("Probar extracción de relaciones"):
             st.error(f"{modelo_extraccion} falló: {e}")
             st.stop()
         if triples:
-            st.table([vars(t) for t in triples])  # vars: la dataclass como dict
+            orden = {"high": 0, "medium": 1, "low": 2}  # lo más crítico arriba
+            triples = sorted(triples, key=lambda t: orden[t.criticality])
+            reporte = save_triples(triples)
+            estados = {0: "pendiente", CONFIRMED: "confirmado", None: "no guardada"}
+            # vars: la dataclass como dict, más el estado con que quedó en el grafo
+            st.table(
+                [
+                    {**vars(t), "estado": estados[s]}
+                    for t, s in zip(triples, reporte.statuses, strict=True)
+                ]
+            )
+            st.success(f"En el grafo: {reporte.summary()}.")
         else:
             st.info("No se encontraron relaciones con respaldo textual.")
+
+# Lo guardado en data/informal_network.json, para revisar estados y conflictos
+with st.expander("Grafo guardado"):
+    grafo = load_graph()
+    if not grafo["edges"]:
+        st.info("Todavía no hay relaciones guardadas.")
+    else:
+        nombres = {n["id"]: n["name"] for n in grafo["nodes"]}
+        st.table(
+            [
+                {
+                    "estado": "confirmado" if e["status"] == CONFIRMED else "pendiente",
+                    "sujeto": nombres[e["source"]],
+                    "relación": e["relation"],
+                    "objeto": nombres[e["target"]],
+                    "criticidad": e.get("criticality", ""),
+                    "frase": e["evidence"],
+                    "cambios": " | ".join(h["evidence"] for h in e["history"]),
+                }
+                for e in grafo["edges"]
+            ]
+        )
+        conflictos = [n for n in grafo["nodes"] if n["type"] == "conflict"]
+        for c in conflictos:
+            frases = " vs. ".join(f"«{f}»" for f in c["attributes"]["evidence"])
+            st.warning(f"{c['name']}: {frases}")
 
 # Mostrar el historial
 for msg in st.session_state.messages:
@@ -137,27 +175,35 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 
-def responder_ollama():
-    # Ollama recibe las instrucciones como un mensaje de sistema más
-    system = "\n\n".join(bloque["text"] for bloque in st.session_state.system)
-    # num_ctx: el procedimiento no entra en la ventana por defecto de Ollama (2048 tokens)
-    chat = ChatOllama(model=modelo, temperature=0.0, num_ctx=16384)
-    for chunk in chat.stream([{"role": "system", "content": system}] + st.session_state.messages):
-        yield chunk.content
+def responder():
+    """La respuesta en partes, con el mismo código para Claude y para Ollama."""
+    chat = crear_modelo(modelo)
+    mensajes = [{"role": "system", "content": st.session_state.system}]
+    for chunk in chat.stream(mensajes + st.session_state.messages):
+        # Claude con razonamiento manda bloques (thinking + texto): solo se muestra el texto
+        if isinstance(chunk.content, str):
+            yield chunk.content
+        else:
+            yield "".join(
+                b.get("text", "")
+                for b in chunk.content
+                if isinstance(b, dict) and b.get("type") == "text"
+            )
 
 
-def responder_claude():
-    # Si Claude rechaza la consulta, la API la reintenta con otro modelo (fallbacks)
-    with client.beta.messages.stream(
-        model=modelo,
-        max_tokens=16000,
-        system=st.session_state.system,
-        messages=st.session_state.messages,
-        output_config={"effort": "low"},  # chat simple: respuestas rápidas
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-    ) as stream:
-        yield from stream.text_stream
+def explicar(error):
+    """El error en castellano. Se reconoce por el nombre de la clase, como en
+    ui/errors.py: así no hace falta importar el SDK de cada proveedor."""
+    # LangChain a veces les antepone el proveedor (OpenAIAuthenticationError)
+    nombre = type(error).__name__.removeprefix("OpenAI")
+    if nombre == "AuthenticationError":
+        return "La clave no es válida. Revisá ANTHROPIC_API_KEY en secrets.toml."
+    if nombre in {"APIConnectionError", "ConnectError", "ConnectionError"}:
+        return (
+            "No se pudo conectar con el modelo. "
+            "Si es Ollama, ¿está abierto? Probá con `ollama serve`."
+        )
+    return f"Error del modelo ({nombre}): {error}"
 
 
 pregunta = st.chat_input("Escribe tu pregunta aquí...")
@@ -168,20 +214,9 @@ if pregunta:
 
     with st.chat_message("assistant"):
         try:
-            if modelo.startswith("claude"):
-                respuesta = st.write_stream(responder_claude())
-            else:
-                respuesta = st.write_stream(responder_ollama())
-        except ConnectionError:
-            st.session_state.messages.pop()
-            st.error("No se pudo conectar con Ollama. ¿Está abierto? Probá con `ollama serve`.")
-            st.stop()
-        except anthropic.AuthenticationError:
+            respuesta = st.write_stream(responder())
+        except Exception as e:  # sin conexión, clave inválida, error del proveedor
             st.session_state.messages.pop()  # la pregunta falló: no la dejamos en el historial
-            st.error("La clave ANTHROPIC_API_KEY no es válida.")
-            st.stop()
-        except anthropic.APIError as e:
-            st.session_state.messages.pop()
-            st.error(f"Error de la API de Claude: {e}")
+            st.error(explicar(e))
             st.stop()
     st.session_state.messages.append({"role": "assistant", "content": respuesta})
